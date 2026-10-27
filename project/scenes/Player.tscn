@@ -1,0 +1,19 @@
+[gd_scene load_steps=4 format=3]
+
+[ext_resource type="Script" path="res://scripts/player_controller.gd" id="1_pc"]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_p"]
+radius = 16.0
+
+[node name="Player" type="CharacterBody2D"]
+collision_layer = 1
+collision_mask = 26
+script = ExtResource("1_pc")
+
+[node name="Sprite2D" type="Sprite2D" parent="."]
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource("CircleShape2D_p")
+
+[node name="WeaponHolder" type="Node2D" parent="."]
+position = Vector2(24, 0)

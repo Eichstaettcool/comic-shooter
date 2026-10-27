@@ -1,0 +1,21 @@
+# Godot 4
+.godot/
+/android/
+*.translation
+export.cfg
+export_credentials.cfg
+*.tmp
+
+# Exporte (gehoeren in die Releases, nicht ins Repo)
+*.exe
+*.pck
+*.apk
+*.aab
+*.zip
+build/
+dist/
+
+# System
+.DS_Store
+Thumbs.db
+*.log

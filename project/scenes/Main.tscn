@@ -1,0 +1,40 @@
+[gd_scene load_steps=6 format=3]
+
+[ext_resource type="Script" path="res://scripts/game_manager.gd" id="1_gm"]
+[ext_resource type="Script" path="res://scripts/map_generator.gd" id="2_mg"]
+[ext_resource type="Script" path="res://scripts/monster_spawner.gd" id="3_ms"]
+[ext_resource type="Script" path="res://scripts/ui_manager.gd" id="4_ui"]
+
+[sub_resource type="Environment" id="Environment_1"]
+background_mode = 0
+
+[node name="Main" type="Node2D"]
+script = ExtResource("1_gm")
+
+[node name="YSort" type="Node2D" parent="."]
+y_sort_enabled = true
+
+[node name="MapGenerator" type="Node2D" parent="YSort"]
+script = ExtResource("2_mg")
+
+[node name="MonsterContainer" type="Node2D" parent="YSort"]
+
+[node name="ChestContainer" type="Node2D" parent="YSort"]
+
+[node name="ItemContainer" type="Node2D" parent="YSort"]
+
+[node name="MonsterSpawner" type="Node2D" parent="."]
+script = ExtResource("3_ms")
+
+[node name="Camera2D" type="Camera2D" parent="."]
+zoom = Vector2(1.6, 1.6)
+limit_left = 0
+limit_top = 0
+limit_right = 3840
+limit_bottom = 2560
+
+[node name="CanvasLayer" type="CanvasLayer" parent="."]
+layer = 2
+
+[node name="UIManager" type="Node" parent="CanvasLayer"]
+script = ExtResource("4_ui")
