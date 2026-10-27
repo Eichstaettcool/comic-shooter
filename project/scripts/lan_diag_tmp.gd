@@ -1,5 +1,5 @@
 extends Node
-# COMIC_LANTEST=lan - LAN-Fenster im Comic-Stil
+# COMIC_LANTEST=earth4 - Wiese mit neuen Bueschen
 
 var gm: Node = null
 var t: float = 0.0
@@ -13,14 +13,15 @@ func start(gmi: Node) -> void:
 
 func _process(delta: float) -> void:
 	t += delta
-	if step == 0 and t > 2.5:
+	if step == 0 and t > 1.0:
 		step = 1
-		var ui = gm.get("ui_manager")
-		ui.call("_open_lan_panel")
-		print("[LAN-UI] offen")
-	if step == 1 and t > 4.5:
+		gm.call("set_active_map", "earth")
+		gm.call("start_game", false, false)
+	if step == 1 and t > 8.0:
 		step = 2
-		var img: Image = get_viewport().get_texture().get_image()
-		img.save_png("C:/Users/vince/AppData/Local/hermes/cache/scratch/lan_panel.png")
-		print("[LAN-UI] Shot ok")
+		var mg = gm.get("map_generator")
+		print("[CHECK] %d Objekte" % mg.get("obstacles").size())
+		get_viewport().get_texture().get_image().save_png(
+			"C:/Users/vince/AppData/Local/hermes/cache/scratch/earth_v4.png")
+		print("[CHECK] ok")
 		get_tree().quit()

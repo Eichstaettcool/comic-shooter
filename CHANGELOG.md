@@ -1,5 +1,13 @@
 # Changelog
 
+## v1.4
+
+**Karte**
+- Büsche neu gezeichnet im Stil der Bäume (Kontur, dunkle Unterseite,
+  Lichtkante) — die geladenen busch_*.png hatten keine Kontur und wirkten
+  wie Flammen
+- Waffen-Überschrift gekürzt, sie wurde abgeschnitten
+
 ## v1.3
 
 **Karte**

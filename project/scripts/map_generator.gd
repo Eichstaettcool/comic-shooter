@@ -655,9 +655,9 @@ const PLANET_TERRAIN := {
 			# Mehr Baeume, mehr Steine, mehr Blueten als Farbtupfer.
 			{ "kind": "tree", "tex": "tree", "clusters": 96, "smin": 0.9, "smax": 1.25,
 			  "radius": 12.0, "rbase": 11.0, "yoff": 12.0, "foot": true, "footat": 0.9, "cmin": 1, "cmax": 2 },
-			{ "kind": "tree", "tex": "prop_bush_1", "texs": ["prop_bush_1", "prop_bush_2", "prop_bush_3", "prop_bush_4", "prop_bush_5", "prop_bush_6"],
-			  "clusters": 34, "smin": 0.55, "smax": 0.85,
-			  "radius": 8.0, "rbase": 0.0, "yoff": 6.0, "cmin": 1, "cmax": 2 },
+			{ "kind": "tree", "tex": "pbush_a", "texs": ["pbush_a", "pbush_b", "pbush_c", "pbush_d"],
+			  "clusters": 34, "smin": 0.65, "smax": 0.95,
+			  "radius": 8.0, "rbase": 0.0, "yoff": 4.0, "cmin": 1, "cmax": 2 },
 			{ "kind": "rock", "tex": "rock", "clusters": 56, "smin": 0.8, "smax": 1.3,
 			  "radius": 10.0, "rbase": 9.0, "yoff": 6.0, "cmin": 1, "cmax": 2 },
 			# Runde 26: Blueten als Farbtupfer

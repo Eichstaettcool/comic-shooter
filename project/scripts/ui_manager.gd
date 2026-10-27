@@ -414,7 +414,7 @@ func _create_hud():
 
 	var wep_title = Label.new()
 	wep_title.name = "WeaponTitle"
-	wep_title.text = "WAFFEN  (antippen zum Wechseln)"
+	wep_title.text = "WAFFEN  (tippen)"
 	wep_title.add_theme_font_size_override("font_size", 18)
 	wep_title.add_theme_color_override("font_color", Color(0.82, 0.88, 0.94))
 	wbox.add_child(wep_title)

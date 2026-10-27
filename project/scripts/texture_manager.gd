@@ -112,6 +112,11 @@ func _generate_all_textures():
 	textures["banana"] = _make_banana()
 	textures["palm"] = _make_palm()
 	textures["bush"] = _make_bush_dot()
+	# Runde 64: gezeichnete Buesche im Baum-Stil (Kontur + Tiefe)
+	textures["pbush_a"] = _make_bush_prop(56, 0)
+	textures["pbush_b"] = _make_bush_prop(56, 1)
+	textures["pbush_c"] = _make_bush_prop(56, 2)
+	textures["pbush_d"] = _make_bush_prop(56, 3)
 	textures["mars_rock"] = _make_rock_col(Color(0.66, 0.32, 0.24), Color(0.44, 0.18, 0.14))
 	textures["mars_crater"] = _make_rock_col(Color(0.52, 0.24, 0.18), Color(0.34, 0.14, 0.11))
 	# Runde 14: eigene Welt-Objekte je Planet
@@ -3215,6 +3220,37 @@ func _make_chest() -> ImageTexture:
 	return ImageTexture.create_from_image(img)
 
 # ---------- Bäume & Steine ----------
+
+func _make_bush_prop(size: int, variant: int = 0) -> ImageTexture:
+	# Runde 64: Busch im Stil der Baeume - schwarze Kontur, dunkle Unterseite,
+	# Hauptfarbe, Lichtkante oben links. Die geladenen busch_*.png hatten
+	# keine Kontur und wirkten wie Flammen.
+	var img = _new_img(size, size)
+	var f := float(size)
+	var leaf := Color(0.20, 0.70, 0.20)
+	var leaf_dark := Color(0.12, 0.50, 0.14)
+	var leaf_light := Color(0.45, 0.85, 0.40)
+	var blobs: Array
+	match variant % 4:
+		0:
+			blobs = [[0.34, 0.60, 0.23], [0.52, 0.55, 0.26], [0.68, 0.61, 0.21]]
+		1:
+			blobs = [[0.36, 0.58, 0.24], [0.58, 0.60, 0.21], [0.47, 0.45, 0.19]]
+		2:
+			blobs = [[0.30, 0.62, 0.20], [0.48, 0.58, 0.25], [0.68, 0.65, 0.18], [0.50, 0.44, 0.17]]
+		_:
+			blobs = [[0.40, 0.56, 0.27], [0.62, 0.62, 0.19]]
+	for b in blobs:
+		_disc(img, float(b[0]) * f, float(b[1]) * f, float(b[2]) * f + 2.0, OUTLINE)
+	for b in blobs:
+		_disc(img, float(b[0]) * f, float(b[1]) * f + f * 0.035, float(b[2]) * f * 0.95, leaf_dark)
+	for b in blobs:
+		_disc(img, float(b[0]) * f, float(b[1]) * f, float(b[2]) * f * 0.86, leaf)
+	for b in blobs:
+		_disc(img, float(b[0]) * f - float(b[2]) * f * 0.22, float(b[1]) * f - float(b[2]) * f * 0.26,
+			float(b[2]) * f * 0.32, leaf_light, true)
+	return ImageTexture.create_from_image(img)
+
 
 func _make_tree() -> ImageTexture:
 	var img = _new_img(64, 64)
