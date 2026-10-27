@@ -72,6 +72,7 @@ var char_unlock_label: Label = null
 var quality_btn = null
 var fps_btn = null
 var sound_btn = null
+var sfx_btn = null
 var quality_info_label: Label = null
 var quality_buttons: Array = []
 var main_hero_img: TextureRect = null
@@ -2536,10 +2537,20 @@ func _create_settings_page() -> void:
 	fps_btn.pressed.connect(_on_fps_pressed)
 	row2.add_child(fps_btn)
 
-	sound_btn = _make_styled_button("SOUND: AN", Color(0.28, 0.32, 0.42), 30)
+	sound_btn = _make_pixel_button("MUSIK: AN", Color(0.24, 0.42, 0.34), 26)
 	sound_btn.custom_minimum_size = Vector2(400, 80)
-	sound_btn.pressed.connect(_on_sound_pressed)
+	sound_btn.pressed.connect(_on_music_pressed)
 	row2.add_child(sound_btn)
+
+	sfx_btn = _make_pixel_button("SOUNDEFFEKTE: AN", Color(0.24, 0.34, 0.48), 26)
+	sfx_btn.custom_minimum_size = Vector2(400, 80)
+	sfx_btn.pressed.connect(_on_sfx_pressed)
+
+	var row3 = HBoxContainer.new()
+	row3.alignment = BoxContainer.ALIGNMENT_CENTER
+	row3.add_theme_constant_override("separation", 12)
+	row3.add_child(sfx_btn)
+	box.add_child(row3)
 
 	var info = Label.new()
 	info.text = "FPS-ANZEIGE zeigt: FPS | Draw-Calls | Objekte | Proz-ms | Phys-ms | Monster | Stufe\nNIEDRIG: ohne Shader, weniger Details (schwache Geraete)  ·  HOCH: Soft-Look-Shader"
@@ -2599,11 +2610,20 @@ func _on_quality_set(i: int) -> void:
 		game_manager.set_quality(i)
 	refresh_settings_ui()
 
-func _on_sound_pressed() -> void:
-	if game_manager:
-		game_manager.set_muted(not SoundManager.muted)
-	# Runde 49: Die Musik folgt dem Sound-Schalter
-	SoundManager.set_music_enabled(not SoundManager.muted)
+func _on_music_pressed() -> void:
+	# Runde 62: eigene Musik-Einstellung
+	var on: bool = not SoundManager.music_on
+	SoundManager.set_music_enabled(on)
+	if game_manager != null:
+		game_manager.call("set_music_setting", on)
+	refresh_settings_ui()
+
+func _on_sfx_pressed() -> void:
+	# Runde 62: eigene Soundeffekt-Einstellung
+	var on: bool = not SoundManager.sfx_on
+	SoundManager.set_sfx_enabled(on)
+	if game_manager != null:
+		game_manager.call("set_sfx_setting", on)
 	refresh_settings_ui()
 
 func refresh_settings_ui() -> void:
@@ -2619,8 +2639,11 @@ func refresh_settings_ui() -> void:
 		fps_btn.text = "FPS-ANZEIGE: " + ("AN" if game_manager.debug_fps else "AUS")
 		fps_btn.modulate = Color(1.35, 1.35, 1.35) if game_manager.debug_fps else Color(0.85, 0.85, 0.9)
 	if sound_btn:
-		sound_btn.text = "SOUND: " + ("AUS" if SoundManager.muted else "AN")
-		sound_btn.modulate = Color(0.85, 0.85, 0.9) if SoundManager.muted else Color(1.35, 1.35, 1.35)
+		sound_btn.text = "MUSIK: " + ("AN" if SoundManager.music_on else "AUS")
+		sound_btn.modulate = Color(1.35, 1.35, 1.35) if SoundManager.music_on else Color(0.85, 0.85, 0.9)
+	if sfx_btn:
+		sfx_btn.text = "SOUNDEFFEKTE: " + ("AN" if SoundManager.sfx_on else "AUS")
+		sfx_btn.modulate = Color(1.35, 1.35, 1.35) if SoundManager.sfx_on else Color(0.85, 0.85, 0.9)
 
 func set_quality_label(name: String) -> void:
 	if quality_info_label:
@@ -4929,6 +4952,16 @@ func _on_map_action(mid: String) -> void:
 # Runde 37: SAMMLUNG (Cosmetics-Uebersicht)
 # ============================================================
 
+func _readonly_tile(b: Button) -> void:
+	# Runde 62: Kachel nur anzeigen - kein Klick, kein Hover.
+	# "disabled" bekommt die normale Optik, damit nichts grau wirkt.
+	b.focus_mode = Control.FOCUS_NONE
+	var sb := b.get_theme_stylebox("normal")
+	if sb != null:
+		b.add_theme_stylebox_override("disabled", sb)
+	b.disabled = true
+
+
 func show_collection() -> void:
 	# Runde 37: Sammlungs-Screen (alle Farben + Huete, Fortschritt, Equip)
 	# Runde 43: Inhalt danach einpassen
@@ -5098,8 +5131,8 @@ func refresh_collection_ui() -> void:
 		elif not owned:
 			b.modulate = Color(0.40, 0.42, 0.50, 0.85)
 		var idx: int = i
-		if owned:
-			b.pressed.connect(func(): game_manager.set_profile_color(idx); refresh_collection_ui())
+		# Runde 62: Sammlung ist READ-ONLY - nur anschauen, nichts umstellen.
+		_readonly_tile(b)
 		grid.add_child(b)
 
 	# ---- SKINS (Runde 47/48: alle 6 Skin-Kacheln sichtbar) ----
@@ -5125,8 +5158,8 @@ func refresh_collection_ui() -> void:
 		elif not owned3:
 			b3.modulate = Color(0.40, 0.42, 0.50, 0.85)
 		var idx3: int = i
-		if owned3:
-			b3.pressed.connect(func(): game_manager.set_profile_rig(idx3); refresh_collection_ui())
+		# Runde 62: READ-ONLY
+		_readonly_tile(b3)
 		grid_s.add_child(b3)
 
 	# ---- HUETE ----
@@ -5150,8 +5183,8 @@ func refresh_collection_ui() -> void:
 		elif not owned2:
 			b2.modulate = Color(0.40, 0.42, 0.50, 0.85)
 		var idx2: int = i
-		if owned2:
-			b2.pressed.connect(func(): game_manager.set_profile_hat(idx2); refresh_collection_ui())
+		# Runde 62: READ-ONLY
+		_readonly_tile(b2)
 		grid_h.add_child(b2)
 
 

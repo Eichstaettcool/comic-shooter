@@ -3955,6 +3955,11 @@ func _load_high_score():
 				cfg_ver = file.get_32()
 			if cfg_ver < CONFIG_VERSION:
 				quality = 1        # einmalig auf MITTEL (60 FPS) umstellen
+			# Runde 62: Musik- und Effekt-Schalter (aeltere Saves haben sie nicht)
+			if file.get_position() + 4 <= file.get_length():
+				SoundManager.set_music_enabled(file.get_32() == 1)
+			if file.get_position() + 4 <= file.get_length():
+				SoundManager.set_sfx_enabled(file.get_32() == 1)
 			file.close()
 
 func _save_high_score():
@@ -3965,7 +3970,21 @@ func _save_high_score():
 		file.store_32(quality)
 		file.store_32(1 if debug_fps else 0)
 		file.store_32(CONFIG_VERSION)
+		file.store_32(1 if SoundManager.music_on else 0)
+		file.store_32(1 if SoundManager.sfx_on else 0)
 		file.close()
+
+
+func set_music_setting(on: bool) -> void:
+	SoundManager.set_music_enabled(on)
+	_save_high_score()
+	print("[SETTINGS] Musik %s" % ("AN" if on else "AUS"))
+
+
+func set_sfx_setting(on: bool) -> void:
+	SoundManager.set_sfx_enabled(on)
+	_save_high_score()
+	print("[SETTINGS] Soundeffekte %s" % ("AN" if on else "AUS"))
 
 
 # ============================================================

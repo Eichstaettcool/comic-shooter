@@ -205,6 +205,15 @@ func _gen_music_game() -> AudioStreamWAV:
 
 
 var muted: bool = false
+var sfx_on: bool = true
+
+func set_sfx_enabled(on: bool) -> void:
+	# Runde 62: eigene Einstellung fuer Soundeffekte, unabhaengig von der Musik
+	sfx_on = on
+	if not on:
+		for p in _pool:
+			if p != null:
+				p.stop()
 
 func set_muted(m: bool) -> void:
 	muted = m
@@ -217,7 +226,7 @@ func set_muted(m: bool) -> void:
 		play_music(c)
 
 func play(name: String) -> void:
-	if muted:
+	if muted or not sfx_on:
 		return
 	if not _streams.has(name):
 		return

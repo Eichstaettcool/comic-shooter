@@ -59,8 +59,9 @@ func apply_profile(color_idx: int, hat_idx: int, rig: int = 0) -> void:
 	profile_color = color_idx
 	profile_hat = hat_idx
 	if rig > 0:
-		# Runde 42: der Skin nimmt die gewaehlte Farbe an
-		var st = TextureManager.get_skin_texture(color_idx, clampi(rig, 0, 5))
+		# Runde 62: Hut mitgeben - vorher rief der Skin-Pfad get_skin_texture()
+		# ohne Hut, dadurch verschwand der gewaehlte Hut im Spiel.
+		var st = TextureManager.get_skin_hat_texture(color_idx, clampi(rig, 0, 5), hat_idx)
 		if st != null:
 			sprite.texture = st
 			return

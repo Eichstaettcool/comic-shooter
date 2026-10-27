@@ -1,5 +1,21 @@
 # Changelog
 
+## v1.2
+
+**Korrekturen**
+- Hüte verschwanden im Spiel, sobald ein Skin gewählt war (Skin-Pfad rief die
+  Textur ohne Hut-Parameter ab) — behoben
+- Sammlung ist jetzt Read-only: Outfits, Farben und Hüte lassen sich dort nur
+  ansehen, geändert wird im Charakter-Menü
+
+**Einstellungen**
+- Musik und Soundeffekte sind getrennt schaltbar und werden gespeichert
+  (vorher ein gemeinsamer Sound-Schalter)
+
+**Karte**
+- Boden-Gitter wieder auf allen Karten inklusive Dschungel eingeblendet
+  (ohne das Gitter wirkten Wiese und Wüste als leere Fläche)
+
 ## v1.1
 
 **Oberfläche**

@@ -528,10 +528,9 @@ func rebuild_visuals() -> void:
 	grid_sprite.region_enabled = true
 	grid_sprite.region_rect = Rect2(0, 0, cols * tile_size, rows * tile_size)
 	grid_sprite.position = Vector2.ZERO
-	# Runde 58: Das Karo-Raster war fuer den alten flaechigen Boden gedacht.
-	# Jetzt liegt es als helles Gitter ueber der organischen Textur und wird
-	# nur noch auf der niedrigsten Detailstufe (flache Farbe) gebraucht.
-	grid_sprite.visible = detail_level == 0
+	# Runde 62: Karo-Raster wieder auf allen Karten und Detailstufen einblenden.
+	# Ohne das Gitter wirkten vor allem Wiese/Wueste als leere Farbflaeche.
+	grid_sprite.visible = detail_level >= 1
 
 	# 3) Details als MultiMesh (je 1 Draw-Call)
 	if specks_mm and is_instance_valid(specks_mm):
