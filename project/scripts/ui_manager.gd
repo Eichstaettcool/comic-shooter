@@ -2490,7 +2490,7 @@ func _create_settings_page() -> void:
 
 	quality_buttons.clear()
 	for i in range(3):
-		var qb := _make_styled_button(["NIEDRIG", "MITTEL", "HOCH"][i], Color(0.30, 0.34, 0.44), 30)
+		var qb := _make_pixel_button(["NIEDRIG", "MITTEL", "HOCH"][i], Color(0.30, 0.34, 0.44), 30)
 		qb.custom_minimum_size = Vector2(300, 84)
 		qb.pressed.connect(_on_quality_set.bind(i))
 		qrow.add_child(qb)
@@ -2513,7 +2513,7 @@ func _create_settings_page() -> void:
 	box.add_child(drow2)
 	settings_diff_buttons.clear()
 	for i in range(DIFF_NAMES.size()):
-		var db2 := _make_styled_button(str(DIFF_NAMES[i]), Color(0.30, 0.34, 0.44), 28)
+		var db2 := _make_pixel_button(str(DIFF_NAMES[i]), Color(0.30, 0.34, 0.44), 28)
 		db2.custom_minimum_size = Vector2(260, 76)
 		db2.pressed.connect(_on_difficulty_set.bind(i))
 		drow2.add_child(db2)
@@ -2531,7 +2531,7 @@ func _create_settings_page() -> void:
 	box.add_child(arow2)
 	settings_aim_buttons.clear()
 	for i in range(3):
-		var ab2 := _make_styled_button(str(AIM_NAMES[i]), Color(0.30, 0.34, 0.44), 28)
+		var ab2 := _make_pixel_button(str(AIM_NAMES[i]), Color(0.30, 0.34, 0.44), 28)
 		ab2.custom_minimum_size = Vector2(260, 76)
 		ab2.pressed.connect(_on_aim_set.bind(i))
 		arow2.add_child(ab2)
@@ -2542,7 +2542,7 @@ func _create_settings_page() -> void:
 	row2.add_theme_constant_override("separation", 24)
 	box.add_child(row2)
 
-	fps_btn = _make_styled_button("FPS-ANZEIGE: AUS", Color(0.28, 0.32, 0.42), 30)
+	fps_btn = _make_pixel_button("FPS-ANZEIGE: AUS", Color(0.28, 0.32, 0.42), 30)
 	fps_btn.custom_minimum_size = Vector2(400, 80)
 	fps_btn.pressed.connect(_on_fps_pressed)
 	row2.add_child(fps_btn)
@@ -2568,7 +2568,7 @@ func _create_settings_page() -> void:
 	info.horizontal_alignment = HorizontalAlignment.HORIZONTAL_ALIGNMENT_CENTER
 	box.add_child(info)
 
-	var back := _make_styled_button("ZURUECK", Color(0.35, 0.38, 0.46), 34)
+	var back := _make_pixel_button("ZURUECK", Color(0.35, 0.38, 0.46), 34)
 	back.custom_minimum_size = Vector2(320, 76)
 	back.pressed.connect(_close_pages)
 	box.add_child(back)

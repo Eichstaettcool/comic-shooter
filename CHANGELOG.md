@@ -1,5 +1,12 @@
 # Changelog
 
+## v1.5
+
+- Einstellungsseite im Pixel-Stil der Startseite (Buttons hatten noch den
+  alten runden Look)
+- Neue Präsentations-Screenshots in 1920×1080 für Startseite, alle vier
+  Welten, Charakter-Auswahl und Einstellungen
+
 ## v1.4
 
 **Karte**

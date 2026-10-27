@@ -12,7 +12,7 @@
 
 </div>
 
-![Gameplay](screenshots/01-jungle.png)
+![Gameplay](screenshots/04-welt-dschungel.png)
 
 ## Über das Spiel
 
@@ -120,10 +120,24 @@ project/
 
 ## Screenshots
 
-| | |
+| Startseite | Charakter-Auswahl |
 |---|---|
-| ![Dschungel](screenshots/01-jungle.png) | ![HUD](screenshots/02-hud.png) |
-| ![Pause](screenshots/03-pause.png) | ![Skins](screenshots/04-skins.png) |
+| ![Startseite](screenshots/01-startseite.png) | ![Charaktere](screenshots/06-skins.png) |
+
+**Die vier Welten**
+
+| Erde | Mars |
+|---|---|
+| ![Erde](screenshots/02-welt-erde.png) | ![Mars](screenshots/03-welt-mars.png) |
+
+| Dschungel | Elektro-Welt |
+|---|---|
+| ![Dschungel](screenshots/04-welt-dschungel.png) | ![Elektro](screenshots/05-welt-elektro.png) |
+
+**Einstellungen** — Grafikstufe, Schwierigkeit, Musik und Soundeffekte getrennt schaltbar
+
+![Einstellungen](screenshots/07-einstellungen.png)
+
 
 ## Mitwirken
 
