@@ -1,5 +1,18 @@
 # Changelog
 
+## v1.3
+
+**Karte**
+- Schlagschatten deutlich kleiner und heller (wirkten vorher wie dunkle Pfützen)
+- Erde/Wiese dichter bepflanzt: 96 statt 58 Baum-Cluster, Büsche, mehr Steine
+  und farbige Blumen (vorher 125 Objekte, jetzt ~275)
+
+**Oberfläche**
+- LAN-Fenster zentriert und im Comic-Stil (war fest auf 520,60 gesetzt und
+  960 px hoch — ragte auf 720p unten aus dem Bild)
+- Trank/Bombe-Knöpfe zeigen ihr Label schon beim Run-Start (vorher stand
+  auf beiden "TRANK x0")
+
 ## v1.2
 
 **Korrekturen**

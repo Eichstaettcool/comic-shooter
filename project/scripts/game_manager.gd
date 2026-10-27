@@ -1897,6 +1897,9 @@ func start_game(duo: bool = false, lan: bool = false):
 		print("LAN: Run gestartet (Host=", NetManager.is_host, ", Partner=", NetManager.has_partner(), ")")
 	# Waffen-HUD (G2) + Buff-Anzeige initialisieren
 	ui_manager.refresh_weapon_hud(player.call("get_owned_weapons"), player.call("get_weapon_key"))
+	# Runde 63: Trank/Bombe-Beschriftung sofort setzen - vorher stand beim
+	# Start auf beiden Knoepfen "TRANK x0".
+	ui_manager.refresh_utility_hud(player.utilities, player.call("get_weapon_key"))
 	ui_manager.update_buffs(0.0, 0.0)
 	# Eigenes Profil auf den Helden anwenden
 	_apply_profile()

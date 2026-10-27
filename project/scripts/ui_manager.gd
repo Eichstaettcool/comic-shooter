@@ -745,20 +745,30 @@ func _open_lan_panel() -> void:
 func _build_lan_panel() -> void:
 	lan_panel = ColorRect.new()
 	lan_panel.name = "LanPanel"
-	lan_panel.color = Color(0.04, 0.05, 0.08, 0.98)
+	lan_panel.color = Color(0.03, 0.04, 0.07, 0.97)
 	lan_panel.set_anchors_preset(Control.PRESET_FULL_RECT)
 	lan_panel.mouse_filter = Control.MOUSE_FILTER_STOP
 	add_child(lan_panel)
 
+	# Runde 63: zentriert in einem Comic-Panel wie die Startseite.
+	# Vorher sass der Inhalt fest auf (520, 60) mit 960 px Hoehe und ragte
+	# auf 720p unten aus dem Bild.
+	var center := CenterContainer.new()
+	center.set_anchors_preset(Control.PRESET_FULL_RECT)
+	lan_panel.add_child(center)
+
+	var panel := PanelContainer.new()
+	panel.add_theme_stylebox_override("panel", _hud_comic_sb(0.97, COMIC_YELLOW, 8, 26))
+	center.add_child(panel)
+
 	var box = VBoxContainer.new()
-	box.position = Vector2(520, 60)
-	box.custom_minimum_size = Vector2(880, 960)
-	box.add_theme_constant_override("separation", 16)
-	lan_panel.add_child(box)
+	box.custom_minimum_size = Vector2(780, 0)
+	box.add_theme_constant_override("separation", 14)
+	panel.add_child(box)
 
 	var title = Label.new()
 	title.text = "LAN · WLAN-MULTIPLAYER"
-	title.label_settings = _make_label_settings(72, Color(0.4, 0.95, 0.6), 12)
+	title.label_settings = _make_label_settings(52, COMIC_YELLOW, 8)
 	title.horizontal_alignment = HorizontalAlignment.HORIZONTAL_ALIGNMENT_CENTER
 	box.add_child(title)
 
@@ -781,8 +791,8 @@ func _build_lan_panel() -> void:
 	lan_count_btns.clear()
 	for i in range(3):
 		var n := i + 2
-		var cb2 := _make_styled_button("%d" % n, Color(0.28, 0.34, 0.46), 32)
-		cb2.custom_minimum_size = Vector2(130, 78)
+		var cb2 := _make_pixel_button("%d" % n, Color(0.26, 0.32, 0.44), 28)
+		cb2.custom_minimum_size = Vector2(110, 68)
 		cb2.pressed.connect(_on_lan_count_pressed.bind(n))
 		crow.add_child(cb2)
 		lan_count_btns.append(cb2)
@@ -793,13 +803,13 @@ func _build_lan_panel() -> void:
 	row.add_theme_constant_override("separation", 40)
 	box.add_child(row)
 
-	var host_btn = _make_styled_button("HOSTEN", Color(0.2, 0.75, 0.45), 38)
-	host_btn.custom_minimum_size = Vector2(340, 96)
+	var host_btn = _make_pixel_button("HOSTEN", Color(0.2, 0.66, 0.42), 32)
+	host_btn.custom_minimum_size = Vector2(300, 84)
 	host_btn.pressed.connect(_on_lan_host_pressed)
 	row.add_child(host_btn)
 
-	var scan_btn = _make_styled_button("NEU SCANNEN", Color(0.25, 0.5, 0.9), 34)
-	scan_btn.custom_minimum_size = Vector2(340, 96)
+	var scan_btn = _make_pixel_button("NEU SCANNEN", Color(0.25, 0.45, 0.80), 30)
+	scan_btn.custom_minimum_size = Vector2(300, 84)
 	scan_btn.pressed.connect(_on_lan_scan_pressed)
 	row.add_child(scan_btn)
 
@@ -815,7 +825,7 @@ func _build_lan_panel() -> void:
 	box.add_child(list_title)
 
 	lan_list = VBoxContainer.new()
-	lan_list.custom_minimum_size = Vector2(880, 260)
+	lan_list.custom_minimum_size = Vector2(760, 190)
 	lan_list.add_theme_constant_override("separation", 8)
 	box.add_child(lan_list)
 
@@ -835,13 +845,13 @@ func _build_lan_panel() -> void:
 	lan_ip_edit.add_theme_font_size_override("font_size", 32)
 	ip_row.add_child(lan_ip_edit)
 
-	var join_btn = _make_styled_button("BEITRETEN", Color(1.0, 0.6, 0.15), 34)
-	join_btn.custom_minimum_size = Vector2(300, 80)
+	var join_btn = _make_pixel_button("BEITRETEN", Color(0.92, 0.55, 0.14), 30)
+	join_btn.custom_minimum_size = Vector2(260, 72)
 	join_btn.pressed.connect(_on_lan_join_manual)
 	ip_row.add_child(join_btn)
 
-	var back_btn = _make_styled_button("ZURUECK", Color(0.35, 0.38, 0.45), 30)
-	back_btn.custom_minimum_size = Vector2(260, 70)
+	var back_btn = _make_pixel_button("ZURUECK", Color(0.32, 0.35, 0.42), 26)
+	back_btn.custom_minimum_size = Vector2(240, 64)
 	back_btn.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
 	back_btn.pressed.connect(_on_lan_back_pressed)
 	box.add_child(back_btn)
@@ -902,8 +912,8 @@ func _refresh_lan_list() -> void:
 		return
 	for ip in ips:
 		var name = str(NetManager.discovered[ip])
-		var b = _make_styled_button("%s   ·   %s" % [name, str(ip)], Color(0.22, 0.42, 0.72), 28)
-		b.custom_minimum_size = Vector2(860, 72)
+		var b = _make_pixel_button("%s   ·   %s" % [name, str(ip)], Color(0.22, 0.38, 0.62), 24)
+		b.custom_minimum_size = Vector2(740, 62)
 		b.pressed.connect(_on_lan_join_manual.bind(str(ip)))
 		lan_list.add_child(b)
 

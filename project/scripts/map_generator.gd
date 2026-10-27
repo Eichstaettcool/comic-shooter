@@ -158,7 +158,7 @@ func _get_shadow_tex() -> Texture2D:
 			var dy: float = (float(y) - 31.5) / 31.5
 			var d: float = sqrt(dx * dx + dy * dy)
 			var a: float = clampf(1.0 - d, 0.0, 1.0)
-			a = a * a * 0.40
+			a = a * a * 0.20
 			if a > 0.002:
 				img.set_pixel(x, y, Color(0.05, 0.10, 0.06, a))
 	_shadow_tex = ImageTexture.create_from_image(img)
@@ -651,13 +651,21 @@ const PLANET_TERRAIN := {
 		# Runde 26: keine dunklen Grasbueschel mehr (wirkten dreckig) - dafuer Blumen
 		"plants": false, "flowers": true, "flower_tex": "", "flower_dens": 9, "fern_clusters": 0,
 		"obstacles": [
-			{ "kind": "tree", "tex": "tree", "clusters": 58, "smin": 0.9, "smax": 1.25,
+			# Runde 63: Wiese war zu leer (76 Baeume auf der ganzen Karte).
+			# Mehr Baeume, mehr Steine, mehr Blueten als Farbtupfer.
+			{ "kind": "tree", "tex": "tree", "clusters": 96, "smin": 0.9, "smax": 1.25,
 			  "radius": 12.0, "rbase": 11.0, "yoff": 12.0, "foot": true, "footat": 0.9, "cmin": 1, "cmax": 2 },
-			{ "kind": "rock", "tex": "rock", "clusters": 38, "smin": 0.8, "smax": 1.3,
+			{ "kind": "tree", "tex": "prop_bush_1", "texs": ["prop_bush_1", "prop_bush_2", "prop_bush_3", "prop_bush_4", "prop_bush_5", "prop_bush_6"],
+			  "clusters": 34, "smin": 0.55, "smax": 0.85,
+			  "radius": 8.0, "rbase": 0.0, "yoff": 6.0, "cmin": 1, "cmax": 2 },
+			{ "kind": "rock", "tex": "rock", "clusters": 56, "smin": 0.8, "smax": 1.3,
 			  "radius": 10.0, "rbase": 9.0, "yoff": 6.0, "cmin": 1, "cmax": 2 },
-			# Runde 26: ein paar grosse Blueten als Farbtupfer
-			{ "kind": "rock", "tex": "jflower", "clusters": 6, "smin": 0.8, "smax": 1.2,
-			  "radius": 4.0, "rbase": 4.0, "yoff": 4.0, "cmin": 2, "cmax": 3 }
+			# Runde 26: Blueten als Farbtupfer
+			{ "kind": "rock", "tex": "jflower", "clusters": 18, "smin": 0.8, "smax": 1.2,
+			  "radius": 4.0, "rbase": 4.0, "yoff": 4.0, "cmin": 2, "cmax": 4 },
+			{ "kind": "rock", "tex": "jflower", "texs": ["jflower", "jflower_pink", "jflower_yellow", "jflower_blue"],
+			  "clusters": 12, "smin": 0.9, "smax": 1.3,
+			  "radius": 3.0, "rbase": 0.0, "yoff": 3.0, "cmin": 2, "cmax": 5 }
 		]
 	},
 	"volt": {
@@ -869,14 +877,16 @@ func place_planet_obstacles(density: float = 1.0) -> void:
 				var rbase := float(sp.get("rbase", sp["radius"]))
 				# Runde 58: Schlagschatten unter dem Prop (ausser Kruemel/Krater)
 				if str(sp["kind"]) != "crater" and bool(sp.get("shadow", true)):
-					var tsz: Vector2 = spr.texture.get_size()
 					var fat := float(sp.get("footat", 0.5))
+					var tsz: Vector2 = spr.texture.get_size()
 					var hh: float = tsz.y * spr.scale.y
 					var sh := Sprite2D.new()
 					sh.texture = _get_shadow_tex()
 					sh.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR
-					var sw: float = tsz.x * spr.scale.x * 0.62
-					sh.scale = Vector2(sw / 32.0, sw * 0.34 / 32.0)
+					# Runde 63: deutlich kleiner und heller - vorher wirkten die
+					# Schatten wie breite dunkle Pfuetzen unter den Baeumen.
+					var sw: float = tsz.x * spr.scale.x * 0.34
+					sh.scale = Vector2(sw / 32.0, sw * 0.46 / 32.0)
 					sh.position = Vector2(spr.position.x, spr.position.y + hh * fat - 2.0)
 					sh.z_index = -1
 					add_child(sh)
