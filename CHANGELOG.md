@@ -1,5 +1,24 @@
 # Changelog
 
+## v1.6
+
+**LAN-Koop — gleiche Welt auf beiden Seiten**
+- Kartengenerierung nutzt einen eigenen Zufallsgenerator statt des globalen
+  (Host und Client hatten trotz gleichem Seed verschiedene Karten)
+- `randf_range()` und `Array.shuffle()` hingen ebenfalls am globalen RNG
+- Die Karten-ID wird im Init-Paket übertragen; der Client setzt Karte und Biom,
+  bevor er generiert
+- Verifiziert: Host und Client erzeugen identische Karten (Prüfsumme 16450/397)
+
+**LAN-Koop — Treffer**
+- Client-Geister sind jetzt treffbar (Kollision auf der Monster-Ebene)
+- Treffer werden beim Host angefragt und dort autoritativ abgezogen,
+  der Client zeigt sofort Sound und Trefferblitz
+
+**LAN-Koop — Doppel-Spawn**
+- Wird ein Slot erneut erzeugt, wird die alte Figur entfernt (vorher blieb sie
+  in der Welt, nahm Schaden und riss den Run mit)
+
 ## v1.5
 
 - Einstellungsseite im Pixel-Stil der Startseite (Buttons hatten noch den

@@ -165,7 +165,21 @@ func _get_shadow_tex() -> Texture2D:
 	return _shadow_tex
 
 
-func generate_map(cols: int, rows: int, tile_sz: int) -> void:
+# Runde 65: eigener Zufallsgenerator fuer die Karte. Vorher lief alles ueber
+# die GLOBALEN rng.randf()/rng.randi(). Der globale Zustand haengt aber davon ab, wie
+# viele Zufallszahlen vorher verbraucht wurden - auf Host und Client war das
+# unterschiedlich, deshalb kamen trotz gleichem Seed zwei verschiedene Karten
+# heraus (Fluss, Baeume, Kisten an anderen Stellen).
+var rng := RandomNumberGenerator.new()
+var map_seed: int = 0
+
+
+func generate_map(cols: int, rows: int, tile_sz: int, seed_value: int = 0) -> void:
+	if seed_value != 0:
+		map_seed = seed_value
+	if map_seed == 0:
+		map_seed = int(Time.get_unix_time_from_system() * 1000.0)
+	rng.seed = map_seed
 	map_size = Vector2(cols, rows)
 	tile_size = tile_sz
 	walkable_positions.clear()
@@ -191,13 +205,13 @@ func _carve_river(cols: int, rows: int) -> void:
 	bridges.clear()
 	if not bool(_terrain().get("river", false)):
 		return
-	var axis: int = 1 if randf() < 0.5 else 2      # 1 = Nord-Sued, 2 = West-Ost
+	var axis: int = 1 if rng.randf() < 0.5 else 2      # 1 = Nord-Sued, 2 = West-Ost
 	var span: int = rows if axis == 1 else cols
 	var across: int = cols if axis == 1 else rows
-	var base_pos: float = float(across) * (0.28 if randf() < 0.5 else 0.72)
+	var base_pos: float = float(across) * (0.28 if rng.randf() < 0.5 else 0.72)
 	var amp: float = 3.0
 	var hw: float = 1.6
-	var phase: float = randf() * TAU
+	var phase: float = rng.randf() * TAU
 	var water: Dictionary = {}
 	for i in range(span):
 		var center: float = base_pos + sin(float(i) * 0.09 + phase) * amp
@@ -210,7 +224,7 @@ func _carve_river(cols: int, rows: int) -> void:
 	# Runde 22: 3-4 Bruecken gleichmaessig verteilt. Das Wasser bleibt DURCHGEHEND
 	# (Optik), nur die KOLLISION hat an der Bruecke eine Luecke -> der Fluss wird
 	# nicht mehr aufgerissen (vorher "weisse Flecken" und "Fluss hoert auf").
-	var nbr: int = 3 if randf() < 0.5 else 4
+	var nbr: int = 3 if rng.randf() < 0.5 else 4
 	if across < 60:
 		nbr = 2
 	var seg: float = float(span) / float(nbr + 1)
@@ -801,13 +815,13 @@ func place_planet_obstacles(density: float = 1.0) -> void:
 				break
 			var center: Vector2 = positions[pi]
 			pi += 1
-			var cnt := randi_range(int(sp["cmin"]), int(sp["cmax"]))
+			var cnt := rng.randi_range(int(sp["cmin"]), int(sp["cmax"]))
 			for k in range(cnt):
 				var spread := 34.0 + 26.0 * float(sp["smax"])
 				var placed_ok := false
 				var spr: Sprite2D = null
 				for _try in range(14):
-					var pos2: Vector2 = center + Vector2(randf_range(-spread, spread), randf_range(-spread, spread))
+					var pos2: Vector2 = center + Vector2(rng.randf_range(-spread, spread), rng.randf_range(-spread, spread))
 					if pos2.x < 150.0 or pos2.y < 150.0 or pos2.x > world_w - 150.0 or pos2.y > world_h - 150.0:
 						continue
 					if water_block.size() > 0 and water_block.has(Vector2i(int(pos2.x / tile_size), int(pos2.y / tile_size))):
@@ -815,17 +829,17 @@ func place_planet_obstacles(density: float = 1.0) -> void:
 					var tex_key0 := str(sp["tex"])
 					if sp.has("texs"):
 						var _vs0: Array = sp["texs"]
-						tex_key0 = str(_vs0[randi() % _vs0.size()])
+						tex_key0 = str(_vs0[rng.randi() % _vs0.size()])
 					var _tex := TextureManager.get_texture(tex_key0)
 					if _tex == null:
 						if not missing_keys.has(tex_key0):
 							missing_keys[tex_key0] = true
 							print("[MAP][FEHLER] Textur fehlt: '%s' (Biom %s) - Prop wird uebersprungen" % [tex_key0, biome_id])
 						continue
-					var sc0 := randf_range(float(sp["smin"]), float(sp["smax"]))
+					var sc0 := rng.randf_range(float(sp["smin"]), float(sp["smax"]))
 					if sp.has("hmin"):      # Hoehe in px vorgeben (echte Props sind unterschiedlich gross)
 						var ts: Vector2 = _tex.get_image().get_size()
-						var want := randf_range(float(sp["hmin"]), float(sp["hmax"]))
+						var want := rng.randf_range(float(sp["hmin"]), float(sp["hmax"]))
 						sc0 = want / maxf(1.0, ts.y)
 					var _tsz: Vector2 = _tex.get_image().get_size()
 					# Runde 29: exaktes SICHTBARES Rechteck statt Kreis um den Stamm.
@@ -919,7 +933,7 @@ func place_planet_obstacles(density: float = 1.0) -> void:
 					wset2[nb2] = true
 		var bank_texs: Array = ["jrock", "prop_stone_1", "prop_stone_2"]
 		for nb3 in wset2.keys():
-			if randf() > 0.16:
+			if rng.randf() > 0.16:
 				continue
 			var wx: float = float(nb3.x) * tile_size + tile_size * 0.5
 			var wy: float = float(nb3.y) * tile_size + tile_size * 0.5
@@ -934,8 +948,8 @@ func place_planet_obstacles(density: float = 1.0) -> void:
 			if near_bridge:
 				continue
 			var st := Sprite2D.new()
-			st.texture = TextureManager.get_texture(str(bank_texs[randi() % bank_texs.size()]))
-			var sc := randf_range(0.32, 0.52)
+			st.texture = TextureManager.get_texture(str(bank_texs[rng.randi() % bank_texs.size()]))
+			var sc := rng.randf_range(0.32, 0.52)
 			st.scale = Vector2(sc, sc)
 			st.position = Vector2(wx, wy)
 			st.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR
@@ -1023,7 +1037,13 @@ func get_bounds() -> Rect2:
 func get_random_walkable_positions(count: int, margin: int = 3) -> Array[Vector2]:
 	var positions: Array[Vector2] = []
 	var available = walkable_positions.duplicate(true)
-	available.shuffle()
+	# Runde 65: shuffle() nutzt den GLOBALEN Zufall - damit haing die Karte
+	# wieder vom Zustand des Prozesses ab. Fisher-Yates mit unserem rng.
+	for i in range(available.size() - 1, 0, -1):
+		var j: int = rng.randi_range(0, i)
+		var tmp = available[i]
+		available[i] = available[j]
+		available[j] = tmp
 	var center = get_center()
 	for pos in available:
 		if positions.size() >= count:

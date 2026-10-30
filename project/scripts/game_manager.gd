@@ -59,6 +59,7 @@ var coop_host: bool = false           # dieser Rechner simuliert die Welt
 var coop_client: bool = false         # dieser Rechner rendert + sendet Input
 var _net_seed: int = 0
 var _net_biome: String = "meadow"
+var _net_map: String = ""
 var _net_chests: PackedFloat32Array = PackedFloat32Array()
 var _net_zones: PackedFloat32Array = PackedFloat32Array()
 var _pending_client_start: bool = false
@@ -1543,6 +1544,7 @@ func _ready():
 	NetManager.partner_left.connect(_on_partner_gone)
 	NetManager.peer_joined.connect(_on_peer_joined_coop)
 	NetManager.coop_init_received.connect(_on_coop_init)
+	NetManager.hit_requested.connect(_on_net_hit_request)
 	NetManager.wave_state_received.connect(_on_net_wave_state)
 	NetManager.chest_open_request_received.connect(_on_chest_open_request)
 	NetManager.world_synced.connect(_on_world_synced)
@@ -1802,7 +1804,7 @@ func start_game(duo: bool = false, lan: bool = false):
 	_apply_quality()
 
 	# Karte generieren
-	map_generator.generate_map(MAP_COLS, MAP_ROWS, TILE_SIZE)
+	map_generator.generate_map(MAP_COLS, MAP_ROWS, TILE_SIZE, _net_seed)
 	map_generator.set_season(season_id)
 	map_generator.place_planet_obstacles(get_vegetation())
 
@@ -1907,6 +1909,16 @@ func start_game(duo: bool = false, lan: bool = false):
 		NetManager.c_send_profile(p_name, p_color, p_hat)
 
 func _spawn_slot_player(slot: int, is_remote_driven: bool, is_remote_ctrl: bool) -> Node:
+	# Runde 65: Existiert fuer diesen Slot schon eine Figur, muss sie weg.
+	# Vorher blieb der alte Charakter in der Welt stehen (Doppel-Spawn): er
+	# nahm weiter Schaden, starb mit und riss den Run mit.
+	var old = players.get(slot, null)
+	if old != null and is_instance_valid(old):
+		if old.player_died.is_connected(Callable(self, "_on_player_died")):
+			old.player_died.disconnect(Callable(self, "_on_player_died"))
+		old.queue_free()
+		print("[COOP][SPAWN] Alter Spieler fuer Slot %d entfernt" % slot)
+	players.erase(slot)
 	var p = player_scene.instantiate()
 	p.max_health = int(diff_data()["hearts"])
 	p.health = p.max_health
@@ -2153,13 +2165,25 @@ func _on_coop_profile(peer_id: int, peer_name: String, color: int, hat: int) -> 
 			spr.texture = TextureManager.get_player_texture(color, hat)
 
 func _send_coop_init() -> void:
-	NetManager.h_send_init(_net_seed, _host_chests, _host_zones, biome_id)
+	NetManager.h_send_init(_net_seed, _host_chests, _host_zones, biome_id, active_map)
 
-func _on_coop_init(net_seed: int, chests: PackedFloat32Array, zone_data: PackedFloat32Array, biome: String) -> void:
+func _on_net_hit_request(monster_id: int, damage: int) -> void:
+	# Runde 66: Treffer-Autoritaet - nur der Host zieht Schaden ab.
+	if not coop_host:
+		return
+	for m in _monster_cache:
+		if is_instance_valid(m) and int(m.get("net_id")) == monster_id:
+			m.call("take_damage", damage, 0)
+			return
+	print("[COOP][HIT] FEHLER: monster=%d nicht gefunden (dmg=%d)" % [monster_id, damage])
+
+
+func _on_coop_init(net_seed: int, chests: PackedFloat32Array, zone_data: PackedFloat32Array, biome: String, map_id: String = "") -> void:
 	_net_seed = net_seed
 	_net_chests = chests
 	_net_zones = zone_data
 	_net_biome = biome
+	_net_map = map_id
 	_try_start_coop_client()
 
 func _try_start_coop_client() -> void:
@@ -2189,10 +2213,17 @@ func _start_coop_client() -> void:
 	freeze_time = 0.0
 	rapid_time = 0.0
 	gold_time = 0.0
-	# Karte mit dem Host-Seed erzeugen -> identische Hindernisse
+	# Karte mit dem Host-Seed erzeugen -> identische Hindernisse.
+	# Runde 65: WICHTIG - zuerst Karte und Biom vom Host uebernehmen, sonst
+	# erzeugt der Client mit seiner eigenen Karte eine voellig andere Welt
+	# (andere Dichte, andere Hindernisse) und laeuft gegen andere Kollisionen.
+	if _net_map != "":
+		active_map = _net_map
+	if _net_biome != "":
+		biome_id = _net_biome
+	map_generator.biome_id = biome_id
 	map_generator.clear_map()
-	seed(_net_seed)
-	map_generator.generate_map(MAP_COLS, MAP_ROWS, TILE_SIZE)
+	map_generator.generate_map(MAP_COLS, MAP_ROWS, TILE_SIZE, _net_seed)
 	if not season_unlocks.has(active_map):
 		season_unlocks[active_map] = ["spring"]
 	season_id = planet_season(active_map)
@@ -2376,9 +2407,15 @@ func _on_players_synced(data: PackedFloat32Array, weapons: PackedStringArray) ->
 		i += 8
 		n += 1
 
-func _make_light_ghost(mtype: int) -> Sprite2D:
+func _make_light_ghost(mtype: int) -> StaticBody2D:
 	# Runde 34: Client-Geister als einfaches Sprite (vorher: komplette Monster-Szene
 	# mit CollisionShape + Warn-Sprite + KI-Skript pro Geist -> viel Last)
+	# Runde 66: zusaetzlich eine Kollision auf der Monster-Ebene, damit
+	# Schuesse des Clients ueberhaupt treffen (Treffer geht an den Host).
+	var body := StaticBody2D.new()
+	body.collision_layer = 2
+	body.collision_mask = 0
+	body.add_to_group("monsters")
 	var sp := Sprite2D.new()
 	var key: String = str(monster_ai_script.ghost_texture_key(mtype)) if monster_ai_script != null else "monster_green"
 	var tex = TextureManager.get_texture(key)
@@ -2388,7 +2425,16 @@ func _make_light_ghost(mtype: int) -> Sprite2D:
 	sp.scale = Vector2(sc, sc)
 	sp.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR
 	sp.z_index = 1
-	return sp
+	body.add_child(sp)
+	var cs := CollisionShape2D.new()
+	var shape := CircleShape2D.new()
+	shape.radius = 16.0 * sc
+	cs.shape = shape
+	body.add_child(cs)
+	body.set_script(load("res://scripts/ghost_body.gd"))
+	body.set("gm", self)
+	body.set("sprite", sp)
+	return body
 
 func _send_mob_snapshot() -> void:
 	var data := PackedFloat32Array()
@@ -2473,6 +2519,7 @@ func _on_mobs_synced(data: PackedFloat32Array) -> void:
 		if g == null or not is_instance_valid(g):
 			g = _make_light_ghost(int(mtype))
 			monster_container.add_child(g)
+			g.set("net_id", id)
 			_ghosts[id] = g
 			g.set_meta("hp", hp)
 		else:

@@ -284,7 +284,7 @@ func _on_server_down() -> void:
 # ============================================================
 var coop_role: int = 0      # 1 = Host, 2 = Client
 
-signal coop_init_received(net_seed: int, chests: PackedFloat32Array, zone_data: PackedFloat32Array, biome: String)
+signal coop_init_received(net_seed: int, chests: PackedFloat32Array, zone_data: PackedFloat32Array, biome: String, map_id: String)
 signal world_synced(score: int, combo: int, biome: String, freeze: float, rapid: float, gold: float, boss_hp: int, boss_max: int)
 signal spectator_received(slot: int)
 signal my_player_synced(x: float, y: float, hp: int, mx: int, weapon: String, angle: float, shield: int)
@@ -307,8 +307,8 @@ func c_send_profile(peer_name: String, color: int, hat: int) -> void:
 	coop_profile.rpc_id(1, peer_name, color, hat)
 
 # ---------- Host: senden ----------
-func h_send_init(net_seed: int, chests: PackedFloat32Array, zone_data: PackedFloat32Array, biome: String) -> void:
-	coop_init.rpc(net_seed, chests, zone_data, biome)
+func h_send_init(net_seed: int, chests: PackedFloat32Array, zone_data: PackedFloat32Array, biome: String, map_id: String = "") -> void:
+	coop_init.rpc(net_seed, chests, zone_data, biome, map_id)
 
 func h_send_world(score_v: int, combo_v: int, biome: String, frz: float, rap: float, gold: float, bhp: int, bmx: int) -> void:
 	coop_world.rpc(score_v, combo_v, biome, frz, rap, gold, bhp, bmx)
@@ -379,6 +379,20 @@ func c_send_shop_buy(item_id: String) -> void:
 		return
 	coop_shop_buy.rpc_id(1, item_id)
 
+signal hit_requested(monster_id: int, damage: int)
+
+@rpc("any_peer", "call_remote", "reliable")
+func c_hit(monster_id: int, damage: int) -> void:
+	# Client meldet einen Treffer - der Host entscheidet ueber den Schaden
+	hit_requested.emit(monster_id, damage)
+
+
+func c_send_hit(monster_id: int, damage: int) -> void:
+	if not multiplayer.has_multiplayer_peer():
+		return
+	c_hit.rpc_id(1, monster_id, damage)
+
+
 @rpc("any_peer", "call_remote", "reliable")
 func coop_shop_buy(item_id: String) -> void:
 	shop_buy_requested.emit(item_id)
@@ -446,8 +460,8 @@ func get_local_ip() -> String:
 
 # ---------- RPCs: Host -> Client (Autoritaet = Server) ----------
 @rpc("authority", "call_remote", "reliable")
-func coop_init(net_seed: int, chests: PackedFloat32Array, zone_data: PackedFloat32Array, biome: String) -> void:
-	coop_init_received.emit(net_seed, chests, zone_data, biome)
+func coop_init(net_seed: int, chests: PackedFloat32Array, zone_data: PackedFloat32Array, biome: String, map_id: String = "") -> void:
+	coop_init_received.emit(net_seed, chests, zone_data, biome, map_id)
 
 @rpc("authority", "call_remote", "reliable")
 func coop_world(score_v: int, combo_v: int, biome: String, frz: float, rap: float, gold: float, bhp: int, bmx: int) -> void:
