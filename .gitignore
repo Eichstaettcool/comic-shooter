@@ -1,21 +1,19 @@
-# Godot 4
+# Godot
 .godot/
-/android/
 *.translation
 export.cfg
-export_credentials.cfg
-*.tmp
+export_presets.cfg.bak
 
-# Exporte (gehoeren in die Releases, nicht ins Repo)
-*.exe
-*.pck
-*.apk
-*.aab
-*.zip
+# Builds
 build/
 dist/
+*.apk
+*.aab
+*.exe
+*.pck
+*.zip
 
-# System
-.DS_Store
-Thumbs.db
-*.log
+# Lokale Sicherungen
+*.bak
+*.bak[0-9]*
+*.tmp

@@ -2,6 +2,8 @@
 # Verwaltet Spielzustände, Score, Map, Monster-Spawning und UI-Übergänge
 extends Node2D
 
+const LootTable = preload("res://scripts/loot_table.gd")
+
 enum GameState { MENU, LOBBY, PLAYING, DEAD }
 var current_state: GameState = GameState.MENU
 var score: int = 0
@@ -48,6 +50,8 @@ var quality: int = 1
 const QUALITY_NAMES := ["NIEDRIG", "MITTEL", "HOCH"]
 const CONFIG_VERSION := 2
 var debug_fps: bool = false
+var gems: int = 0            # Runde 67: Edelsteine fuer Kosmetik-Kisten
+var chests_opened: int = 0
 
 # Zufalls-Events
 var event_timer: float = 55.0
@@ -208,6 +212,10 @@ func _start_wave() -> void:
 		if current_boss != null and is_instance_valid(current_boss) and not current_boss.is_queued_for_deletion():
 			current_boss.queue_free()
 		current_boss = spawn_monster_at(_wave_spawn_pos(center, true), btype)
+		if current_boss == null:
+			# Sicherheitsnetz: zweiter Versuch naeher am Spieler
+			_bdiag("SPAWN", "WARNUNG: Boss-Spawn null - zweiter Versuch bei 380 px")
+			current_boss = spawn_monster_at(_wave_spawn_pos(center, false), btype)
 		# Runde 53: Dieser Pfad setzte _boss_active NICHT - dadurch feuerte
 		# beim Tod eines Wellen-/Mini-Bosses nie das Defeat-Handling
 		# (kein "BOSS BESIEGT", Bossbar blieb stehen).
@@ -317,6 +325,7 @@ func _on_net_wave_state(w: int, shop: bool, t: float, remaining: int, c_v: int, 
 
 func refresh_utility_hud() -> void:
 	if ui_manager != null and is_instance_valid(player) and ui_manager.has_method("refresh_utility_hud"):
+		apply_quick_buffs(player)
 		ui_manager.call("refresh_utility_hud", player.utilities, player.call("get_weapon_key"))
 
 func toggle_pause() -> void:
@@ -340,9 +349,46 @@ func restart_run() -> void:
 		ui_manager.hide_pause()
 	start_game(false, false)
 
+func _clear_run() -> void:
+	# Runde 76: Beim Verlassen eines Runs blieben Spieler und Monster in der
+	# Welt stehen. Beim naechsten Start existierten dann ZWEI Figuren.
+	# Hier wird die Welt vollstaendig geraeumt - Knoten werden sofort aus dem
+	# Baum genommen, nicht erst am Frame-Ende.
+	var removed := 0
+	for slot in players.keys():
+		var p = players[slot]
+		if is_instance_valid(p):
+			if p.get_parent() != null:
+				p.get_parent().remove_child(p)
+			p.queue_free()
+			removed += 1
+	players.clear()
+	for p2 in [player, player2]:
+		if p2 != null and is_instance_valid(p2):
+			if p2.get_parent() != null:
+				p2.get_parent().remove_child(p2)
+			p2.queue_free()
+			removed += 1
+	player = null
+	player2 = null
+	if monster_container != null and is_instance_valid(monster_container):
+		for m in monster_container.get_children():
+			monster_container.remove_child(m)
+			m.queue_free()
+			removed += 1
+	_monster_cache.clear()
+	current_boss = null
+	_boss_active = false
+	wave_active = false
+	in_shop = false
+	zones.clear()
+	print("[RUN] Welt geraeumt: %d Knoten entfernt" % removed)
+
+
 func quit_to_menu() -> void:
 	paused = false
 	get_tree().paused = false
+	_clear_run()
 	if ui_manager != null:
 		ui_manager.hide_pause()
 	current_state = GameState.MENU
@@ -644,10 +690,10 @@ const CHESTS := [
 # Gewoehnlich = die Basics, Selten = die kräftigen Varianten,
 # Episch = die Sonderformen.
 const COLOR_RARITY := ["common", "common", "common", "common", "common", "rare", "common", "rare", "rare", "epic"]
-const HAT_RARITY := ["common", "common", "common", "rare", "rare", "common", "rare", "rare", "epic", "epic"]
-const RIG_RARITY := ["common", "rare", "rare", "epic", "epic", "epic"]
+const HAT_RARITY := ["common", "common", "common", "rare", "rare", "common", "rare", "rare", "epic", "legendary"]
+const RIG_RARITY := ["common", "rare", "rare", "epic", "epic", "legendary"]
 
-const RARITY_NAMES := { "common": "GEWOEHNLICH", "rare": "SELTEN", "epic": "EPISCH" }
+const RARITY_NAMES := { "common": "GEWOEHNLICH", "rare": "SELTEN", "epic": "EPISCH", "legendary": "LEGENDAER" }
 const RARITY_COLORS := {
 	"common": Color(0.68, 0.72, 0.78),
 	"rare": Color(0.38, 0.68, 1.0),
@@ -1279,6 +1325,7 @@ func _load_profile() -> void:
 	var d = f.get_var()
 	f.close()
 	if typeof(d) == TYPE_DICTIONARY:
+		quick_buffs = d.get("quick", {})
 		p_name = str(d.get("name", "HELD"))
 		p_color = int(d.get("color", 0))
 		p_hat = int(d.get("hat", 0))
@@ -1340,7 +1387,8 @@ func _save_profile() -> void:
 			"gold": gold, "xp_total": xp_total, "unlocked_colors": unlocked_colors,
 			"unlocked_maps": unlocked_maps, "active_map": active_map, "boosts": boosts,
 			"best_run_xp": best_run_xp, "active_season": active_season, "season_unlocks": season_unlocks,
-			"difficulty": difficulty, "aim_assist": aim_assist, "tip_shown": tip_shown })
+			"difficulty": difficulty, "aim_assist": aim_assist, "tip_shown": tip_shown,
+			"quick": quick_buffs })
 		f.close()
 
 func set_muted(m: bool) -> void:
@@ -1488,6 +1536,16 @@ func _input(event: InputEvent) -> void:
 		if debug_panel != null and is_instance_valid(debug_panel):
 			debug_panel.call("toggle")
 			get_viewport().set_input_as_handled()
+
+
+func debug_toggle() -> void:
+	# Geheimer Debug-Modus (7x auf die Versionszeile tippen)
+	if debug_panel == null or not is_instance_valid(debug_panel):
+		print("[DEBUG] Fenster existiert noch nicht - wird erzeugt")
+		debug_unlock_all()
+		return
+	debug_panel.call("toggle")
+	print("[DEBUG] Fenster umgeschaltet (open=%s)" % str(debug_open))
 
 
 func debug_unlock_all() -> void:
@@ -1760,6 +1818,7 @@ func start_game(duo: bool = false, lan: bool = false):
 	duo_mode = duo
 	lan_mode = lan
 	# Runde 53: Zuschauer-Status eines alten Runs darf nicht ueberleben
+	_clear_run()
 	spectator.clear()
 	downed.clear()
 	downed_time.clear()
@@ -1901,6 +1960,7 @@ func start_game(duo: bool = false, lan: bool = false):
 	ui_manager.refresh_weapon_hud(player.call("get_owned_weapons"), player.call("get_weapon_key"))
 	# Runde 63: Trank/Bombe-Beschriftung sofort setzen - vorher stand beim
 	# Start auf beiden Knoepfen "TRANK x0".
+	apply_quick_buffs(player)
 	ui_manager.refresh_utility_hud(player.utilities, player.call("get_weapon_key"))
 	ui_manager.update_buffs(0.0, 0.0)
 	# Eigenes Profil auf den Helden anwenden
@@ -3443,6 +3503,10 @@ func _spawn_boss() -> void:
 	if current_boss != null and is_instance_valid(current_boss) and not current_boss.is_queued_for_deletion():
 		current_boss.queue_free()
 	current_boss = spawn_monster_at(pos, _biome_boss_type())
+	if current_boss == null:
+		_bdiag("SPAWN", "WARNUNG: Boss-Spawn null - zweiter Versuch")
+		pos = player.position + Vector2(cos(ang + PI), sin(ang + PI)) * 380.0
+		current_boss = spawn_monster_at(pos, _biome_boss_type())
 	_boss_active = current_boss != null
 	ui_manager.show_boss_warning(_boss_count)
 	if current_boss != null:
@@ -4010,6 +4074,8 @@ func _load_high_score():
 				SoundManager.set_music_enabled(file.get_32() == 1)
 			if file.get_position() + 4 <= file.get_length():
 				SoundManager.set_sfx_enabled(file.get_32() == 1)
+			if file.get_position() + 4 <= file.get_length():
+				gems = maxi(0, file.get_32())
 			file.close()
 
 func _save_high_score():
@@ -4022,7 +4088,154 @@ func _save_high_score():
 		file.store_32(CONFIG_VERSION)
 		file.store_32(1 if SoundManager.music_on else 0)
 		file.store_32(1 if SoundManager.sfx_on else 0)
+		file.store_32(gems)
 		file.close()
+
+
+# ============================================================
+# Runde 67: Edelsteine, Umtausch und Kosmetik-Kisten
+# ============================================================
+
+const GEM_PACKAGES := [
+	{ "gold": 1000, "gems": 1 },
+	{ "gold": 10000, "gems": 12 },
+]
+
+
+func _cosmetic_catalog() -> Array:
+	# Alle freischaltbaren Kosmetik-Items mit Seltenheit
+	var out: Array = []
+	for i in range(TextureManager.HAT_NAMES.size()):
+		var rar: String = str(HAT_RARITY[i]) if i < HAT_RARITY.size() else "common"
+		out.append({ "kind": "hat", "index": i, "rarity": rar, "name": str(TextureManager.HAT_NAMES[i]) })
+	for i in range(TextureManager.RIG_NAMES.size()):
+		var rar2: String = str(RIG_RARITY[i]) if i < RIG_RARITY.size() else "rare"
+		out.append({ "kind": "skin", "index": i, "rarity": rar2, "name": str(TextureManager.RIG_NAMES[i]) })
+	for i in range(TextureManager.PLAYER_COLORS.size()):
+		out.append({ "kind": "color", "index": i, "rarity": "common", "name": str(TextureManager.COLOR_NAMES[i]) })
+	return out
+
+
+func _owned_map() -> Dictionary:
+	return { "hat": unlocked_hats, "skin": unlocked_rigs, "color": unlocked_colors }
+
+
+# ---------------------------------------------------------------
+# Runde 73: Sofortkaeufe fuer den naechsten Run
+# ---------------------------------------------------------------
+const QUICK_SHOP := {
+	"rapid":  { "label": "SCHNELLFEUER", "desc": "20 % schneller schiessen", "price": 800 },
+	"potion": { "label": "2x TRANK",     "desc": "heilt 40 LP",              "price": 300 },
+	"bomb":   { "label": "2x BOMBE",     "desc": "Flaechenschaden",          "price": 400 },
+}
+
+var quick_buffs: Dictionary = {}
+
+func buy_quick(kind: String) -> bool:
+	if not QUICK_SHOP.has(kind):
+		print("[SHOP][QUICK] FEHLER: unbekannter Artikel '%s'" % kind)
+		return false
+	var price: int = int(QUICK_SHOP[kind]["price"])
+	if gold < price:
+		print("[SHOP][QUICK] zu wenig Gold: %d < %d (%s)" % [gold, price, kind])
+		return false
+	gold -= price
+	quick_buffs[kind] = int(quick_buffs.get(kind, 0)) + 1
+	print("[SHOP][QUICK] gekauft %s fuer %d Gold (gold=%d)" % [kind, price, gold])
+	return true
+
+func apply_quick_buffs(p: Node) -> void:
+	if quick_buffs.is_empty():
+		return
+	var applied: Array = []
+	if int(quick_buffs.get("rapid", 0)) > 0:
+		p.buff_cooldown_mult = minf(float(p.buff_cooldown_mult), 0.8)
+		applied.append("schnellfeuer x%d" % int(quick_buffs["rapid"]))
+	if int(quick_buffs.get("potion", 0)) > 0:
+		p.call("add_utility", "potion", 2 * int(quick_buffs["potion"]))
+		applied.append("trank x%d" % (2 * int(quick_buffs["potion"])))
+	if int(quick_buffs.get("bomb", 0)) > 0:
+		p.call("add_utility", "bomb", 2 * int(quick_buffs["bomb"]))
+		applied.append("bombe x%d" % (2 * int(quick_buffs["bomb"])))
+	print("[SHOP][QUICK] auf Run angewendet: %s" % ", ".join(applied))
+	quick_buffs.clear()
+
+func exchange_gold_for_gems(pkg_index: int) -> bool:
+	if pkg_index < 0 or pkg_index >= GEM_PACKAGES.size():
+		print("[SHOP][GEMS] FEHLER: unbekanntes Paket %d" % pkg_index)
+		return false
+	var pkg: Dictionary = GEM_PACKAGES[pkg_index]
+	var need: int = int(pkg["gold"])
+	var give: int = int(pkg["gems"])
+	if gold < need:
+		print("[SHOP][GEMS] FEHLER: zu wenig Gold (%d von %d)" % [gold, need])
+		return false
+	gold -= need
+	gems += give
+	_save_profile()
+	ui_manager.refresh_shop_ui()
+	print("[SHOP][GEMS] exchange %d gold -> %d gems (gems=%d, gold=%d)" % [need, give, gems, gold])
+	return true
+
+
+func buy_chest(chest_id: String) -> Dictionary:
+	var cost: int = LootTable.chest_cost(chest_id)
+	if cost <= 0:
+		print("[CHEST] FEHLER: unbekannte Kiste '%s'" % chest_id)
+		return { "ok": false, "error": "unbekannte Kiste" }
+	if gems < cost:
+		print("[CHEST] FEHLER: zu wenig Edelsteine (%d von %d)" % [gems, cost])
+		return { "ok": false, "error": "zu wenig Edelsteine" }
+	var rng := RandomNumberGenerator.new()
+	rng.randomize()
+	var res: Dictionary = LootTable.roll(chest_id, _cosmetic_catalog(), _owned_map(), rng)
+	if not bool(res.get("ok", false)):
+		print("[CHEST] FEHLER: %s" % str(res.get("error", "?")))
+		return res
+	gems -= cost
+	var kind := str(res["kind"])
+	var idx := int(res["index"])
+	if kind == "none":
+		print("[CHEST] open kind=%s cost=%d -> NIETE (nichts) gems=%d" % [chest_id, cost, gems])
+		chests_opened += 1
+		_save_profile()
+		return res
+	if kind == "gems":
+		var g_add: int = int(res.get("gems", 0))
+		gems += g_add
+		print("[CHEST] open kind=%s cost=%d -> Trostpreis EDELSTEINE +%d (gems=%d)" % [chest_id, cost, g_add, gems])
+		chests_opened += 1
+		_save_profile()
+		return res
+	if kind == "gold":
+		var g_add: int = int(res.get("gold", 0))
+		gold += g_add
+		print("[CHEST] open kind=%s cost=%d -> Trostpreis GOLD +%d (gold=%d)" % [chest_id, cost, g_add, gold])
+		chests_opened += 1
+		_save_profile()
+		return res
+	if bool(res["duplicate"]):
+		var refund: int = int(res["refund"])
+		gems += refund
+		print("[CHEST] open kind=%s cost=%d -> item=%s_%d rarity=%s duplicate=true refund=%d" % [
+			chest_id, cost, kind, idx, str(res["rarity"]), refund])
+	else:
+		match kind:
+			"hat":
+				if not unlocked_hats.has(idx):
+					unlocked_hats.append(idx)
+			"skin":
+				if not unlocked_rigs.has(idx):
+					unlocked_rigs.append(idx)
+			"color":
+				if not unlocked_colors.has(idx):
+					unlocked_colors.append(idx)
+		print("[CHEST] open kind=%s cost=%d -> item=%s_%d rarity=%s duplicate=false refund=0" % [
+			chest_id, cost, kind, idx, str(res["rarity"])])
+	chests_opened += 1
+	_save_profile()
+	print("[CHEST] Kontostand: gems=%d  geoeffnet=%d" % [gems, chests_opened])
+	return res
 
 
 func set_music_setting(on: bool) -> void:

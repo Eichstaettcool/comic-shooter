@@ -385,12 +385,16 @@ func set_gm(g: Node) -> void:
 
 # Mini-Version (Splitter-Kinder)
 func set_mini() -> void:
-	max_health = 2
-	current_health = 2
-	points_worth = 4
-	base_scale = Vector2(0.65, 0.65)
+	# Runde 75: Vorher wurde hier max_health/current_health auf 2 gesetzt.
+	# Ein Mini-Boss mit 2 HP stirbt beim ersten Treffer - er wirkt dadurch
+	# wie "gar nicht gespawnt". Nur die Groesse wird angepasst.
+	base_scale = Vector2(0.72, 0.72)
+	if current_health > 400:
+		max_health = 400
+		current_health = 400
 	if collision_shape != null:
 		collision_shape.scale = base_scale
+	print("[BOSS] set_mini: hp=%d/%d scale=0.72" % [current_health, max_health])
 
 # --- LAN-Geist (Client): keine KI, Position kommt vom Host ---
 var ghost: bool = false

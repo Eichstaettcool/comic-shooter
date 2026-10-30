@@ -554,7 +554,11 @@ func _spawn_muzzle_flash() -> void:
 func set_shoot_held(value: bool) -> void:
 	shoot_held = value
 
+var god_mode: bool = false
+
 func take_damage(amount: int) -> void:
+	if god_mode:
+		return
 	# Runde 50: Wer schon liegt, nimmt keinen weiteren Schaden
 	if downed:
 		return

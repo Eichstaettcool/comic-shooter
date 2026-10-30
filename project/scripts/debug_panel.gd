@@ -112,6 +112,48 @@ func _build() -> void:
 	unlock.pressed.connect(_unlock_all)
 	vb.add_child(unlock)
 
+	var spawnall := Button.new()
+	spawnall.text = "ALLE MONSTER SPAWNEN (12 um den Spieler)"
+	spawnall.pressed.connect(_spawn_all_monsters)
+	vb.add_child(spawnall)
+
+	# --- Gezielt Monster/Bosse spawnen ---
+	var pick_row := HBoxContainer.new()
+	vb.add_child(pick_row)
+	type_picker = OptionButton.new()
+	type_picker.custom_minimum_size = Vector2(230, 40)
+	var names: Array = [
+		"GREEN","RED","BLUE","PURPLE","YELLOW","PINK","ORANGE","BOSS (alt)",
+		"BURROWER","GOLEM","PYRO","MARS_ALIEN","MARS_ROVER","ROBO_APE","BIG_FLOWER",
+		"MARS_DRONE","MARS_GUARD","ROBO_TIGER","VINE_TRAP",
+		"BOSS MARS","BOSS JUNGLE","BOSS EARTH",
+		"MINI EARTH","MINI MARS","MINI JUNGLE",
+		"VOLT DRONE","VOLT TROOPER","VOLT SPIDER","BOSS VOLT","VOLT SPOOLER","MINI VOLT"]
+	for i in range(names.size()):
+		type_picker.add_item("%d · %s" % [i, names[i]], i)
+	pick_row.add_child(type_picker)
+
+	var spawn_one := Button.new()
+	spawn_one.text = "SPAWNEN"
+	spawn_one.pressed.connect(_spawn_selected)
+	pick_row.add_child(spawn_one)
+
+	var boss_btn := Button.new()
+	boss_btn.text = "BOSS DIESER KARTE"
+	boss_btn.pressed.connect(_spawn_biome_boss)
+	vb.add_child(boss_btn)
+
+	var mini_btn := Button.new()
+	mini_btn.text = "MINI-BOSS DIESER KARTE"
+	mini_btn.pressed.connect(_spawn_biome_mini)
+	vb.add_child(mini_btn)
+
+	var god := Button.new()
+	god.text = "UNVERWUNDBAR: AUS"
+	god.pressed.connect(_toggle_god)
+	vb.add_child(god)
+	god_btn = god
+
 	grid_scroll = ScrollContainer.new()
 	grid_scroll.custom_minimum_size = Vector2(0, 0)
 	grid_scroll.visible = false
@@ -286,7 +328,81 @@ func _pick_combo(s: int, h: int) -> void:
 	_apply()
 
 
+var god_btn: Button = null
+var type_picker: OptionButton = null
+
+func _spawn_selected() -> void:
+	if gm == null or type_picker == null:
+		return
+	var p = gm.get("player")
+	if p == null:
+		print("[DEBUG] FEHLER: kein Spieler")
+		return
+	var id: int = type_picker.get_selected_id()
+	var m = gm.call("spawn_monster_at", p.global_position + Vector2(180, 0), id, false)
+	var isb: bool = bool(m.call("is_boss")) if m != null else false
+	print("[DEBUG] gespawnt id=%d boss=%s" % [id, str(isb)])
+
+
+func _spawn_biome_boss() -> void:
+	if gm == null:
+		return
+	var p = gm.get("player")
+	if p == null:
+		print("[DEBUG] FEHLER: kein Spieler")
+		return
+	var id: int = int(gm.call("_biome_boss_type"))
+	gm.call("spawn_monster_at", p.global_position + Vector2(220, 0), id, false)
+	print("[DEBUG] Biome-Boss id=%d gespawnt" % id)
+
+
+func _spawn_biome_mini() -> void:
+	if gm == null:
+		return
+	var p = gm.get("player")
+	if p == null:
+		print("[DEBUG] FEHLER: kein Spieler")
+		return
+	var id: int = int(gm.call("_mini_boss_type"))
+	# NICHT as_mini: MINI_*-Typen sind bereits Mini-Bosse. Der Flag haette
+	# ihnen die HP genommen (alter set_mini-Bug).
+	var mb = gm.call("spawn_monster_at", p.global_position + Vector2(220, 0), id, false)
+	if mb != null:
+		print("[DEBUG] Biome-Mini id=%d hp=%d boss=%s" % [id, int(mb.get("current_health")), str(mb.call("is_boss"))])
+	else:
+		print("[DEBUG] FEHLER: Mini-Boss id=%d nicht erzeugt" % id)
+
+func _spawn_all_monsters() -> void:
+	if gm == null:
+		return
+	var p = gm.get("player")
+	if p == null:
+		print("[DEBUG] FEHLER: kein Spieler in der Szene")
+		return
+	var base: Vector2 = p.global_position
+	for i in range(12):
+		var a: float = TAU * float(i) / 12.0
+		gm.call("spawn_monster_at", base + Vector2(cos(a), sin(a)) * 260.0, -1, false)
+	print("[DEBUG] 12 Monster um %s gespawnt" % str(base))
+
+
+func _toggle_god() -> void:
+	if gm == null:
+		return
+	var p = gm.get("player")
+	if p == null:
+		print("[DEBUG] FEHLER: kein Spieler")
+		return
+	p.god_mode = not bool(p.god_mode)
+	if god_btn != null:
+		god_btn.text = "UNVERWUNDBAR: " + ("AN" if p.god_mode else "AUS")
+	print("[DEBUG] Unverwundbar=%s hp=%d" % [str(p.god_mode), int(p.health)])
+
+
 func _unlock_all() -> void:
+	if gm != null:
+		gm.gems += 5000
+		print("[DEBUG] +5000 Edelsteine")
 	if gm == null:
 		return
 	gm.call("debug_unlock_all")

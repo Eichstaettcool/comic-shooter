@@ -1,157 +1,82 @@
-<div align="center">
-
 # Comic Shooter
 
-**Top-down shooter im Comic-Stil — vier Welten, Wellen, Bosse und LAN-Koop für bis zu 4 Spieler.**
+Top-down Comic-Shooter mit vier Welten, Wellen-Modus, Koop über LAN und einem
+Kosmetik-Shop mit Edelsteinen und Lootboxen.
 
-[![Godot](https://img.shields.io/badge/Godot-4.7.2-478cbf?logo=godot-engine&logoColor=white)](https://godotengine.org)
-[![Platform](https://img.shields.io/badge/Platform-Windows%20%7C%20Android-2f8f4e)](https://github.com)
-[![License](https://img.shields.io/badge/License-MIT-d6b32a)](LICENSE)
-
-[**Download**](../../releases/latest) · [Steuerung](#-steuerung) · [Selbst bauen](#-selbst-bauen) · [Screenshots](#-screenshots)
-
-</div>
-
-![Gameplay](screenshots/04-welt-dschungel.png)
-
-## Über das Spiel
-
-Ein runderbasierter Arena-Shooter: du kämpfst dich durch Wellen von Gegnern, sammelst
-Gold und rüstest dich zwischen den Wellen im Shop auf. Alle fünf Wellen wartet ein
-Mini-Boss mit eigener Fähigkeit, nach zehn ein Riesenboss.
-
-Vier Schauplätze mit eigenen Gegnern, Farben und Bodenbeschaffenheiten:
-
-| Welt | Besonderheit |
-|---|---|
-| **Erde** | Wiese, Wüste, Eis und Lava in einem durchlaufenden Run |
-| **Mars** | Rutschiger Sand, Drift-Physik, Rover und Mars-Männchen |
-| **Dschungel** | Dichte Vegetation, Robo-Affen, Sporenblumen |
-| **Elektro-Welt** | Stahl und Strom, Teslaspulen, Kettenblitze |
+![Gameplay](screenshots/01-jungle.png)
 
 ## Features
 
-- **6 Skins × 10 Hüte × 10 Farben** — alle Kombinationen frei spielbar
-- **LAN-Koop für 4 Spieler** (ENet): Host ist autoritativ, Clients sehen dieselbe Welt,
-  Downed-/Revive-System, Zuschauermodus bei endgültigem Tod
-- **Bosse mit Phasen** — jeder Mini-Boss hat eine eigene Fähigkeit und eine
-  Überladungsphase ab 35 % HP
-- **Shop** zwischen den Wellen: Waffen, Upgrades, Tränke, Bomben
-- **Wellen-Modus** — die nächste Welle startet, sobald die aktuelle geräumt ist
-- Prozedural erzeugte Grafik und Musik (keine externen Assets nötig)
+- **Vier Welten** — Erde, Mars, Dschungel, Elektro, jede mit eigener Karte,
+  eigener Gegnerliste und eigenem Boss
+- **Wellen-Modus** — Mini-Boss alle 5 Wellen, Biome-Boss alle 10
+- **Koop über LAN/WLAN** — Host simuliert die Welt, Client schickt Eingaben
+- **Kosmetik-Shop** — Farben, Hüte, Skins; Kisten mit 12/18/28 Edelsteinen
+- **Lootbox mit Laufband** — CS:GO-artige Öffnung, Seltenheitsstufen mit
+  Leucht-Effekten, Nieten (Gold/Edelsteine) als Trostpreis
+- **Sofortkäufe** — Schnellfeuer, Tränke, Bomben für den nächsten Run
+- **Debug-Modus** — 7× auf die Versionszeile tippen
 
-## Download
+## Shop
 
-Fertige Builds liegen unter [**Releases**](../../releases/latest):
+![Shop](screenshots/60-shop-breit.png)
+![Kisten](screenshots/15-kisten-final.png)
 
-- `ComicShooter.apk` — Android 7.0+ (arm64)
-- `ComicShooter.exe` — Windows 10/11 (64-bit)
+| Kiste | Preis | Inhalt |
+|---|---|---|
+| Standard | 12 💎 | Farben, Hüte |
+| Silber | 18 💎 | bessere Chancen, keine Skins |
+| Premium | 28 💎 | zusätzlich Skins, nie gewöhnlich |
 
-**Android:** APK installieren, „Unbekannte Quellen" erlauben.
-**Windows:** EXE starten, keine Installation nötig.
+Alle Kisten liegen bei rund 35–40 % „nichts Sinnvolles" (Niete, Gold oder
+Edelsteine als Trostpreis) — gemessen über 8.000 Züge je Kiste.
 
 ## Steuerung
 
-| Aktion | Tastatur / Maus | Gamepad |
-|---|---|---|
-| Bewegen | `WASD` / Pfeiltasten | linker Stick |
-| Zielen | Mauszeiger | rechter Stick |
-| Schießen | linke Maustaste halten | RT |
-| Waffe wechseln | `1`–`6` oder HUD-Slot antippen | Schultertasten |
-| Trank / Bombe | `Q` / `E` | LB / RB |
-| Pause | `ESC` | Start |
+| Taste | Aktion |
+|---|---|
+| WASD / Pfeile | Bewegen |
+| Maus / rechter Stick | Zielen |
+| Linke Maustaste | Schießen (halten = Dauerfeuer) |
+| Q / E | Trank / Bombe |
+| ESC | Pause |
+| F9 | Debug-Fenster (Desktop) |
+
+Auf Android: virtueller Stick links, Feuerknopf rechts, Utility-Knöpfe unten.
 
 ## Selbst bauen
 
-### Voraussetzungen
+Voraussetzung: **Godot 4.7** (Standard-Build, kein Mono).
 
-1. **Godot 4.7.2** (Standard, nicht .NET) — [godotengine.org/download](https://godotengine.org/download)
-2. **Export-Templates 4.7.2** — in Godot: *Editor → Manage Export Templates → Download*
-3. Nur für Android zusätzlich:
-   - **JDK 17+**
-   - **Android SDK** (Build-Tools, Platform 34+), Pfade in den Editor-Einstellungen setzen
-   - Debug-Keystore (liegt bei den meisten Setups bereits unter `~/.android/debug.keystore`)
+```bash
+# Windows-EXE
+godot --headless --path project --export-release "Windows Desktop" build/ComicShooter.exe
 
-### Windows-EXE
-
-```bat
-export_exe.bat "C:\Pfad\zu\Godot_v4.7.2-stable_win64.exe"
+# Android-APK (Debug-Keystore)
+godot --headless --path project --export-debug "Android" build/ComicShooter.apk
 ```
 
-Oder in Godot: *Projekt → Exportieren → Windows Desktop → Export Projekt*.
-Ergebnis: `ComicShooter.exe` neben dem `project`-Ordner.
+Oder die mitgelieferten Skripte:
 
-### Android-APK
+- `export_exe.bat` — baut die Windows-EXE nach `build/`
+- `export_apk.bat` — baut die APK nach `build/`
 
-```bat
-export_apk.bat "C:\Pfad\zu\Godot.exe"
-```
-
-Oder *Projekt → Exportieren → Android → Export Projekt*.
+Die Export-Presets liegen in `project/export_presets.cfg`. Für Android wird
+ein installiertes Android-SDK (Platform 36, Build-Tools 36) und ein Debug-Keystore
+in `%USERPROFILE%\.android\debug.keystore` benötigt.
 
 ## Projektstruktur
 
 ```
 project/
-├── assets/              Texturen, Sounds
-├── scenes/              Main, Player, Monster, Projectile, Chest, Item
-├── scripts/
-│   ├── game_manager.gd      Spielzustand, Wellen, Shop, Boss-Buchhaltung
-│   ├── player_controller.gd Bewegung, Waffen, Downed/Revive
-│   ├── monster_ai.gd        Gegner-KI, Mini-Bosse, Fähigkeiten
-│   ├── map_generator.gd     Kartenaufbau, Biome, Boden, Deko
-│   ├── texture_manager.gd   prozedurale Grafiken
-│   ├── sound_manager.gd     prozedurale Musik und Effekte
-│   ├── net_manager.gd       LAN-Koop (ENet)
-│   └── ui_manager.gd        HUD, Menüs, Shop, Debug-Fenster
-├── shaders/             Postprocessing
-└── export_presets.cfg   Presets für Android und Windows
+  scenes/        Szenen (Player, Monster, Chest, …)
+  scripts/       Gameplay, UI, Map-Generierung, Loot
+  assets/        Kisten-Grafiken, Schriften, Sounds
+  export_presets.cfg
+screenshots/     Bilder für diese README
 ```
-
-## Debug-Fenster
-
-`F9` öffnet im Spiel ein Entwicklerfenster:
-
-- **Charakter** — Farbe, Skin und Hut durchschalten, Vorschau live;
-  „Alle Kombinationen" zeigt alle 60 Varianten als klickbares Raster
-- **Welt** — direkt in eine andere Karte springen oder die aktuelle neu auswürfeln
-- **Alles freischalten** — Gold, Karten, Skins, Hüte, Jahreszeiten
-- **Live-Werte** — FPS, Gegnerzahl, Welle, HP, Score
-
-## Screenshots
-
-| Startseite | Charakter-Auswahl |
-|---|---|
-| ![Startseite](screenshots/01-startseite.png) | ![Charaktere](screenshots/06-skins.png) |
-
-**Die vier Welten**
-
-| Erde | Mars |
-|---|---|
-| ![Erde](screenshots/02-welt-erde.png) | ![Mars](screenshots/03-welt-mars.png) |
-
-| Dschungel | Elektro-Welt |
-|---|---|
-| ![Dschungel](screenshots/04-welt-dschungel.png) | ![Elektro](screenshots/05-welt-elektro.png) |
-
-**Einstellungen** — Grafikstufe, Schwierigkeit, Musik und Soundeffekte getrennt schaltbar
-
-![Einstellungen](screenshots/07-einstellungen.png)
-
-
-## Mitwirken
-
-Issues und Pull Requests sind willkommen. Für Änderungen am Gameplay bitte vorher
-ein Issue aufmachen — die Balance hängt an vielen Stellen zusammen.
-
-## Credits
-
-- Engine: [Godot Engine](https://godotengine.org) (MIT)
-- Palmen- und Busch-Texturen: [Kenney](https://kenney.nl) — CC0
-- Alle übrigen Grafiken, Musik und Sounds werden zur Laufzeit prozedural erzeugt
-
-Details in [CREDITS.md](CREDITS.md).
 
 ## Lizenz
 
-Quellcode unter [MIT](LICENSE). Die Kenney-Assets stehen unter CC0.
+Code und Grafiken: MIT, siehe [LICENSE](LICENSE).
+Schrift „Pixelify Sans" von Stefie Justprince, SIL Open Font License 1.1.

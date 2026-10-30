@@ -1,6 +1,8 @@
 # UIManager.gd - Verwaltet HUD, StartScreen und DeathScreen inkl. Touch-Controls
 extends Node
 
+const LootTable = preload("res://scripts/loot_table.gd")
+
 signal upgrade_chosen(id: String)
 
 var game_manager: Node = null
@@ -1133,6 +1135,35 @@ func show_banner(text: String, color: Color = Color(1, 1, 1)) -> void:
 	tw.tween_property(banner_label, "modulate:a", 0.0, 0.45)
 	tw.tween_callback(func(): banner_label.visible = false)
 
+var _pixel_font: Font = null
+var _pixel_font_tried: bool = false
+
+func _shop_font() -> Font:
+	# Pixel-Schrift fuer den Shop. Faellt auf die Standardschrift zurueck,
+	# wenn die Datei fehlt - mit klarer Meldung.
+	if not _pixel_font_tried:
+		_pixel_font_tried = true
+		var path := "res://assets/fonts/PixelifySans.ttf"
+		if ResourceLoader.exists(path):
+			_pixel_font = load(path)
+			print("[FONT] Pixel-Schrift geladen: %s" % path)
+		else:
+			print("[FONT] FEHLER: %s fehlt - Standardschrift" % path)
+	return _pixel_font
+
+
+func _shop_ls(size: int, col: Color, outline: int = 6) -> LabelSettings:
+	var ls := LabelSettings.new()
+	if _shop_font() != null:
+		ls.font = _shop_font()
+	ls.font_size = size
+	ls.font_color = col
+	ls.outline_size = outline
+	ls.outline_color = Color(0.03, 0.03, 0.06)
+	ls.shadow_size = 0
+	return ls
+
+
 func _make_label_settings(size: int, color: Color, outline: int) -> LabelSettings:
 	var ls = LabelSettings.new()
 	ls.font_size = size
@@ -1747,6 +1778,24 @@ func _create_start_screen():
 	bounce.tween_property(title, "rotation", 0.03, 1.4).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
 	bounce.tween_property(title, "rotation", -0.03, 1.4).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
 
+	# Versionsanzeige - damit man am Geraet sofort sieht, welcher Build laeuft
+	var ver := Label.new()
+	ver.text = "v1.10  ·  Build 10"
+	ver.label_settings = _make_label_settings(20, Color(0.75, 0.80, 0.86), 3)
+	ver.horizontal_alignment = HorizontalAlignment.HORIZONTAL_ALIGNMENT_CENTER
+	ver.mouse_filter = Control.MOUSE_FILTER_STOP
+	box.add_child(ver)
+	# Geheim: 7x tippen schaltet das Debug-Fenster frei
+	ver.gui_input.connect(func(ev):
+		if ev is InputEventMouseButton and ev.pressed and ev.button_index == MOUSE_BUTTON_LEFT:
+			ver.set_meta("taps", int(ver.get_meta("taps", 0)) + 1)
+			var n: int = int(ver.get_meta("taps"))
+			print("[DEBUG] Tap %d/7" % n)
+			if n >= 7:
+				ver.set_meta("taps", 0)
+				game_manager.call("debug_toggle"))
+	print("[BUILD] Versionsanzeige v1.7 aktiv")
+
 	# Held + Name
 	var hero_row = HBoxContainer.new()
 	hero_row.alignment = BoxContainer.ALIGNMENT_CENTER
@@ -1883,7 +1932,7 @@ func _create_start_screen():
 	var nav_defs: Array = [
 		{ "id": "lan", "text": "LAN SPIEL", "col": Color(0.18, 0.66, 0.40), "cb": _open_lan_panel },
 		{ "id": "char", "text": "CHARAKTER", "col": Color(0.50, 0.28, 0.82), "cb": _open_char_page },
-		{ "id": "shop", "text": "SHOP", "col": Color(0.86, 0.58, 0.12), "cb": _open_shop_page },
+		{ "id": "shop", "text": "SHOP", "col": Color(0.86, 0.58, 0.12), "cb": _open_chest_page },
 		{ "id": "coll", "text": "SAMMLUNG", "col": Color(0.74, 0.22, 0.46), "cb": func(): show_collection() },
 		{ "id": "map", "text": "KARTEN", "col": Color(0.18, 0.56, 0.70), "cb": _open_maps_page }
 	]
@@ -2267,12 +2316,14 @@ func _input(event: InputEvent) -> void:
 	# Auf Android schlucken die Item-Buttons (mouse_filter STOP) die Drag-Events,
 	# dadurch bewegte sich der ScrollContainer nicht. Hier global abgefangen -
 	# funktioniert auch bei pausiertem Spiel (process_mode ALWAYS).
-	if shop_panel == null or shop_scroll == null:
+	if shop_scroll == null:
 		return
-	if not shop_panel.visible:
+	var aktywn: bool = (shop_panel != null and shop_panel.visible) \
+		or (chest_page != null and chest_page.visible)
+	if not aktywn:
 		return
 	if event is InputEventScreenDrag:
-		shop_scroll.scroll_vertical -= int((event as InputEventScreenDrag).relative.y * 1.2)
+		shop_scroll.scroll_vertical -= int((event as InputEventScreenDrag).relative.y * 1.6)
 		get_viewport().set_input_as_handled()
 	elif event is InputEventMouseMotion and ((event as InputEventMouseMotion).button_mask & MOUSE_BUTTON_MASK_LEFT) != 0:
 		shop_scroll.scroll_vertical -= int((event as InputEventMouseMotion).relative.y * 1.2)
@@ -2609,6 +2660,11 @@ func _close_pages() -> void:
 		maps_page.hide()
 	if collection_page:
 		collection_page.hide()
+	# Runde 74: Kisten-Seite wurde nie geschlossen -> Zurueck tat nichts
+	if chest_page:
+		chest_page.hide()
+	if start_screen:
+		start_screen.show()
 	# Runde 40: die Run-Uebersicht ist auch eine Seite - sonst liegt sie
 	# beim Zurueck zur Startseite weiter ueber dem Menue
 	if confirm_page:
@@ -3911,6 +3967,402 @@ func set_start_gold(g: int) -> void:
 # ============================================================
 # SHOP-SEITE (Kisten + Direktkauf)
 # ============================================================
+# ============================================================
+# Runde 67: KISTEN-SEITE (Edelsteine + Kosmetik-Kisten)
+# ============================================================
+var chest_page: Control = null
+var gems_label: Control = null
+var chest_msg: Label = null
+
+
+func _open_chest_page() -> void:
+	if chest_page == null:
+		_create_chest_page()
+	_close_pages()
+	chest_page.show()
+	if shop_scroll != null:
+		shop_scroll.scroll_vertical = 0
+	refresh_chest_page()
+
+
+func _create_chest_page() -> void:
+	chest_page = _make_page("SHOP")
+	var box := _page_box(chest_page)
+	box.add_theme_constant_override("separation", 8)
+
+	# ZURUECK fest oben links - nicht erst durchscrollen muessen
+	var back_top := _make_pixel_button("ZURÜCK", Color(0.32, 0.35, 0.42), 26)
+	back_top.add_theme_font_override("font", _shop_font())
+	back_top.position = Vector2(40, 26)
+	back_top.custom_minimum_size = Vector2(210, 68)
+	back_top.size = Vector2(210, 68)
+	back_top.pressed.connect(_close_pages)
+	chest_page.add_child(back_top)
+
+	# Scrollbereich: alles untereinander, eine Spalte, 1240 breit
+	var scroll := ScrollContainer.new()
+	scroll.custom_minimum_size = Vector2(1680, 820)
+	scroll.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+	scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	scroll.vertical_scroll_mode = ScrollContainer.SCROLL_MODE_AUTO
+	scroll.follow_focus = true
+	# Touch-Drag selbst behandeln: auf Android greift der Container nicht immer
+	scroll.gui_input.connect(func(ev):
+		if ev is InputEventScreenDrag:
+			scroll.scroll_vertical -= int(ev.relative.y)
+		elif ev is InputEventMouseButton and ev.pressed:
+			if ev.button_index == MOUSE_BUTTON_WHEEL_DOWN:
+				scroll.scroll_vertical += 120
+			elif ev.button_index == MOUSE_BUTTON_WHEEL_UP:
+				scroll.scroll_vertical -= 120)
+	box.add_child(scroll)
+	shop_scroll = scroll
+
+	var col := VBoxContainer.new()
+	col.custom_minimum_size = Vector2(1680, 0)
+	col.add_theme_constant_override("separation", 34)
+	scroll.add_child(col)
+
+	# ---- Waehrungen: fest oben rechts, ausserhalb des Scrolls ----
+	var head := HBoxContainer.new()
+	head.add_theme_constant_override("separation", 14)
+	head.alignment = BoxContainer.ALIGNMENT_END
+	head.anchor_left = 0.0
+	head.anchor_right = 1.0
+	head.offset_left = 0.0
+	head.offset_right = -118.0
+	head.offset_top = 26.0
+	head.offset_bottom = 96.0
+	chest_page.add_child(head)
+	shop_gold_chip = _make_chip("🪙 0", Color(0.52, 0.40, 0.14), 36)
+	gems_label = _make_chip("💎 0", Color(0.16, 0.40, 0.50), 36)
+	head.add_child(shop_gold_chip)
+	head.add_child(gems_label)
+
+	# ---- Kisten ----
+	col.add_child(_section_banner("KISTEN", Color(0.99, 0.80, 0.22)))
+	var chest_row := HBoxContainer.new()
+	chest_row.alignment = BoxContainer.ALIGNMENT_CENTER
+	chest_row.add_theme_constant_override("separation", 46)
+	col.add_child(chest_row)
+	chest_row.add_child(_chest_card("standard", "STANDARD", "Farben + Hüte",
+		Color(0.46, 0.32, 0.18), "44 / 15 / 5 / 1 %"))
+	chest_row.add_child(_chest_card("silver", "SILBER", "bessere Chancen",
+		Color(0.40, 0.44, 0.52), "20 / 30 / 13 / 2 %"))
+	chest_row.add_child(_chest_card("premium", "PREMIUM", "auch Skins",
+		Color(0.42, 0.28, 0.58), "0 / 39 / 19 / 6 %"))
+
+	# ---- Edelsteine aufladen ----
+	col.add_child(_section_banner("EDELSTEINE AUFLADEN", Color(0.99, 0.80, 0.22)))
+	var gem_row := HBoxContainer.new()
+	gem_row.alignment = BoxContainer.ALIGNMENT_CENTER
+	gem_row.add_theme_constant_override("separation", 26)
+	col.add_child(gem_row)
+	var gi := 0
+	for pkg in game_manager.GEM_PACKAGES:
+		gem_row.add_child(_gem_card(gi, int(pkg["gold"]), int(pkg["gems"])))
+		gi += 1
+
+	# ---- Sofortkauf ----
+	col.add_child(_section_banner("SOFORTKAUF FÜR DEN NÄCHSTEN RUN", Color(0.99, 0.80, 0.22)))
+	var quick_row := HBoxContainer.new()
+	quick_row.alignment = BoxContainer.ALIGNMENT_CENTER
+	quick_row.add_theme_constant_override("separation", 22)
+	col.add_child(quick_row)
+	for qk in ["rapid", "potion", "bomb"]:
+		quick_row.add_child(_quick_card(str(qk)))
+
+	chest_msg = Label.new()
+	chest_msg.text = ""
+	chest_msg.label_settings = _make_label_settings(20, Color(0.95, 0.85, 0.45), 4)
+	chest_msg.horizontal_alignment = HorizontalAlignment.HORIZONTAL_ALIGNMENT_CENTER
+	col.add_child(chest_msg)
+
+	var back := _make_pixel_button("ZURÜCK", Color(0.32, 0.35, 0.42), 26)
+	back.custom_minimum_size = Vector2(210, 68)
+	back.add_theme_font_override("font", _shop_font())
+	back.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+	back.pressed.connect(_close_pages)
+	col.add_child(back)
+
+
+func _section_banner(text: String, col: Color) -> Control:
+	# Variante A: schraeger Aufkleber - dicke Kontur, harter Versatzschatten,
+	# Halbton-Streifen, wippt alle 3,4 s leicht.
+	var holder := Control.new()
+	holder.custom_minimum_size = Vector2(1680, 100)
+	var w: float = clampf(float(text.length()) * 23.0 + 150.0, 360.0, 1080.0)
+	var h: float = 72.0
+	var x: float = (1680.0 - w) * 0.5
+
+	# harter Schatten (versetzt, keine Unschaerfe -> Comic)
+	var sh := ColorRect.new()
+	sh.color = Color(0, 0, 0, 0.85)
+	sh.position = Vector2(x + 8, 10)
+	sh.size = Vector2(w, h)
+	holder.add_child(sh)
+
+	var plate := Panel.new()
+	var sb := StyleBoxFlat.new()
+	sb.bg_color = col
+	sb.border_color = Color(0.03, 0.03, 0.05)
+	sb.set_border_width_all(5)
+	sb.set_corner_radius_all(3)
+	plate.add_theme_stylebox_override("panel", sb)
+	plate.position = Vector2(x, 2)
+	plate.size = Vector2(w, h)
+	plate.pivot_offset = Vector2(w * 0.5, h * 0.5)
+	holder.add_child(plate)
+
+	# Halbton-Streifen als Detail (dezente dunkle Linien)
+	var stripes := Control.new()
+	stripes.position = Vector2(6, 6)
+	stripes.size = Vector2(w - 12, h - 12)
+	plate.add_child(stripes)
+	var i := 0
+	while i * 14 < int(h):
+		var ln := ColorRect.new()
+		ln.color = Color(0.03, 0.03, 0.05, 0.10)
+		ln.position = Vector2(0, i * 14)
+		ln.size = Vector2(w - 12, 2)
+		stripes.add_child(ln)
+		i += 1
+
+	# Lichtkante oben, Schattenkante unten
+	var top := ColorRect.new()
+	top.color = Color(1, 1, 1, 0.45)
+	top.position = Vector2(4, 4)
+	top.size = Vector2(w - 8, 4)
+	plate.add_child(top)
+	var bot := ColorRect.new()
+	bot.color = Color(0, 0, 0, 0.30)
+	bot.position = Vector2(4, h - 10)
+	bot.size = Vector2(w - 8, 4)
+	plate.add_child(bot)
+
+	var l := Label.new()
+	l.text = text
+	l.position = Vector2(0, 8)
+	l.size = Vector2(w, h - 12)
+	l.horizontal_alignment = HorizontalAlignment.HORIZONTAL_ALIGNMENT_CENTER
+	l.vertical_alignment = VerticalAlignment.VERTICAL_ALIGNMENT_CENTER
+	var lum: float = col.r * 0.3 + col.g * 0.6 + col.b * 0.1
+	l.label_settings = _shop_ls(38, Color(0.12, 0.09, 0.02) if lum > 0.55 else Color(1.0, 0.97, 0.90), 0)
+	l.label_settings.outline_size = 0
+	plate.add_child(l)
+
+	# Wippen: leichte Drehung hin und her
+	plate.rotation = -0.055
+	var tw := plate.create_tween()
+	tw.set_loops()
+	tw.tween_property(plate, "rotation", 0.012, 1.7).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
+	tw.tween_property(plate, "rotation", -0.055, 1.7).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
+	return holder
+
+
+func _chest_card(tier: String, title: String, sub: String, accent: Color, odds: String) -> Control:
+	var card := PanelContainer.new()
+	var csb := StyleBoxFlat.new()
+	csb.bg_color = accent.darkened(0.25)
+	csb.border_color = Color(0.03, 0.03, 0.05)
+	csb.set_border_width_all(5)
+	csb.set_corner_radius_all(6)
+	csb.content_margin_left = 16.0
+	csb.content_margin_right = 16.0
+	csb.content_margin_top = 16.0
+	csb.content_margin_bottom = 16.0
+	# Glow: weicher farbiger Schatten hinter der Karte
+	csb.shadow_color = Color(accent.r, accent.g, accent.b, 0.45)
+	csb.shadow_size = 24
+	csb.shadow_offset = Vector2.ZERO
+	card.add_theme_stylebox_override("panel", csb)
+	if tier == "premium":
+		# Dauerhaft pulsierender Lichtkranz um die Premium-Kiste
+		var glow := card.create_tween()
+		glow.set_loops()
+		glow.tween_property(csb, "shadow_color:a", 0.85, 1.3).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
+		glow.tween_property(csb, "shadow_color:a", 0.35, 1.3).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
+	card.custom_minimum_size = Vector2(500, 520)
+	var v := VBoxContainer.new()
+	v.add_theme_constant_override("separation", 10)
+	card.add_child(v)
+
+	var img := TextureRect.new()
+	img.texture = TextureManager.get_texture("chest_gem_" + tier)
+	img.custom_minimum_size = Vector2(300, 250)
+	img.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	img.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	img.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR
+	img.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+	v.add_child(img)
+	# Kiste lebt: schwebt und atmet leicht - wirkt nicht wie ein statisches Bild
+	img.pivot_offset = Vector2(150, 130)
+	var bob := img.create_tween()
+	bob.set_loops()
+	bob.tween_property(img, "scale", Vector2(1.035, 1.035), 1.4).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
+	bob.tween_property(img, "scale", Vector2(1.0, 1.0), 1.4).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
+	img.modulate = Color(1.04, 1.04, 1.02, 1.0)
+
+	var t := Label.new()
+	t.text = title + "-KISTE"
+	t.horizontal_alignment = HorizontalAlignment.HORIZONTAL_ALIGNMENT_CENTER
+	t.label_settings = _shop_ls(26, Color(0.98, 0.94, 0.86), 6)
+	v.add_child(t)
+
+	var s2 := Label.new()
+	s2.text = sub
+	s2.horizontal_alignment = HorizontalAlignment.HORIZONTAL_ALIGNMENT_CENTER
+	s2.label_settings = _shop_ls(18, Color(0.80, 0.84, 0.88), 4)
+	v.add_child(s2)
+
+	var o := Label.new()
+	o.text = "Chancen " + odds
+	o.horizontal_alignment = HorizontalAlignment.HORIZONTAL_ALIGNMENT_CENTER
+	o.label_settings = _shop_ls(19, Color(0.88, 0.92, 0.96), 4)
+	v.add_child(o)
+
+	var b := _make_pixel_button("%d 💎 ÖFFNEN" % LootTable.chest_cost(tier), Color(0.99, 0.80, 0.22), 24)
+	b.add_theme_font_override("font", _shop_font())
+	b.add_theme_color_override("font_color", Color(0.16, 0.11, 0.02))
+	b.custom_minimum_size = Vector2(320, 78)
+	b.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+	b.pressed.connect(_on_chest_open.bind(tier))
+	v.add_child(b)
+	return card
+
+
+func _gem_card(idx: int, gold_cost: int, gems: int) -> Control:
+	var card := PanelContainer.new()
+	card.add_theme_stylebox_override("panel", _comic_panel_sb(Color(0.16, 0.46, 0.50), Color(0.06, 0.05, 0.10), 6, 16))
+	card.custom_minimum_size = Vector2(560, 200)
+	var v := VBoxContainer.new()
+	v.add_theme_constant_override("separation", 6)
+	card.add_child(v)
+
+	var top := Label.new()
+	top.text = "%d GOLD" % gold_cost
+	top.horizontal_alignment = HorizontalAlignment.HORIZONTAL_ALIGNMENT_CENTER
+	top.label_settings = _shop_ls(26, Color(0.98, 0.86, 0.45), 6)
+	v.add_child(top)
+
+	var mid := Label.new()
+	mid.text = ("→  %d EDELSTEIN" if gems == 1 else "→  %d EDELSTEINE") % gems
+	mid.horizontal_alignment = HorizontalAlignment.HORIZONTAL_ALIGNMENT_CENTER
+	mid.label_settings = _shop_ls(34, Color(0.55, 0.92, 1.0), 8)
+	v.add_child(mid)
+
+	var b := _make_pixel_button("UMTAUSCHEN", Color(0.16, 0.58, 0.52), 24)
+	b.add_theme_font_override("font", _shop_font())
+	b.custom_minimum_size = Vector2(400, 70)
+	b.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+	b.pressed.connect(_on_gem_package.bind(idx))
+	v.add_child(b)
+	return card
+
+
+func _quick_card(kind: String) -> Control:
+	var info: Dictionary = game_manager.QUICK_SHOP[kind]
+	var card := PanelContainer.new()
+	card.add_theme_stylebox_override("panel", _comic_panel_sb(Color(0.46, 0.22, 0.36), Color(0.06, 0.05, 0.10), 6, 16))
+	card.custom_minimum_size = Vector2(500, 215)
+	var v := VBoxContainer.new()
+	v.add_theme_constant_override("separation", 8)
+	card.add_child(v)
+
+	var t := Label.new()
+	t.text = str(info["label"])
+	t.horizontal_alignment = HorizontalAlignment.HORIZONTAL_ALIGNMENT_CENTER
+	t.label_settings = _shop_ls(25, Color(1.0, 0.94, 0.86), 6)
+	v.add_child(t)
+
+	var d := Label.new()
+	d.text = str(info["desc"])
+	d.horizontal_alignment = HorizontalAlignment.HORIZONTAL_ALIGNMENT_CENTER
+	d.label_settings = _shop_ls(18, Color(0.82, 0.84, 0.88), 4)
+	v.add_child(d)
+
+	var b := _make_pixel_button("%d GOLD" % int(info["price"]), Color(0.72, 0.26, 0.52), 24)
+	b.add_theme_font_override("font", _shop_font())
+	b.custom_minimum_size = Vector2(330, 70)
+	b.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+	b.pressed.connect(_on_quick_buy.bind(str(kind)))
+	v.add_child(b)
+	return card
+
+
+func _on_quick_buy(kind: String) -> void:
+	if game_manager == null:
+		return
+	var ok: bool = game_manager.call("buy_quick", kind)
+	if chest_msg != null:
+		var info: Dictionary = game_manager.QUICK_SHOP[kind]
+		chest_msg.text = ("%s gekauft - gilt im nächsten Run" % str(info["label"])) if ok \
+			else ("Zu wenig Gold - %d nötig" % int(info["price"]))
+	refresh_chest_page()
+
+
+func refresh_chest_page() -> void:
+	if game_manager == null:
+		return
+	if gems_label != null:
+		var gl = gems_label.get_meta("label", null)
+		if gl != null:
+			gl.text = "💎 %d" % game_manager.gems
+	if shop_gold_chip != null:
+		var gol = shop_gold_chip.get_meta("label", null)
+		if gol != null:
+			gol.text = "🪙 %d" % game_manager.gold
+
+
+func _on_gem_package(i: int) -> void:
+	if game_manager == null:
+		return
+	var ok: bool = game_manager.call("exchange_gold_for_gems", i)
+	if chest_msg != null:
+		var pkg: Dictionary = game_manager.GEM_PACKAGES[i]
+		chest_msg.text = ("+%d Edelsteine für %d Gold" % [int(pkg["gems"]), int(pkg["gold"])]) if ok 			else ("Zu wenig Gold - %d nötig" % int(pkg["gold"]))
+	refresh_chest_page()
+
+
+func _on_chest_open(chest_id: String) -> void:
+	if game_manager == null:
+		return
+	# Flash beim Kauf: kurzer weisser Blitz ueber der Seite
+	var fl := ColorRect.new()
+	fl.color = Color(1, 1, 1, 0)
+	fl.anchor_right = 1.0
+	fl.anchor_bottom = 1.0
+	fl.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	chest_page.add_child(fl)
+	var ftw := fl.create_tween()
+	ftw.tween_property(fl, "color:a", 0.75, 0.06)
+	ftw.tween_property(fl, "color:a", 0.0, 0.22)
+	ftw.tween_callback(fl.queue_free)
+	var res: Dictionary = game_manager.call("buy_chest", chest_id)
+	refresh_chest_page()
+	if not bool(res.get("ok", false)):
+		if chest_msg != null:
+			chest_msg.text = "Nicht genug Edelsteine für die Kiste"
+		return
+	var ui = load("res://scripts/chest_ui.gd").new()
+	ui.setup(game_manager)
+	add_child(ui)
+	# Seite ausblenden, sonst scheint der Text durch Titel und Laufband
+	if chest_page != null:
+		chest_page.hide()
+	if start_screen != null:
+		start_screen.hide()
+	ui.call("open", chest_id, res)
+	ui.connect("closed", func():
+		if chest_page != null:
+			chest_page.show()
+		if start_screen != null:
+			start_screen.show()
+		refresh_chest_page()
+		refresh_shop_ui())
+
+
 func _open_shop_page() -> void:
 	if shop_page == null:
 		_create_shop_page()

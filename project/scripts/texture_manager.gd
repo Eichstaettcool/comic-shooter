@@ -113,6 +113,10 @@ func _generate_all_textures():
 	textures["palm"] = _make_palm()
 	textures["bush"] = _make_bush_dot()
 	# Runde 64: gezeichnete Buesche im Baum-Stil (Kontur + Tiefe)
+	# Runde 72: gemalte Kisten aus assets/chests/ (Fallback: prozedural)
+	for _tier in ["standard", "silver", "premium"]:
+		textures["chest_gem_" + _tier] = _load_chest_png("res://assets/chests/chest_%s.png" % _tier, _tier, false)
+		textures["chest_gem_open_" + _tier] = _load_chest_png("res://assets/chests/open_%s.png" % _tier, _tier, true)
 	textures["pbush_a"] = _make_bush_prop(56, 0)
 	textures["pbush_b"] = _make_bush_prop(56, 1)
 	textures["pbush_c"] = _make_bush_prop(56, 2)
@@ -3250,6 +3254,118 @@ func _make_bush_prop(size: int, variant: int = 0) -> ImageTexture:
 		_disc(img, float(b[0]) * f - float(b[2]) * f * 0.22, float(b[1]) * f - float(b[2]) * f * 0.26,
 			float(b[2]) * f * 0.32, leaf_light, true)
 	return ImageTexture.create_from_image(img)
+
+
+func _load_chest_png(path: String, tier: String, open_state: bool):
+	# Laedt das gemalte PNG; fehlt es, wird die gezeichnete Kiste genutzt.
+	# Jeder Fehler wird gemeldet, kein stiller Fallback.
+	if ResourceLoader.exists(path):
+		var res = load(path)
+		if res is Texture2D:
+			print("[CHEST][TEX] geladen: %s (%dx%d)" % [path, res.get_width(), res.get_height()])
+			return res
+		print("[CHEST][TEX] FEHLER: %s ist keine Textur" % path)
+	else:
+		print("[CHEST][TEX] FEHLER: %s fehlt - prozedurale Kiste" % path)
+	return _make_gem_chest(128, tier, open_state)
+
+
+func _make_gem_chest(size: int, tier: String, open_state: bool) -> ImageTexture:
+	# Runde 71: Truhen-Silhouette - hoher Korpus, halbrunder Deckel mit
+	# Ueberstand, Schloss auf der Naht. Weiche Kanten via Coverage-Sampling.
+	_aa = true
+	var img = _new_img(size, size)
+	var f := float(size)
+	var body_l: Color
+	var body_m: Color
+	var body_d: Color
+	var rim_l: Color
+	var rim_m: Color
+	var rim_d: Color
+	var gem_l: Color
+	var gem_m: Color
+	var gem_d: Color
+	match tier:
+		"silver":
+			body_l = Color(0.80, 0.82, 0.88); body_m = Color(0.60, 0.63, 0.70)
+			body_d = Color(0.37, 0.40, 0.48)
+			rim_l = Color(0.98, 0.99, 1.0); rim_m = Color(0.74, 0.78, 0.86); rim_d = Color(0.45, 0.48, 0.56)
+			gem_l = Color(0.88, 1.0, 0.95); gem_m = Color(0.32, 0.86, 0.60); gem_d = Color(0.10, 0.50, 0.34)
+		"premium":
+			body_l = Color(0.48, 0.40, 0.68); body_m = Color(0.31, 0.25, 0.50)
+			body_d = Color(0.17, 0.13, 0.31)
+			rim_l = Color(1.0, 0.92, 0.60); rim_m = Color(0.87, 0.72, 0.33); rim_d = Color(0.50, 0.37, 0.14)
+			gem_l = Color(0.96, 0.78, 1.0); gem_m = Color(0.75, 0.40, 0.98); gem_d = Color(0.43, 0.16, 0.66)
+		_:
+			body_l = Color(0.70, 0.47, 0.25); body_m = Color(0.50, 0.31, 0.16)
+			body_d = Color(0.29, 0.17, 0.09)
+			rim_l = Color(0.98, 0.89, 0.58); rim_m = Color(0.78, 0.64, 0.29); rim_d = Color(0.45, 0.34, 0.13)
+			gem_l = Color(0.80, 0.98, 1.0); gem_m = Color(0.31, 0.73, 0.95); gem_d = Color(0.10, 0.36, 0.58)
+
+	var cx: float = f * 0.5
+	var half: float = f * 0.33          # halbe Korpusbreite
+	var top: float = f * 0.50           # Deckel-Naht
+	var bot: float = f * 0.84
+
+	# Bodenschatten
+	_ellipse(img, int(cx), int(bot + f * 0.02), int(half * 1.06), int(f * 0.045), Color(0, 0, 0, 0.28), true)
+
+	# --- Deckel zuerst (Korpus deckt die untere Haelfte spaeter ab) ---
+	if not open_state:
+		_ellipse(img, int(cx), int(top), int(half * 1.06), int(f * 0.20), OUTLINE)
+		_ellipse(img, int(cx), int(top - f * 0.005), int(half * 1.01), int(f * 0.185), body_m)
+		_ellipse(img, int(cx), int(top - f * 0.045), int(half * 0.96), int(f * 0.150), body_l)
+		# Metallkante entlang der Naht
+		_rect(img, int(cx - half * 1.03), int(top - f * 0.018), int(half * 2.06), int(f * 0.030), rim_m)
+		_rect(img, int(cx - half * 1.03), int(top - f * 0.018), int(half * 2.06), int(f * 0.010), rim_l)
+
+	# --- Korpus ---
+	_rect(img, int(cx - half) - 3, int(top) - 3, int(half * 2.0) + 6, int(bot - top) + 3, OUTLINE)
+	_rect(img, int(cx - half), int(top), int(half * 2.0), int(f * 0.10), body_l)
+	_rect(img, int(cx - half), int(top + f * 0.10), int(half * 2.0), int(f * 0.16), body_m)
+	_rect(img, int(cx - half), int(bot - f * 0.08), int(half * 2.0), int(f * 0.08), body_d)
+	# senkrechte Metallbaender
+	for bx in [cx - half * 0.52, cx + half * 0.52]:
+		_rect(img, int(bx - f * 0.020), int(top), int(f * 0.040), int(bot - top), rim_m)
+		_rect(img, int(bx - f * 0.020), int(top), int(f * 0.012), int(bot - top), rim_l)
+
+	# --- Schloss auf der Naht ---
+	_rect(img, int(cx - f * 0.055), int(top - f * 0.035), int(f * 0.11), int(f * 0.105), OUTLINE)
+	_rect(img, int(cx - f * 0.045), int(top - f * 0.025), int(f * 0.09), int(f * 0.085), rim_m)
+	_rect(img, int(cx - f * 0.045), int(top - f * 0.025), int(f * 0.09), int(f * 0.012), rim_l)
+
+	if open_state:
+		# Deckel hinten aufgeklappt: schmaler Bogen ueber der Hinterkante
+		_ellipse(img, int(cx), int(top - f * 0.10), int(half * 1.02), int(f * 0.075), OUTLINE)
+		_ellipse(img, int(cx), int(top - f * 0.105), int(half * 0.97), int(f * 0.062), body_d)
+		_ellipse(img, int(cx), int(top - f * 0.115), int(half * 0.80), int(f * 0.040), body_m)
+		# Oeffnung + Licht
+		_ellipse(img, int(cx), int(top + f * 0.01), int(half * 0.90), int(f * 0.055), Color(0.05, 0.04, 0.08, 1.0), true)
+		_ellipse(img, int(cx), int(top + f * 0.015), int(half * 0.74), int(f * 0.040),
+			Color(gem_m.r, gem_m.g, gem_m.b, 0.65), true)
+		_ellipse(img, int(cx), int(top + f * 0.02), int(half * 0.42), int(f * 0.022), Color(1, 1, 1, 0.30), true)
+
+	# --- Edelstein auf dem Deckel (geschlossen) ---
+	if not open_state:
+		var gy: float = top - f * 0.115
+		var gw: float = f * 0.075
+		var gh: float = f * 0.070
+		_tri(img, Vector2(cx, gy - gh), Vector2(cx + gw, gy), Vector2(cx - gw, gy), OUTLINE)
+		_tri(img, Vector2(cx, gy + gh * 0.55), Vector2(cx + gw, gy), Vector2(cx - gw, gy), OUTLINE)
+		_tri(img, Vector2(cx, gy - gh * 0.82), Vector2(cx + gw * 0.80, gy), Vector2(cx - gw * 0.80, gy), gem_m)
+		_tri(img, Vector2(cx, gy - gh * 0.82), Vector2(cx, gy), Vector2(cx - gw * 0.80, gy), gem_l)
+		_tri(img, Vector2(cx, gy), Vector2(cx + gw * 0.80, gy), Vector2(cx, gy + gh * 0.40), gem_d)
+		_disc(img, cx - gw * 0.28, gy - gh * 0.42, f * 0.010, Color(1, 1, 1, 0.95), true)
+
+	_aa = false
+	return ImageTexture.create_from_image(img)
+
+
+
+func bw_inset(cx: float, bw: float, y: float) -> float:
+	# Korpus verjuengt sich nach unten leicht -> Breitenfunktion
+	return bw * (0.97 - 0.04 * clampf((y - cx * 0.8) / 400.0, 0.0, 1.0))
+
 
 
 func _make_tree() -> ImageTexture:
