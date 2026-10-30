@@ -1,26 +1,61 @@
 # Comic Shooter
 
-Top-down Comic-Shooter mit vier Welten, Wellen-Modus, Koop über LAN und einem
-Kosmetik-Shop mit Edelsteinen und Lootboxen.
+Top-down Comic-Shooter für Desktop und Android. Vier Welten, Wellen-Modus mit
+Bossen, Koop über LAN und ein Kosmetik-Shop mit Edelsteinen und Lootboxen.
 
-![Gameplay](screenshots/01-jungle.png)
+![Startseite](screenshots/01-startseite.png)
 
-## Features
+## Die vier Welten
 
-- **Vier Welten** — Erde, Mars, Dschungel, Elektro, jede mit eigener Karte,
-  eigener Gegnerliste und eigenem Boss
-- **Wellen-Modus** — Mini-Boss alle 5 Wellen, Biome-Boss alle 10
-- **Koop über LAN/WLAN** — Host simuliert die Welt, Client schickt Eingaben
-- **Kosmetik-Shop** — Farben, Hüte, Skins; Kisten mit 12/18/28 Edelsteinen
-- **Lootbox mit Laufband** — CS:GO-artige Öffnung, Seltenheitsstufen mit
-  Leucht-Effekten, Nieten (Gold/Edelsteine) als Trostpreis
-- **Sofortkäufe** — Schnellfeuer, Tränke, Bomben für den nächsten Run
-- **Debug-Modus** — 7× auf die Versionszeile tippen
+Jede Welt hat eine eigene prozedural generierte Karte, eigene Gegner und
+einen eigenen Boss.
 
-## Shop
+| Erde | Mars |
+|---|---|
+| ![Erde](screenshots/02-welt-erde.png) | ![Mars](screenshots/03-welt-mars.png) |
+
+| Dschungel | Elektro |
+|---|---|
+| ![Dschungel](screenshots/04-welt-dschungel.png) | ![Elektro](screenshots/05-welt-elektro.png) |
+
+## Bosse
+
+Alle 10 Wellen erscheint der Biome-Boss, dazwischen alle 5 Wellen ein Mini-Boss.
+Jeder Boss hat eigene Angriffsmuster und eine eigene Schwachstelle.
+
+| Splitter-König (Erde) | Meteor-Golem (Mars) |
+|---|---|
+| ![Boss Erde](screenshots/70-boss-earth.png) | ![Boss Mars](screenshots/70-boss-mars.png) |
+
+| Robo-Affe-König (Dschungel) | Volt-Boss (Elektro) |
+|---|---|
+| ![Boss Dschungel](screenshots/70-boss-jungle.png) | ![Boss Volt](screenshots/70-boss-volt.png) |
+
+## Charaktere
+
+Sechs Skins, zehn Hüte und mehrere Farben — alles nur kosmetisch, die
+Spielbalance bleibt unberührt.
+
+![Skins](screenshots/06-skins.png)
+
+## Shop und Lootboxen
+
+Kisten kosten 12, 18 oder 28 Edelsteine. Edelsteine kauft man mit Gold —
+1.000 Gold = 1 💎, 10.000 Gold = 12 💎.
 
 ![Shop](screenshots/60-shop-breit.png)
+
 ![Kisten](screenshots/15-kisten-final.png)
+
+Beim Öffnen läuft ein Streifen durch, bleibt auf dem Gewinn stehen und die
+Kachel leuchtet auf — gestaffelt nach Seltenheit.
+
+![Lootbox](screenshots/61-epic-highlight.png)
+
+Rund 35–40 % der Kisten bringen keinen Skin: Niete, Gold oder Edelsteine als
+Trostpreis (gemessen über 8.000 Züge je Kiste).
+
+![Niete](screenshots/50-niete.png)
 
 | Kiste | Preis | Inhalt |
 |---|---|---|
@@ -28,21 +63,29 @@ Kosmetik-Shop mit Edelsteinen und Lootboxen.
 | Silber | 18 💎 | bessere Chancen, keine Skins |
 | Premium | 28 💎 | zusätzlich Skins, nie gewöhnlich |
 
-Alle Kisten liegen bei rund 35–40 % „nichts Sinnvolles" (Niete, Gold oder
-Edelsteine als Trostpreis) — gemessen über 8.000 Züge je Kiste.
+## Einstellungen
+
+Musik und Soundeffekte getrennt schaltbar, Grafikqualität, Aim-Assist,
+Schwierigkeit — alles im Comic-Stil der Startseite.
+
+![Einstellungen](screenshots/07-einstellungen.png)
 
 ## Steuerung
 
 | Taste | Aktion |
 |---|---|
 | WASD / Pfeile | Bewegen |
-| Maus / rechter Stick | Zielen |
+| Maus | Zielen |
 | Linke Maustaste | Schießen (halten = Dauerfeuer) |
 | Q / E | Trank / Bombe |
 | ESC | Pause |
 | F9 | Debug-Fenster (Desktop) |
 
 Auf Android: virtueller Stick links, Feuerknopf rechts, Utility-Knöpfe unten.
+
+**Debug-Modus:** 7× auf die Versionszeile auf dem Startbildschirm tippen.
+Darin: Weltwechsel, Monster-Dropdown (31 Typen), Boss/Mini-Boss je Karte,
+Unverwundbarkeit, alles freischalten.
 
 ## Selbst bauen
 
@@ -56,14 +99,9 @@ godot --headless --path project --export-release "Windows Desktop" build/ComicSh
 godot --headless --path project --export-debug "Android" build/ComicShooter.apk
 ```
 
-Oder die mitgelieferten Skripte:
-
-- `export_exe.bat` — baut die Windows-EXE nach `build/`
-- `export_apk.bat` — baut die APK nach `build/`
-
-Die Export-Presets liegen in `project/export_presets.cfg`. Für Android wird
-ein installiertes Android-SDK (Platform 36, Build-Tools 36) und ein Debug-Keystore
-in `%USERPROFILE%\.android\debug.keystore` benötigt.
+Oder die mitgelieferten Skripte `export_exe.bat` und `export_apk.bat`
+(Android braucht SDK Platform 36 und einen Debug-Keystore unter
+`%USERPROFILE%\.android\debug.keystore`).
 
 ## Projektstruktur
 
@@ -71,8 +109,7 @@ in `%USERPROFILE%\.android\debug.keystore` benötigt.
 project/
   scenes/        Szenen (Player, Monster, Chest, …)
   scripts/       Gameplay, UI, Map-Generierung, Loot
-  assets/        Kisten-Grafiken, Schriften, Sounds
-  export_presets.cfg
+  assets/        Kisten-Grafiken, Schrift, Sounds
 screenshots/     Bilder für diese README
 ```
 
