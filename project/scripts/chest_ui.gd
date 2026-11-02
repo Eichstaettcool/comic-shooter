@@ -110,7 +110,8 @@ func _build(chest_id: String) -> void:
 	for i in range(STRIP_LEN):
 		var e: Dictionary
 		if i == WIN_INDEX:
-			e = { "kind": win_kind, "index": win_idx, "rarity": str(result.get("rarity", "common")) }
+			e = { "kind": win_kind, "index": win_idx, "rarity": str(result.get("rarity", "common")),
+				"gold": int(result.get("gold", 0)), "gems": int(result.get("gems", 0)) }
 		else:
 			var roll := (i * 7 + 3) % 12
 			if roll == 0:
@@ -165,21 +166,50 @@ func _tile(e: Dictionary, highlight: bool) -> Control:
 	var kind := str(e.get("kind", "hat"))
 	var idx := int(e.get("index", 0))
 	var tex = null
-	if kind == "none" or kind == "gold" or kind == "gems":
+	if kind == "none":
 		var lbl := Label.new()
-		lbl.text = "LEER" if kind == "none" else ("GOLD" if kind == "gold" else "GEMS")
+		lbl.text = "LEER"
 		lbl.horizontal_alignment = HorizontalAlignment.HORIZONTAL_ALIGNMENT_CENTER
 		lbl.vertical_alignment = VerticalAlignment.VERTICAL_ALIGNMENT_CENTER
-		lbl.label_settings = _ls(24, Color(0.95, 0.80, 0.30) if kind == "gold" else Color(0.55, 0.58, 0.62))
+		lbl.label_settings = _ls(24, Color(0.55, 0.58, 0.62))
 		p.add_child(lbl)
 		return p
+	if kind == "gold" or kind == "gems":
+		# Runde 95: 1 / 2 / 3 Symbole je nach Hoehe - man sieht sofort,
+		# ob es ein kleiner oder grosser Trostpreis ist.
+		var amount: int = int(e.get("gold", 0)) if kind == "gold" else int(e.get("gems", 0))
+		var level: int = 1
+		if kind == "gold":
+			if amount >= 250: level = 3
+			elif amount >= 100: level = 2
+		else:
+			if amount >= 25: level = 3
+			elif amount >= 10: level = 2
+		var sym := "slot_gold%d" % level if kind == "gold" else "slot_gem%d" % level
+		var tex2 = TextureManager.get_texture(sym)
+		if tex2 == null:
+			print("[CHEST][UI] FEHLER: Textur %s fehlt fuer %s x%d" % [sym, kind, amount])
+			tex2 = TextureManager.get_texture("slot_gold1")
+		var tr2 := TextureRect.new()
+		tr2.texture = tex2
+		tr2.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+		tr2.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+		tr2.custom_minimum_size = Vector2(TILE_W - 14, TILE_W - 30)
+		p.add_child(tr2)
+		var cl := Label.new()
+		cl.text = ("+%d" % amount)
+		cl.horizontal_alignment = HorizontalAlignment.HORIZONTAL_ALIGNMENT_CENTER
+		cl.label_settings = _ls(18, Color(0.98, 0.86, 0.40) if kind == "gold" else Color(0.60, 0.90, 1.0))
+		p.add_child(cl)
+		return p
+	# Runde 96: Jede Kategorie zeigt NUR das, was man gewinnt.
 	match kind:
 		"hat":
-			tex = TextureManager.get_skin_hat_texture_or_player(gm.get("p_color"), gm.get("p_rig"), idx)
+			tex = TextureManager.get_hat_only_texture(idx)
 		"skin":
-			tex = TextureManager.get_skin_hat_texture_or_player(gm.get("p_color"), idx, gm.get("p_hat"))
+			tex = TextureManager.get_skin_texture(int(gm.get("p_color")), idx)
 		"color":
-			tex = TextureManager.get_skin_hat_texture_or_player(idx, gm.get("p_rig"), gm.get("p_hat"))
+			tex = TextureManager.get_skin_texture(idx, int(gm.get("p_rig")))
 	if tex != null:
 		tr.texture = tex
 	tr.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
@@ -259,7 +289,8 @@ func _reveal() -> void:
 	var refund := int(result.get("refund", 0))
 	if str(result.get("kind", "")) == "none":
 		info_label.text = "NIETE  ·  diesmal nichts"
-		info_label.label_settings = _ls(32, Color(0.62, 0.64, 0.70))
+		info_label.label_settings = _ls(26, Color(0.45, 0.47, 0.52))
+		info_label.modulate = Color(0.75, 0.75, 0.78, 1.0)
 	elif str(result.get("kind", "")) == "gems":
 		info_label.text = "TROSTPREIS  ·  +%d Edelsteine" % int(result.get("gems", 0))
 		info_label.label_settings = _ls(32, Color(0.55, 0.80, 0.98))
@@ -270,8 +301,11 @@ func _reveal() -> void:
 		info_label.text = "%s  ·  %s  ·  schon vorhanden  →  +%d Edelsteine" % [label, rar.to_upper(), refund]
 		info_label.label_settings = _ls(30, Color(0.85, 0.86, 0.90))
 	else:
-		info_label.text = "%s  ·  %s  ·  NEU FREIGESCHALTET" % [label, rar.to_upper()]
-		info_label.label_settings = _ls(32, _rarity_color(rar))
+		info_label.text = "%s  ·  %s  ·  NEU!" % [label, rar.to_upper()]
+		info_label.label_settings = _ls(40, _rarity_color(rar).lightened(0.15))
+		var pop := create_tween()
+		pop.tween_property(info_label, "scale", Vector2(1.08, 1.08), 0.18).set_trans(Tween.TRANS_BACK)
+		pop.tween_property(info_label, "scale", Vector2(1.0, 1.0), 0.25)
 	# --- Gewinner-Kachel hervorheben: aufleuchten + pulsieren ---
 	if win_tile != null:
 		var col2: Color = _rarity_color(rar)
@@ -319,9 +353,26 @@ func _reveal() -> void:
 	# Weiter-Knopf
 	var btn := Button.new()
 	btn.text = "WEITER"
-	btn.custom_minimum_size = Vector2(260, 64)
-	btn.add_theme_font_size_override("font_size", 26)
-	btn.position = Vector2((size.x - 260) * 0.5, size.y - 110)
+	btn.custom_minimum_size = Vector2(300, 76)
+	btn.add_theme_font_size_override("font_size", 32)
+	var bsb := StyleBoxFlat.new()
+	bsb.bg_color = Color(0.99, 0.80, 0.22)
+	bsb.border_color = Color(0.03, 0.03, 0.05)
+	bsb.set_border_width_all(5)
+	bsb.set_corner_radius_all(4)
+	bsb.shadow_color = Color(0, 0, 0, 0.6)
+	bsb.shadow_size = 0
+	bsb.shadow_offset = Vector2(6, 6)
+	btn.add_theme_stylebox_override("normal", bsb)
+	var bh: StyleBoxFlat = bsb.duplicate()
+	bh.bg_color = Color(1.0, 0.88, 0.40)
+	btn.add_theme_stylebox_override("hover", bh)
+	var bp: StyleBoxFlat = bsb.duplicate()
+	bp.bg_color = Color(0.85, 0.66, 0.14)
+	bp.shadow_offset = Vector2(2, 2)
+	btn.add_theme_stylebox_override("pressed", bp)
+	btn.add_theme_color_override("font_color", Color(0.14, 0.10, 0.02))
+	btn.position = Vector2((size.x - 300) * 0.5, size.y - 120)
 	add_child(btn)
 	btn.pressed.connect(func():
 		closed.emit()

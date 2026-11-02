@@ -117,6 +117,18 @@ func _generate_all_textures():
 	for _tier in ["standard", "silver", "premium"]:
 		textures["chest_gem_" + _tier] = _load_chest_png("res://assets/chests/chest_%s.png" % _tier, _tier, false)
 		textures["chest_gem_open_" + _tier] = _load_chest_png("res://assets/chests/open_%s.png" % _tier, _tier, true)
+	# Runde 94: Walzensymbole
+	textures["slot_machine_icon"] = _make_slot_icon(256)
+	textures["slot_gem1"] = _make_gem_icon(1, 128)
+	textures["slot_gem2"] = _make_gem_icon(2, 128)
+	textures["slot_gem3"] = _make_gem_icon(3, 128)
+	textures["slot_cherry"] = _make_slot_symbol("cherry", 128)
+	textures["slot_bell"] = _make_slot_symbol("bell", 128)
+	textures["slot_bar"] = _make_slot_symbol("bar", 128)
+	textures["slot_gold1"] = _make_slot_symbol("gold1", 128)
+	textures["slot_gold2"] = _make_slot_symbol("gold2", 128)
+	textures["slot_gold3"] = _make_slot_symbol("gold3", 128)
+	textures["slot_skull"] = _make_slot_symbol("skull", 128)
 	textures["pbush_a"] = _make_bush_prop(56, 0)
 	textures["pbush_b"] = _make_bush_prop(56, 1)
 	textures["pbush_c"] = _make_bush_prop(56, 2)
@@ -466,7 +478,40 @@ func _make_force_field() -> ImageTexture:
 		_rect(img, int(rpts[4].x) - 2, int(rpts[4].y) - 2, 4, 4, line_c)
 	return ImageTexture.create_from_image(img)
 
+func _draw_ring(img, cx: float, cy: float, rx: float, ry: float, col: Color, width: float) -> void:
+	# Einfacher Ring aus vielen kleinen Punkten (fuer Halo)
+	var steps := 40
+	for i in range(steps):
+		var a: float = TAU * float(i) / float(steps)
+		var px: float = cx + cos(a) * rx
+		var py: float = cy + sin(a) * ry
+		_disc(img, px, py, width, col, true)
+
+
 func _draw_hat(img, hat: int) -> void:
+	# Runde 98: Halo, Antenne, Kroenchen zuerst - eigene Motive, kein
+	# Durchlauf durch die alten case-Zweige.
+	if hat == 10:
+		_draw_ring(img, 32.0, 6.0, 11.0, 4.5, Color(1.0, 0.88, 0.35), 2.2)
+		_draw_ring(img, 32.0, 6.0, 11.0, 4.5, Color(1.0, 0.97, 0.70), 1.2)
+		return
+	if hat == 11:
+		_thick_line(img, Vector2(28, 20), Vector2(26, 7), 2.0, OUTLINE)
+		_thick_line(img, Vector2(36, 20), Vector2(38, 7), 2.0, OUTLINE)
+		_disc(img, 26, 6, 2.4, OUTLINE, true)
+		_disc(img, 38, 6, 2.4, OUTLINE, true)
+		_disc(img, 26, 6, 1.6, Color(1.0, 0.45, 0.35), true)
+		_disc(img, 38, 6, 1.6, Color(0.45, 1.0, 0.55), true)
+		return
+	if hat == 12:
+		_rect(img, 21, 10, 22, 7, OUTLINE)
+		_rect(img, 22, 11, 20, 5, Color(0.99, 0.84, 0.26))
+		_tri(img, Vector2(24, 11), Vector2(27, 4), Vector2(30, 11), OUTLINE)
+		_tri(img, Vector2(31, 11), Vector2(34, 3), Vector2(37, 11), OUTLINE)
+		_tri(img, Vector2(24, 11), Vector2(27, 5), Vector2(30, 11), Color(1.0, 0.92, 0.45))
+		_tri(img, Vector2(31, 11), Vector2(34, 4), Vector2(37, 11), Color(1.0, 0.92, 0.45))
+		return
+
 	# Runde 48: Hut-Overlay - wird fuer Base-Skin UND alle Skins benutzt
 		match hat:
 			1:
@@ -595,6 +640,44 @@ func _make_player_rig(idx: int, shirt: Color = Color(0.20, 0.60, 1.0), pants: Co
 			_rect(img, 41, 29, 18, 6, gun)
 			_rect(img, 55, 27, 5, 10, OUTLINE)
 			_rect(img, 56, 28, 3, 8, gun)
+		6:
+			# ASTRONAUT: weisser Anzug, blaues Visier
+			var suit6 := Color(0.92, 0.93, 0.96)
+			_outlined_ellipse(img, 32, 36, 14, 14, suit6, 3)
+			_outlined_ellipse(img, 26, 47, 4, 8, suit6.darkened(0.15), 2)
+			_outlined_ellipse(img, 38, 47, 4, 8, suit6.darkened(0.15), 2)
+			_outlined_disc(img, 32, 21, 12, suit6, 3)
+			_rect(img, 22, 17, 20, 9, Color(0.10, 0.22, 0.40))
+			_rect(img, 23, 18, 8, 4, Color(0.45, 0.75, 0.98))
+			_rect(img, 30, 30, 5, 8, shirt)
+			_disc(img, 32, 34, 3, Color(0.95, 0.30, 0.30))
+			_rect(img, 40, 28, 20, 8, OUTLINE)
+			_rect(img, 41, 29, 18, 6, gun)
+		7:
+			# GOLD-ROBOTER: goldene Panzerung, gluehende Augen
+			var gold7 := Color(0.92, 0.74, 0.26).lerp(shirt, 0.15)
+			_outlined_ellipse(img, 32, 36, 13, 14, gold7, 3)
+			_outlined_ellipse(img, 26, 47, 4, 8, gold7.darkened(0.35), 2)
+			_outlined_ellipse(img, 38, 47, 4, 8, gold7.darkened(0.35), 2)
+			_outlined_disc(img, 32, 21, 12, gold7.lightened(0.10), 3)
+			_rect(img, 24, 17, 16, 6, Color(0.15, 0.10, 0.05))
+			_disc(img, 28, 20, 2, Color(1.0, 0.55, 0.20))
+			_disc(img, 36, 20, 2, Color(1.0, 0.55, 0.20))
+			_disc(img, 32, 36, 6, Color(1.0, 0.90, 0.45))
+			_rect(img, 40, 28, 20, 8, OUTLINE)
+			_rect(img, 41, 29, 18, 6, Color(0.30, 0.24, 0.12))
+		8:
+			# SCHATTEN: dunkler Mantel, violette Energie
+			var cloak8 := Color(0.22, 0.14, 0.34)
+			_outlined_ellipse(img, 32, 36, 13, 15, cloak8, 3)
+			_outlined_ellipse(img, 26, 48, 4, 8, cloak8.darkened(0.3), 2)
+			_outlined_ellipse(img, 38, 48, 4, 8, cloak8.darkened(0.3), 2)
+			_outlined_disc(img, 32, 21, 11, Color(0.14, 0.10, 0.20), 3)
+			_rect(img, 23, 20, 18, 4, Color(0.72, 0.40, 0.95))
+			_disc(img, 32, 36, 5, Color(0.72, 0.40, 0.95))
+			_disc(img, 32, 36, 2, Color(1, 1, 1))
+			_rect(img, 40, 28, 20, 8, OUTLINE)
+			_rect(img, 41, 29, 18, 6, Color(0.20, 0.20, 0.26))
 		4:
 			# COMIC-HELD: Umhang + Muskel in der Spielerfarbe
 			_tri(img, Vector2(20.0, 26.0), Vector2(44.0, 26.0), Vector2(40.0, 50.0), shirt.darkened(0.22))
@@ -654,8 +737,8 @@ func _make_player_rig(idx: int, shirt: Color = Color(0.20, 0.60, 1.0), pants: Co
 const COLOR_NAMES := ["BLAU", "ROT", "GRUEN", "GELB", "LILA", "WEISS", "ORANGE", "CYAN", "ROSA", "STAHL"]
 # Runde 38: Character-Rigs (Helden-Overlays)
 # Runde 40/42: RIGS = echte SKINS (kompletter Charakter-Look, farbbar)
-const RIG_NAMES := ["STANDARD", "PANZERHELD", "NINJA", "ROBOTER", "COMIC-HELD", "MARS-MARSCHALL"]
-const HAT_NAMES := ["OHNE", "KAPPE", "COWBOY", "KRONE", "ZYLINDER", "MUETZE", "PIRAT", "STROMP", "VIKING", "STERN"]
+const RIG_NAMES := ["STANDARD", "PANZERHELD", "NINJA", "ROBOTER", "COMIC-HELD", "MARS-MARSCHALL", "ASTRONAUT", "GOLD-ROBOTER", "SCHATTEN"]
+const HAT_NAMES := ["KAPPE", "COWBOY", "KRONE", "ZYLINDER", "WOLLMÜTZE", "PIRAT", "STROHHUT", "WIKINGER", "STERN", "KRONE+", "HALO", "ANTENNE", "KRÖNCHEN"]
 
 const PLAYER_COLORS := [
 	{ "shirt": Color(0.20, 0.60, 1.00), "pants": Color(0.15, 0.25, 0.55) },
@@ -669,6 +752,111 @@ const PLAYER_COLORS := [
 	{ "shirt": Color(0.98, 0.42, 0.72), "pants": Color(0.46, 0.16, 0.30) },
 	{ "shirt": Color(0.58, 0.64, 0.72), "pants": Color(0.26, 0.30, 0.36) }
 ]
+
+
+func _make_hat_icon(idx: int, size: int) -> ImageTexture:
+	# Runde 97: Hut-Motive eigenstaendig in 128 px (statt Ausschnitt aus der
+	# Figur). Reihenfolge entspricht _draw_hat().
+	_aa = true
+	var img = _new_img(size, size)
+	var f := float(size)
+	var cx := f * 0.5
+	var base := f * 0.72          # Unterkante des Hutes
+	# Zuordnung der gezeichneten Motive zur echten Hut-Reihenfolge aus _draw_hat():
+	# 0 Kappe, 1 Cowboy, 2 Krone, 3 Zylinder, 4 Wollmuetze, 5 Pirat,
+	# 6 Strohhut, 7 Wikinger, 8 Stern
+	var map := [0, 4, 2, 1, 5, 7, 4, 3, 8, 9, 10, 11]
+	var style: int = int(map[idx]) if idx >= 0 and idx < map.size() else 0
+	match style:
+		0:  # Kappe
+			_ellipse(img, int(cx), int(base - f * 0.10), int(f * 0.30), int(f * 0.20), OUTLINE)
+			_ellipse(img, int(cx), int(base - f * 0.12), int(f * 0.27), int(f * 0.17), Color(0.82, 0.18, 0.20))
+			_rect(img, int(cx - f * 0.34), int(base - f * 0.04), int(f * 0.68), int(f * 0.08), OUTLINE)
+			_rect(img, int(cx - f * 0.32), int(base - f * 0.03), int(f * 0.64), int(f * 0.05), Color(0.68, 0.12, 0.14))
+		1:  # Zylinder
+			_rect(img, int(cx - f * 0.18), int(base - f * 0.46), int(f * 0.36), int(f * 0.40), OUTLINE)
+			_rect(img, int(cx - f * 0.15), int(base - f * 0.44), int(f * 0.30), int(f * 0.38), Color(0.16, 0.16, 0.20))
+			_rect(img, int(cx - f * 0.15), int(base - f * 0.16), int(f * 0.30), int(f * 0.08), Color(0.72, 0.16, 0.18))
+			_rect(img, int(cx - f * 0.36), int(base - f * 0.08), int(f * 0.72), int(f * 0.10), OUTLINE)
+			_rect(img, int(cx - f * 0.34), int(base - f * 0.07), int(f * 0.68), int(f * 0.06), Color(0.22, 0.22, 0.26))
+		2:  # Krone
+			_rect(img, int(cx - f * 0.30), int(base - f * 0.26), int(f * 0.60), int(f * 0.22), OUTLINE)
+			_rect(img, int(cx - f * 0.27), int(base - f * 0.24), int(f * 0.54), int(f * 0.18), Color(0.96, 0.80, 0.20))
+			for i in range(3):
+				var px: float = cx + (float(i) - 1.0) * f * 0.20
+				_tri(img, Vector2(px, base - f * 0.56), Vector2(px + f * 0.09, base - f * 0.26), Vector2(px - f * 0.09, base - f * 0.26), OUTLINE)
+				_tri(img, Vector2(px, base - f * 0.52), Vector2(px + f * 0.06, base - f * 0.27), Vector2(px - f * 0.06, base - f * 0.27), Color(0.99, 0.86, 0.30))
+		3:  # Wikinger
+			_ellipse(img, int(cx), int(base - f * 0.22), int(f * 0.28), int(f * 0.20), OUTLINE)
+			_ellipse(img, int(cx), int(base - f * 0.23), int(f * 0.25), int(f * 0.17), Color(0.62, 0.64, 0.70))
+			_tri(img, Vector2(cx - f * 0.26, base - f * 0.28), Vector2(cx - f * 0.52, base - f * 0.52), Vector2(cx - f * 0.30, base - f * 0.10), OUTLINE)
+			_tri(img, Vector2(cx + f * 0.26, base - f * 0.28), Vector2(cx + f * 0.52, base - f * 0.52), Vector2(cx + f * 0.30, base - f * 0.10), OUTLINE)
+			_tri(img, Vector2(cx - f * 0.29, base - f * 0.29), Vector2(cx - f * 0.46, base - f * 0.46), Vector2(cx - f * 0.31, base - f * 0.15), Color(0.94, 0.92, 0.86))
+			_tri(img, Vector2(cx + f * 0.29, base - f * 0.29), Vector2(cx + f * 0.46, base - f * 0.46), Vector2(cx + f * 0.31, base - f * 0.15), Color(0.94, 0.92, 0.86))
+		4:  # Cowboy
+			_ellipse(img, int(cx), int(base - f * 0.10), int(f * 0.44), int(f * 0.12), OUTLINE)
+			_ellipse(img, int(cx), int(base - f * 0.11), int(f * 0.41), int(f * 0.09), Color(0.62, 0.44, 0.22))
+			_ellipse(img, int(cx), int(base - f * 0.26), int(f * 0.24), int(f * 0.16), OUTLINE)
+			_ellipse(img, int(cx), int(base - f * 0.27), int(f * 0.21), int(f * 0.13), Color(0.72, 0.52, 0.26))
+		5:  # Helm
+			_ellipse(img, int(cx), int(base - f * 0.20), int(f * 0.30), int(f * 0.24), OUTLINE)
+			_ellipse(img, int(cx), int(base - f * 0.21), int(f * 0.27), int(f * 0.21), Color(0.34, 0.52, 0.34))
+			_rect(img, int(cx - f * 0.03), int(base - f * 0.30), int(f * 0.06), int(f * 0.26), Color(0.90, 0.92, 0.94))
+		6:  # Zauberer
+			_tri(img, Vector2(cx, base - f * 0.72), Vector2(cx + f * 0.30, base - f * 0.08), Vector2(cx - f * 0.30, base - f * 0.08), OUTLINE)
+			_tri(img, Vector2(cx, base - f * 0.66), Vector2(cx + f * 0.25, base - f * 0.11), Vector2(cx - f * 0.25, base - f * 0.11), Color(0.34, 0.26, 0.62))
+			_ellipse(img, int(cx), int(base - f * 0.08), int(f * 0.34), int(f * 0.08), Color(0.34, 0.26, 0.62))
+			_disc(img, cx + f * 0.12, base - f * 0.42, f * 0.03, Color(1.0, 0.90, 0.40), true)
+		7:  # Pirat
+			_ellipse(img, int(cx), int(base - f * 0.14), int(f * 0.24), int(f * 0.18), OUTLINE)
+			_ellipse(img, int(cx), int(base - f * 0.15), int(f * 0.21), int(f * 0.15), Color(0.20, 0.20, 0.24))
+			_ellipse(img, int(cx), int(base - f * 0.06), int(f * 0.36), int(f * 0.08), Color(0.20, 0.20, 0.24))
+			_disc(img, cx, base - f * 0.20, f * 0.05, Color(0.95, 0.95, 0.90), true)
+		9:  # Halo (Engelsschein)
+			var halo := Color(1.0, 0.88, 0.35)
+			_ellipse(img, int(cx), int(base - f * 0.40), int(f * 0.26), int(f * 0.11), OUTLINE)
+			_ellipse(img, int(cx), int(base - f * 0.40), int(f * 0.22), int(f * 0.08), Color(0, 0, 0, 0))
+			_draw_ring(img, cx, base - f * 0.40, f * 0.24, f * 0.09, halo, f * 0.045)
+			_disc(img, cx - f * 0.22, base - f * 0.48, f * 0.03, Color(1, 1, 0.85, 0.9), true)
+		10:  # Antenne
+			for sgn in [-1.0, 1.0]:
+				var ax: float = cx + sgn * f * 0.13
+				_thick_line(img, Vector2(ax, base - f * 0.16), Vector2(ax + sgn * f * 0.06, base - f * 0.56), 4.0, OUTLINE)
+				_thick_line(img, Vector2(ax, base - f * 0.16), Vector2(ax + sgn * f * 0.06, base - f * 0.56), 2.0, Color(0.55, 0.60, 0.68))
+				_disc(img, ax + sgn * f * 0.06, base - f * 0.58, f * 0.05, OUTLINE, true)
+				_disc(img, ax + sgn * f * 0.06, base - f * 0.58, f * 0.035, Color(1.0, 0.45, 0.35) if sgn < 0 else Color(0.45, 1.0, 0.55), true)
+		11:  # Kroenchen
+			_rect(img, int(cx - f * 0.24), int(base - f * 0.22), int(f * 0.48), int(f * 0.18), OUTLINE)
+			_rect(img, int(cx - f * 0.21), int(base - f * 0.20), int(f * 0.42), int(f * 0.14), Color(0.99, 0.84, 0.26))
+			for i in range(3):
+				var px3: float = cx + (float(i) - 1.0) * f * 0.15
+				_tri(img, Vector2(px3, base - f * 0.44), Vector2(px3 + f * 0.07, base - f * 0.22), Vector2(px3 - f * 0.07, base - f * 0.22), OUTLINE)
+				_tri(img, Vector2(px3, base - f * 0.40), Vector2(px3 + f * 0.045, base - f * 0.23), Vector2(px3 - f * 0.045, base - f * 0.23), Color(1.0, 0.92, 0.45))
+		8:  # Stern-Krone
+			_rect(img, int(cx - f * 0.26), int(base - f * 0.22), int(f * 0.52), int(f * 0.16), OUTLINE)
+			_rect(img, int(cx - f * 0.23), int(base - f * 0.20), int(f * 0.46), int(f * 0.12), Color(0.99, 0.84, 0.24))
+			for i in range(5):
+				var a: float = -PI * 0.5 + float(i) * TAU / 5.0
+				var px2: float = cx + cos(a) * f * 0.16
+				var py2: float = base - f * 0.34 + sin(a) * f * 0.16
+				_disc(img, px2, py2, f * 0.055, Color(1.0, 0.94, 0.55), true)
+		_:
+			_ellipse(img, int(cx), int(base - f * 0.18), int(f * 0.28), int(f * 0.18), OUTLINE)
+			_ellipse(img, int(cx), int(base - f * 0.19), int(f * 0.25), int(f * 0.15), Color(0.70, 0.28, 0.72))
+	_aa = false
+	return ImageTexture.create_from_image(img)
+
+
+func get_hat_only_texture(idx: int) -> Texture2D:
+	# Runde 96: Nur der Hut, ohne Figur - fuer die Gewinner-Kachel.
+	# Wird einmal gezeichnet und dann aus dem Cache geliefert.
+	var key := "hat_only_%d" % idx
+	if textures.has(key):
+		return textures[key]
+	textures[key] = _make_hat_icon(idx, 128)
+	var img = textures[key].get_image()
+	print("[HAT][TEX] Hut %d gezeichnet (%dx%d)" % [idx, img.get_width(), img.get_height()])
+	return textures[key]
 
 
 func get_skin_texture(color_idx: int, skin_idx: int) -> Texture2D:
@@ -3268,6 +3456,104 @@ func _load_chest_png(path: String, tier: String, open_state: bool):
 	else:
 		print("[CHEST][TEX] FEHLER: %s fehlt - prozedurale Kiste" % path)
 	return _make_gem_chest(128, tier, open_state)
+
+
+func _make_gem_icon(level: int, size: int) -> ImageTexture:
+	# Runde 95: 1-3 Edelsteine fuer den Kisten-Reveal
+	_aa = true
+	var img = _new_img(size, size)
+	var f := float(size)
+	var cx := f * 0.5
+	for i in range(level):
+		var ox: float = (float(i) - float(level - 1) * 0.5) * f * 0.22
+		var cy: float = f * 0.55
+		var w: float = f * 0.14
+		var h: float = f * 0.20
+		_tri(img, Vector2(cx + ox, cy - h), Vector2(cx + ox + w, cy), Vector2(cx + ox - w, cy), OUTLINE)
+		_tri(img, Vector2(cx + ox, cy + h), Vector2(cx + ox + w, cy), Vector2(cx + ox - w, cy), OUTLINE)
+		_tri(img, Vector2(cx + ox, cy - h * 0.9), Vector2(cx + ox + w * 0.85, cy), Vector2(cx + ox - w * 0.85, cy), Color(0.35, 0.82, 0.98))
+		_tri(img, Vector2(cx + ox, cy - h * 0.9), Vector2(cx + ox, cy), Vector2(cx + ox - w * 0.85, cy), Color(0.78, 0.96, 1.0))
+		_tri(img, Vector2(cx + ox, cy), Vector2(cx + ox + w * 0.85, cy), Vector2(cx + ox, cy + h * 0.9), Color(0.12, 0.52, 0.72))
+		_disc(img, cx + ox - w * 0.3, cy - h * 0.45, f * 0.012, Color(1, 1, 1, 0.95), true)
+	_aa = false
+	return ImageTexture.create_from_image(img)
+
+
+func _make_slot_icon(size: int) -> ImageTexture:
+	# Runde 100: Automat als Kachel-Icon fuer den Shop
+	_aa = true
+	var img = _new_img(size, size)
+	var f := float(size)
+	var cx := f * 0.5
+	# Gehaeuse
+	_rect(img, int(f * 0.10), int(f * 0.14), int(f * 0.80), int(f * 0.72), OUTLINE)
+	_rect(img, int(f * 0.14), int(f * 0.18), int(f * 0.72), int(f * 0.64), Color(0.55, 0.16, 0.20))
+	# Fenster
+	_rect(img, int(f * 0.18), int(f * 0.24), int(f * 0.64), int(f * 0.30), OUTLINE)
+	_rect(img, int(f * 0.21), int(f * 0.27), int(f * 0.58), int(f * 0.24), Color(0.92, 0.90, 0.82))
+	for i in range(3):
+		var wx: float = f * 0.29 + float(i) * f * 0.18
+		_disc(img, wx, f * 0.39, f * 0.055, [Color(0.80, 0.14, 0.18), Color(0.96, 0.78, 0.20), Color(0.24, 0.44, 0.78)][i], true)
+	# Hebel
+	_thick_line(img, Vector2(f * 0.86, f * 0.30), Vector2(f * 0.92, f * 0.62), 5.0, OUTLINE)
+	_disc(img, f * 0.92, f * 0.64, f * 0.055, Color(0.95, 0.20, 0.20), true)
+	# Muenzschacht
+	_rect(img, int(f * 0.36), int(f * 0.70), int(f * 0.28), int(f * 0.08), OUTLINE)
+	_rect(img, int(f * 0.38), int(f * 0.72), int(f * 0.24), int(f * 0.04), Color(0.15, 0.15, 0.18))
+	# Fuss
+	_rect(img, int(f * 0.14), int(f * 0.86), int(f * 0.72), int(f * 0.06), Color(0.30, 0.30, 0.36))
+	_aa = false
+	return ImageTexture.create_from_image(img)
+
+
+func _make_slot_symbol(kind: String, size: int) -> ImageTexture:
+	# Runde 94: Walzensymbole im Comic-Stil - dicke Kontur, flache Farben.
+	_aa = true
+	var img = _new_img(size, size)
+	var f := float(size)
+	var cx := f * 0.5
+	match kind:
+		"cherry":
+			_thick_line(img, Vector2(cx, f * 0.30), Vector2(cx - f * 0.16, f * 0.62), 4.0, Color(0.20, 0.55, 0.22))
+			_thick_line(img, Vector2(cx, f * 0.30), Vector2(cx + f * 0.18, f * 0.58), 4.0, Color(0.20, 0.55, 0.22))
+			_disc(img, cx - f * 0.17, f * 0.66, f * 0.17, OUTLINE, true)
+			_disc(img, cx + f * 0.19, f * 0.62, f * 0.16, OUTLINE, true)
+			_disc(img, cx - f * 0.17, f * 0.65, f * 0.13, Color(0.80, 0.12, 0.16), true)
+			_disc(img, cx + f * 0.19, f * 0.61, f * 0.12, Color(0.72, 0.10, 0.14), true)
+			_disc(img, cx - f * 0.21, f * 0.60, f * 0.035, Color(1, 1, 1, 0.85), true)
+		"bell":
+			_tri(img, Vector2(cx, f * 0.20), Vector2(cx + f * 0.30, f * 0.66), Vector2(cx - f * 0.30, f * 0.66), OUTLINE)
+			_tri(img, Vector2(cx, f * 0.26), Vector2(cx + f * 0.25, f * 0.64), Vector2(cx - f * 0.25, f * 0.64), Color(0.96, 0.79, 0.22))
+			_rect(img, int(cx - f * 0.34), int(f * 0.64), int(f * 0.68), int(f * 0.08), OUTLINE)
+			_rect(img, int(cx - f * 0.30), int(f * 0.66), int(f * 0.60), int(f * 0.04), Color(0.98, 0.86, 0.40))
+			_disc(img, cx, f * 0.78, f * 0.07, OUTLINE, true)
+			_disc(img, cx, f * 0.78, f * 0.05, Color(0.85, 0.66, 0.16), true)
+		"bar":
+			_rect(img, int(cx - f * 0.34), int(f * 0.30), int(f * 0.68), int(f * 0.40), OUTLINE)
+			_rect(img, int(cx - f * 0.30), int(f * 0.34), int(f * 0.60), int(f * 0.32), Color(0.20, 0.42, 0.78))
+			for i in range(3):
+				_rect(img, int(cx - f * 0.22 + float(i) * f * 0.17), int(f * 0.40), int(f * 0.10), int(f * 0.20), Color(0.92, 0.95, 1.0))
+		"gold1", "gold2", "gold3":
+			var n: int = 1
+			if kind == "gold2": n = 2
+			elif kind == "gold3": n = 3
+			for i in range(n):
+				var ox: float = (float(i) - float(n - 1) * 0.5) * f * 0.22
+				_disc(img, cx + ox, f * 0.52, f * 0.19, OUTLINE, true)
+				_disc(img, cx + ox, f * 0.52, f * 0.15, Color(0.98, 0.80, 0.20), true)
+				_disc(img, cx + ox - f * 0.04, f * 0.47, f * 0.045, Color(1, 1, 1, 0.9), true)
+			if n == 3:
+				_disc(img, cx, f * 0.22, f * 0.06, Color(1, 1, 0.9, 0.95), true)
+		"skull":
+			_disc(img, cx, f * 0.44, f * 0.28, OUTLINE, true)
+			_disc(img, cx, f * 0.44, f * 0.24, Color(0.90, 0.90, 0.86), true)
+			_rect(img, int(cx - f * 0.14), int(f * 0.60), int(f * 0.28), int(f * 0.14), OUTLINE)
+			_rect(img, int(cx - f * 0.11), int(f * 0.60), int(f * 0.22), int(f * 0.11), Color(0.90, 0.90, 0.86))
+			_disc(img, cx - f * 0.10, f * 0.42, f * 0.06, Color(0.05, 0.05, 0.08), true)
+			_disc(img, cx + f * 0.10, f * 0.42, f * 0.06, Color(0.05, 0.05, 0.08), true)
+			_tri(img, Vector2(cx, f * 0.50), Vector2(cx + f * 0.05, f * 0.58), Vector2(cx - f * 0.05, f * 0.58), Color(0.05, 0.05, 0.08))
+	_aa = false
+	return ImageTexture.create_from_image(img)
 
 
 func _make_gem_chest(size: int, tier: String, open_state: bool) -> ImageTexture:

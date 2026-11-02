@@ -248,9 +248,80 @@ func _build_streams():
 	_streams["pickup"] = _gen_sweep(500.0, 1100.0, 0.12, "sine", 0.6)
 	_streams["hurt"] = _gen_sweep(200.0, 60.0, 0.25, "saw", 0.7)
 	_streams["chest"] = _gen_sweep(150.0, 400.0, 0.3, "sine", 0.5)
+	# Runde 100: Glueckswalze
+	# Runde 101: eigene Automaten-Klaenge (kein Schuss-/Sterbe-Sound)
+	_streams["slot_spin"] = _gen_ratchet(0.38, 16, 0.30)
+	_streams["slot_stop"] = _gen_clunk(0.65)
+	_streams["slot_win"] = _gen_arp([659.25, 830.61, 1108.73], 0.085, "sine", 0.55)
+	_streams["slot_jackpot"] = _gen_fanfare(0.62)
 	_streams["levelup"] = _gen_chord([523.0, 659.0, 784.0, 1046.0], 0.5)
 	_streams["boss"] = _gen_sweep(90.0, 40.0, 0.8, "saw", 0.9)
 	_streams["death"] = _gen_sweep(400.0, 50.0, 1.2, "square", 0.7)
+
+func _gen_ratchet(dur: float, clicks: int, vol: float) -> AudioStreamWAV:
+	# Mechanisches Ratscheln: kurze Klicks mit Koerper + tiefem Brummen
+	var n := int(SAMPLE_RATE * dur)
+	var data := PackedByteArray()
+	data.resize(n * 2)
+	var step: int = maxi(1, int(float(n) / float(clicks)))
+	for i in range(n):
+		var t: float = float(i) / float(n)
+		var in_click: int = i % step
+		var env_click: float = pow(1.0 - float(in_click) / float(step), 6.0)
+		var noise: float = randf() * 2.0 - 1.0
+		var hum: float = sin(TAU * 90.0 * float(i) / float(SAMPLE_RATE)) * 0.25
+		var s2: float = (noise * env_click * 0.9 + hum) * vol * (1.0 - t * 0.25)
+		data.encode_s16(i * 2, int(clampf(s2 * 32767.0, -32768.0, 32767.0)))
+	return _make_wav(data)
+
+
+func _gen_clunk(vol: float) -> AudioStreamWAV:
+	# Satter mechanischer Anschlag: tiefer Ton + kurzer Knack
+	var dur := 0.22
+	var n := int(SAMPLE_RATE * dur)
+	var data := PackedByteArray()
+	data.resize(n * 2)
+	var phase := 0.0
+	for i in range(n):
+		var t: float = float(i) / float(n)
+		var freq: float = lerpf(140.0, 55.0, t)
+		phase += TAU * freq / float(SAMPLE_RATE)
+		var body: float = sin(phase) * pow(1.0 - t, 2.2)
+		var crack: float = (randf() * 2.0 - 1.0) * pow(1.0 - t, 14.0) * 0.5
+		var s2: float = (body + crack) * vol
+		data.encode_s16(i * 2, int(clampf(s2 * 32767.0, -32768.0, 32767.0)))
+	return _make_wav(data)
+
+
+func _gen_arp(freqs: Array, note_dur: float, type: String, vol: float) -> AudioStreamWAV:
+	# Tonfolge (Muenzen klingeln) - jede Note mit eigenem Ausklingen
+	var per_note: int = int(SAMPLE_RATE * note_dur)
+	var n: int = per_note * freqs.size()
+	var data := PackedByteArray()
+	data.resize(n * 2)
+	for k in range(freqs.size()):
+		var f: float = float(freqs[k])
+		var phase := 0.0
+		for i in range(per_note):
+			var t: float = float(i) / float(per_note)
+			phase += TAU * f / float(SAMPLE_RATE)
+			var s2 := 0.0
+			match type:
+				"sine": s2 = sin(phase)
+				"square": s2 = 1.0 if sin(phase) >= 0.0 else -1.0
+				_: s2 = 2.0 * fmod(phase / TAU, 1.0) - 1.0
+			# zwei Oberschwingungen fuer Glockenklang
+			s2 = s2 + sin(phase * 2.0) * 0.35 + sin(phase * 3.0) * 0.15
+			var env: float = pow(1.0 - t, 2.0)
+			data.encode_s16((k * per_note + i) * 2, int(clampf(s2 * vol * env * 32767.0, -32768.0, 32767.0)))
+	return _make_wav(data)
+
+
+func _gen_fanfare(vol: float) -> AudioStreamWAV:
+	# Jackpot: aufsteigende Akkorde, lauter und laenger
+	var notes: Array = [523.25, 659.25, 783.99, 1046.5, 1318.5]
+	return _gen_arp(notes, 0.11, "sine", vol)
+
 
 func _gen_sweep(f0: float, f1: float, dur: float, type: String, vol: float) -> AudioStreamWAV:
 	var n := int(SAMPLE_RATE * dur)

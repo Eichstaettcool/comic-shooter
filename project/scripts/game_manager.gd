@@ -69,7 +69,14 @@ var _net_zones: PackedFloat32Array = PackedFloat32Array()
 var _pending_client_start: bool = false
 var _host_chests: PackedFloat32Array = PackedFloat32Array()
 var _host_zones: PackedFloat32Array = PackedFloat32Array()
-var _ghosts: Dictionary = {}          # net_id -> Monster-Geist (Client)
+var _revive_held: bool = false
+var _ghosts: Dictionary = {}
+# Runde 79: Snapshot-Puffer fuer Client-Interpolation (100 ms Verzoegerung)
+var _mob_buf: Array = []          # [{ "t": ms, "seq": int, "e": [{id,type,x,y,hp,ang}] }]
+var _mob_seq_last: int = -1
+var _mob_seq_out: int = 0
+const MOB_DELAY_MS: float = 100.0
+const MOB_BUF_MAX: int = 6          # net_id -> Monster-Geist (Client)
 var _item_ghosts: Dictionary = {}     # net_id -> Item-Geist (Client)
 
 # --- Mehrspieler (Runde 10): bis zu 4 Spieler, Slot 1 = Host ---
@@ -92,7 +99,7 @@ var _boss_last_type: String = "?"       # Runde 53: Typ fuer das DEFEAT-Log merk
 var _downed_rings: Dictionary = {}      # Runde 35b: HILFE-Ringe
 var force_fields: Array = []            # Runde 38: wandernde Kraftfelder (ab Welle 7)
 const DOWNED_LIMIT := 30.0              # Sekunden, bis der Run endet
-const REVIVE_TIME := 2.5                # Sekunden Nachbarschaft zum Aufwecken
+const REVIVE_TIME := 5.0                # Runde 86: 5 s Halten zum Aufwecken
 const WAVE_LEVEL_UPS := 2             # Level-Aufstiege pro Welle, BIS der Shop oeffnet
 var wave_start_level: int = 1         # Level bei Wellebeginn (Differenz = Aufstiege)
 var _reinforce_timer: float = 0.0     # Nachschub-Timer (Welle laeuft weiter bis Levelziel)
@@ -690,8 +697,9 @@ const CHESTS := [
 # Gewoehnlich = die Basics, Selten = die kräftigen Varianten,
 # Episch = die Sonderformen.
 const COLOR_RARITY := ["common", "common", "common", "common", "common", "rare", "common", "rare", "rare", "epic"]
-const HAT_RARITY := ["common", "common", "common", "rare", "rare", "common", "rare", "rare", "epic", "legendary"]
-const RIG_RARITY := ["common", "rare", "rare", "epic", "epic", "legendary"]
+const HAT_RARITY := ["common", "common", "common", "rare", "rare", "common", "rare", "rare", "epic", "legendary",
+	"legendary", "rare", "epic"]   # 10 Halo, 11 Antenne, 12 Kroenchen
+const RIG_RARITY := ["common", "rare", "rare", "epic", "epic", "legendary", "epic", "legendary", "epic"]
 
 const RARITY_NAMES := { "common": "GEWOEHNLICH", "rare": "SELTEN", "epic": "EPISCH", "legendary": "LEGENDAER" }
 const RARITY_COLORS := {
@@ -1328,7 +1336,7 @@ func _load_profile() -> void:
 		quick_buffs = d.get("quick", {})
 		p_name = str(d.get("name", "HELD"))
 		p_color = int(d.get("color", 0))
-		p_hat = int(d.get("hat", 0))
+		p_hat = clampi(int(d.get("hat", 0)), 0, HAT_RARITY.size() - 1)
 		var u = d.get("unlocked", [0, 1])
 		if typeof(u) == TYPE_ARRAY:
 			unlocked_hats = u
@@ -1378,6 +1386,29 @@ func _load_profile() -> void:
 	if p_name == "":
 		p_name = "HELD"
 	SoundManager.set_muted(bool(d.get("muted", false)))
+
+# ---------------------------------------------------------------
+# Runde 93: Glueckswalze (nur Gold, siehe SPEC_SLOT.md)
+# ---------------------------------------------------------------
+const SlotMachine = preload("res://scripts/slot_machine.gd")
+
+var slot_rng := RandomNumberGenerator.new()
+var slot_rng_ready: bool = false
+var slot_spins_total: int = 0
+var slot_gold_won_total: int = 0
+
+func slot_spin(bet: int) -> Dictionary:
+	if not slot_rng_ready:
+		slot_rng.randomize()
+		slot_rng_ready = true
+	var r: Dictionary = SlotMachine.spin(bet, gold, slot_rng)
+	if bool(r.get("ok", false)):
+		gold = int(r["gold_after"])
+		slot_spins_total += 1
+		slot_gold_won_total += int(r["win"])
+		_save_profile()
+	return r
+
 
 func _save_profile() -> void:
 	var f := FileAccess.open("user://profile.save", FileAccess.WRITE)
@@ -1608,6 +1639,9 @@ func _ready():
 	NetManager.world_synced.connect(_on_world_synced)
 	NetManager.my_player_synced.connect(_on_my_player_synced)
 	NetManager.mobs_synced.connect(_on_mobs_synced)
+	NetManager.downed_state_received.connect(_on_downed_state)
+	NetManager.revive_request_received.connect(_on_revive_request)
+	ui_manager.revive_hold_changed.connect(_on_revive_hold)
 	NetManager.items_synced.connect(_on_items_synced)
 	NetManager.shot_synced.connect(_on_shot_synced)
 	NetManager.coop_game_over.connect(_on_coop_game_over)
@@ -2098,6 +2132,9 @@ func _on_lan_run_start() -> void:
 		return
 	if NetManager.is_host:
 		return
+	if multiplayer.get_peers().size() < 1:
+		print("[LAN][FEHLER] run_start ohne Verbindung - Client bleibt im Menue")
+		return
 	coop_client = true
 	NetManager.coop_role = 2
 	my_slot = maxi(2, NetManager.my_slot)
@@ -2122,6 +2159,10 @@ func start_lan_host(wanted_players: int = 2) -> void:
 	_build_slot_profiles()
 	ui_manager.show_lobby(true, 1)
 	print("LOBBY: Host gestartet, max ", NetManager.player_count, " Spieler, IP ", NetManager.get_local_ip())
+	# Runde 85: IP und Port direkt im LAN-Fenster anzeigen, damit der
+	# Handy-Spieler sie nur abtippen muss.
+	if ui_manager != null and ui_manager.get("lan_status") != null:
+		ui_manager.lan_status.text = "HOST: %s  ·  PORT %d" % [NetManager.get_local_ip(), NetManager.ENET_PORT]
 
 func start_lan_join(ip: String) -> void:
 	var err: String = NetManager.join_game(ip)
@@ -2169,6 +2210,28 @@ func _on_lobby_changed() -> void:
 func _on_peer_left(_id: int) -> void:
 	if current_state == GameState.PLAYING:
 		ui_manager.show_banner("Mitspieler hat verlassen", Color(1.0, 0.5, 0.4))
+	# Runde 104: Slot aufraeumen - vorher blieb die Figur als Geist stehen
+	# und der Run lief mit einem toten Partner weiter.
+	var removed := 0
+	for sl in players.keys():
+		if int(sl) == int(my_slot):
+			continue
+		var p = players[sl]
+		if is_instance_valid(p):
+			if p.get_parent() != null:
+				p.get_parent().remove_child(p)
+			p.queue_free()
+			removed += 1
+		players.erase(sl)
+		downed.erase(int(sl))
+		downed_time.erase(int(sl))
+		revive_progress.erase(int(sl))
+		spectator.erase(int(sl))
+		var ring = _downed_rings.get(int(sl), null)
+		if is_instance_valid(ring):
+			ring.queue_free()
+		_downed_rings.erase(int(sl))
+	print("[LAN] Peer getrennt - %d Partner-Figur(en) entfernt, players=%s" % [removed, str(players.keys())])
 
 func _apply_slot_profiles() -> void:
 	for s in players.keys():
@@ -2186,6 +2249,14 @@ func start_lan_run_as_host() -> void:
 	if not NetManager.is_host:
 		return
 	if current_state != GameState.LOBBY:
+		return
+	# Runde 99: Ohne Mitspieler darf kein Run starten - sonst laufen beide
+	# Seiten als "SOLO/1" mit hp=0 (genau das stand im Log).
+	var peers: int = multiplayer.get_peers().size()
+	if peers < 1:
+		print("[LAN] Warte auf Mitspieler: 1/2 - Run noch nicht gestartet")
+		if ui_manager != null and ui_manager.get("lan_status") != null:
+			ui_manager.lan_status.text = "WARTE AUF MITSPIELER (1/2)"
 		return
 	NetManager.h_start_run()      # coop_begin -> alle Clients bauen die Welt auf
 	ui_manager.hide_lobby()
@@ -2368,7 +2439,7 @@ func _start_coop_client() -> void:
 # ---------- Host: Senden ----------
 func _coop_host_tick(delta: float) -> void:
 	_t_mobs += delta
-	if _t_mobs >= 0.10:      # Runde 34: 10 statt 7.7 Hz (fluessiger)
+	if _t_mobs >= 0.05:      # Runde 77: 20 Hz - 10 Hz war fuer Egoshooter zu wenig
 		_t_mobs = 0.0
 		_send_mob_snapshot()
 		_t_diag_mobs += 1
@@ -2498,8 +2569,22 @@ func _make_light_ghost(mtype: int) -> StaticBody2D:
 
 func _send_mob_snapshot() -> void:
 	var data := PackedFloat32Array()
+	_mob_seq_out += 1
+	data.append(float(_mob_seq_out))   # Sequenz gegen Out-of-Order
+	# Runde 81: Nur Monster in der Naehe des Clients senden (Relevanz).
+	# Auf grossen Karten mit 40+ Gegnern halbiert das die Paketgroesse.
+	var anchor: Vector2 = Vector2.ZERO
+	var have_anchor := false
+	for sl in players.keys():
+		if int(sl) != my_slot:
+			var cp = players[sl]
+			if is_instance_valid(cp):
+				anchor = cp.global_position
+				have_anchor = true
 	for m in _monster_cache:          # Runde 33: eigene Liste statt Baumsuche
 		if not is_instance_valid(m) or m.ghost:
+			continue
+		if have_anchor and m.global_position.distance_to(anchor) > 1650.0:
 			continue
 		if m.net_id == 0:
 			m.net_id = _next_mid
@@ -2548,11 +2633,15 @@ func _coop_client_tick(delta: float) -> void:
 	# Runde 50: Monster-Geister werden HIER (60+ Hz) zum letzten Ziel
 	# interpoliert. Vorher geschah das nur im Paket-Callback (~10 Hz),
 	# dadurch ruckelten sie trotz stabiler FPS.
-	var w: float = 1.0 - exp(-14.0 * delta)
-	for g in _ghosts.values():
-		if is_instance_valid(g):
-			var tgt: Vector2 = g.get_meta("tgt", g.position)
-			g.position = g.position.lerp(tgt, w)
+	# (alte Einzelziel-Glaettung ersetzt durch Puffer-Interpolation)
+	# Runde 79: Monster aus dem Puffer 100 ms hinter "jetzt" abspielen
+	_mob_lerp_to(float(Time.get_ticks_msec()) - MOB_DELAY_MS)
+	# Downed-Ringe fuer den Partner auch auf dem Client zeichnen
+	for sl in downed.keys():
+		if bool(downed[sl]):
+			var dp: Node2D = players.get(sl)
+			if is_instance_valid(dp):
+				_update_downed_ring(int(sl), dp)
 	_t_myp += delta
 	if _t_myp >= 0.05:
 		_t_myp = 0.0
@@ -2562,48 +2651,126 @@ func _coop_client_tick(delta: float) -> void:
 			_my_aim_deg = ang
 		NetManager.c_send_input(player.input_direction, player.shoot_held, ang)
 
+func _on_revive_hold(held: bool) -> void:
+	_revive_held = held
+	# Runde 89: Im Client muss die Anfrage zum Host - sonst kann der Client
+	# den Host nie aufwecken (genau das war der Fehler).
+	if coop_client and NetManager.active:
+		for sl in downed.keys():
+			if bool(downed[sl]) and int(sl) != int(my_slot):
+				NetManager.c_send_revive(int(sl), held)
+				print("[REVIVE] Client sendet Aufweck-Anfrage slot=%d active=%s" % [int(sl), str(held)])
+	print("[REVIVE] Knopf %s" % ("gedrueckt - halte 5 s" if held else "losgelassen"))
+
+
+var _remote_revive: Dictionary = {}
+
+func _on_revive_request(slot: int, active: bool) -> void:
+	_remote_revive[slot] = active
+	print("[REVIVE] Host: Client %s Slot %d" % ["weckt" if active else "laesst los", slot])
+
+
+func _on_downed_state(slot: int, is_downed: bool, hp: int, progress: float) -> void:
+	# Runde 78: Der Host sendet den Downed-/Revive-Zustand bereits, aber der
+	# Client hat das Signal nie verbunden - dadurch gab es beim Partner
+	# weder Ring noch Fortschritt, und der eigene Downed-Zustand kam nie an.
+	if not coop_client:
+		return
+	var was: bool = bool(downed.get(slot, false))
+	downed[slot] = is_downed
+	if is_downed:
+		revive_progress[slot] = progress
+		if not was:
+			if int(slot) == my_slot:
+				ui_manager.show_banner("DU LIEGST - DEIN PARTNER MUSS DICH AUFWECKEN", Color(1.0, 0.40, 0.40))
+				print("[NET][REVIVE] eigener Downed-Zustand empfangen")
+			else:
+				ui_manager.show_banner("PARTNER LIEGT - GEH ZU IHM!", Color(1.0, 0.72, 0.30))
+				print("[NET][REVIVE] Partner downed slot=%d" % slot)
+	else:
+		revive_progress.erase(slot)
+		if was:
+			if int(slot) == my_slot:
+				print("[NET][REVIVE] wieder auf den Beinen")
+			else:
+				print("[NET][REVIVE] Partner wieder auf den Beinen")
+
+
 func _on_mobs_synced(data: PackedFloat32Array) -> void:
 	if not coop_client or current_state != GameState.PLAYING:
 		return
-	var seen: Dictionary = {}
-	var i := 0
+	if data.size() < 1:
+		return
+	var seq: int = int(data[0])
+	# Aeltere oder doppelte Pakete verwerfen (unreliable = ungeordnet)
+	if seq <= _mob_seq_last:
+		return
+	_mob_seq_last = seq
+	var entries: Array = []
+	var i := 1
 	while i + 6 <= data.size():
-		var id := int(data[i])
-		var mtype := int(data[i + 1])
-		var x := data[i + 2]
-		var y := data[i + 3]
-		var hp := int(data[i + 4])
-		var ang := data[i + 5]
+		entries.append({
+			"id": int(data[i]), "type": int(data[i + 1]),
+			"x": data[i + 2], "y": data[i + 3],
+			"hp": int(data[i + 4]), "ang": data[i + 5],
+		})
+		i += 6
+	_mob_buf.append({ "t": Time.get_ticks_msec(), "seq": seq, "e": entries })
+	while _mob_buf.size() > MOB_BUF_MAX:
+		_mob_buf.pop_front()
+	# Geister anlegen/entfernen (Position kommt aus dem Puffer)
+	var seen: Dictionary = {}
+	for e in entries:
+		var id: int = int(e["id"])
 		seen[id] = true
 		var g = _ghosts.get(id)
 		if g == null or not is_instance_valid(g):
-			g = _make_light_ghost(int(mtype))
+			g = _make_light_ghost(int(e["type"]))
 			monster_container.add_child(g)
 			g.set("net_id", id)
+			g.position = Vector2(float(e["x"]), float(e["y"]))
 			_ghosts[id] = g
-			g.set_meta("hp", hp)
-		else:
-			# Runde 50: Nur das Ziel merken - bewegt wird in _coop_client_tick
-			g.set_meta("tgt", Vector2(x, y))
-			g.set("flip_h", ang > 90.0)
-			_t_diag_ghost += 1
-			var old_hp: int = int(g.get_meta("hp", hp))
-			if hp < old_hp:
-				g.set("modulate", Color(1.6, 0.7, 0.7))
-			else:
-				g.set("modulate", Color(1, 1, 1))
-			g.set_meta("hp", hp)
-		i += 6
+		g.set_meta("hp", int(e["hp"]))
+		g.set_meta("ang", float(e["ang"]))
 	for id in _ghosts.keys():
 		if not seen.has(id):
-			var g = _ghosts[id]
-			if is_instance_valid(g):
-				g.queue_free()
+			var gg = _ghosts[id]
+			if is_instance_valid(gg):
+				gg.queue_free()
 			_ghosts.erase(id)
-	# Runde 50: Diagnose - Zaehler erst nach dem Log nullen
-	if _ldiag_th("GHOSTS", 1.0, "Client-Geister: %d Ziel-Updates/s, ghosts=%d fps=%d" % [
-		_t_diag_ghost, _ghosts.size(), Engine.get_frames_per_second()]):
-		_t_diag_ghost = 0
+
+func _mob_lerp_to(target_ms: float) -> void:
+	# Findet zwei Snapshots um target_ms und interpoliert dazwischen
+	if _mob_buf.is_empty():
+		return
+	var a: Dictionary = _mob_buf[0]
+	var b: Dictionary = _mob_buf[0]
+	for k in range(_mob_buf.size()):
+		var sn: Dictionary = _mob_buf[k]
+		if float(sn["t"]) <= target_ms:
+			a = sn
+			b = _mob_buf[k + 1] if k + 1 < _mob_buf.size() else sn
+		else:
+			break
+	var ta: float = float(a["t"])
+	var tb: float = float(b["t"])
+	var al: float = 0.0
+	if tb > ta:
+		al = clampf((target_ms - ta) / (tb - ta), 0.0, 1.0)
+	var bmap: Dictionary = {}
+	for e in b["e"]:
+		bmap[int(e["id"])] = e
+	for e in a["e"]:
+		var id: int = int(e["id"])
+		var g = _ghosts.get(id)
+		if g == null or not is_instance_valid(g):
+			continue
+		var pa := Vector2(float(e["x"]), float(e["y"]))
+		var pb := pa
+		if bmap.has(id):
+			var eb: Dictionary = bmap[id]
+			pb = Vector2(float(eb["x"]), float(eb["y"]))
+		g.position = pa.lerp(pb, al)
 
 func _on_items_synced(data: PackedFloat32Array, types: PackedStringArray, rarities: PackedStringArray) -> void:
 	if not coop_client or current_state != GameState.PLAYING:
@@ -2662,10 +2829,30 @@ func _on_my_player_synced(x: float, y: float, hp: int, mx: int, weapon: String, 
 		# Runde 49: Reload-Indikator aktualisieren
 		if player.has_method("get_reload_progress"):
 			ui_manager.update_reload_indicator(float(player.call("get_reload_progress")), str(player.call("get_ammo_text")))
-	player.health = hp
+	# Runde 99: Ein hp=0 direkt nach dem Spawn ist ein Sync-Fehler, kein Tod.
+	# Vorher standen beide Seiten sofort auf 0 und waren "downed".
+	if hp <= 0 and not bool(player.get("downed")) and int(player.health) > 0:
+		print("[LAN][FEHLER] Sync lieferte hp=0 bei lebendem Spieler - ignoriert")
+	else:
+		player.health = hp
 	player.max_health = mx
 	player.shield = shield
-	player.call("set_remote_transform", Vector2(x, y), angle)
+	# Runde 80: Der eigene Held wird LOKAL gesteuert (Client-Prediction).
+	# Vorher stand er auf remote_controlled und wurde 20x/s zur Host-Position
+	# gezogen - jede Eingabe kam um RTT+50 ms verzoegert an (Gummiband).
+	if player.remote_controlled or not player.local_controlled:
+		player.remote_controlled = false
+		player.local_controlled = true
+		print("[NET][PREDICT] eigener Held lokal gesteuert (remote_controlled=false)")
+	var srv := Vector2(x, y)
+	var err: float = player.global_position.distance_to(srv)
+	if err > 220.0:
+		player.global_position = srv
+		print("[NET][RECON] Resync dist=%.0f (Teleport/Respawn)" % err)
+	elif err > 12.0:
+		# sanfte Korrektur: 22 % pro Paket, nie sichtbarer Sprung
+		player.global_position = player.global_position.lerp(srv, 0.22)
+	player.call("set_remote_transform", srv, angle)
 	ui_manager.update_health(hp, mx, 1)
 
 func _on_shot_synced(x: float, y: float, angle_deg: float) -> void:
@@ -3158,12 +3345,26 @@ func _tick_downed(delta: float) -> void:
 			sl, float(downed_time.get(sl, 0.0)), str(near),
 			float(revive_progress.get(sl, 0.0)), REVIVE_TIME,
 			str(players.keys())])
+		# Runde 83: Aufwecken nur, solange der Knopf gehalten wird
 		if near:
-			revive_progress[sl] = float(revive_progress.get(sl, 0.0)) + delta
+			if ui_manager != null:
+				ui_manager.call("show_revive_prompt", true)
+				ui_manager.call("set_revive_progress", float(revive_progress.get(sl, 0.0)) / REVIVE_TIME)
+			var client_holds: bool = bool(_remote_revive.get(sl, false))
+			if _revive_held or client_holds:
+				revive_progress[sl] = float(revive_progress.get(sl, 0.0)) + delta
 			if float(revive_progress[sl]) >= REVIVE_TIME:
 				_revive_player(sl)
+				_revive_held = false
+				_remote_revive.erase(sl)
+				revive_progress[sl] = 0.0
+				if ui_manager != null:
+					ui_manager.call("show_revive_prompt", false)
 		else:
 			revive_progress[sl] = 0.0
+			_revive_held = false
+			if ui_manager != null:
+				ui_manager.call("show_revive_prompt", false)
 		if float(downed_time.get(sl, 0.0)) <= 0.0:
 			# Runde 51: Nicht mehr wiederbelebbar. Wenn noch jemand lebt,
 			# wird dieser Spieler Zuschauer - sonst ist der Run vorbei.
@@ -3209,6 +3410,21 @@ func _make_spectator(sl: int) -> void:
 	if coop_host and NetManager.active:
 		NetManager.h_send_spectator(sl)
 	if sl == int(my_slot):
+		# Kamera auf den ueberlebenden Partner haengen, damit man nicht auf
+		# der eigenen Leiche steht. Dazu ein klarer Zuschauer-Bildschirm.
+		var alive: Array = _alive_slots()
+		var pname: String = ""
+		if alive.size() > 0:
+			var partner = players.get(int(alive[0]), null)
+			if is_instance_valid(partner):
+				var cam = p.get("camera") if p != null else null
+				if cam != null and cam is Camera2D:
+					cam.reparent(partner)
+					cam.position = Vector2.ZERO
+					cam.make_current()
+					print("[SPEC] Kamera auf Slot %d umgehaengt" % int(alive[0]))
+			pname = str(_slot_texture_profile(int(alive[0])).get("name", "PARTNER"))
+		ui_manager.call("show_spectator_overlay", true, pname)
 		ui_manager.show_banner("DU BIST ZUSCHAUER", Color(0.75, 0.85, 1.0))
 
 
@@ -3246,6 +3462,15 @@ func _revive_player(slot: int) -> void:
 		p.set("health", maxi(1, int(round(float(p.call("get_max_health")) * 0.6))))
 		if p.has_signal("health_changed"):
 			p.emit_signal("health_changed", int(p.get("health")))
+		# Runde 86: 2 s Schutz, sonst wird man im Monsterknäuel sofort wieder
+		# umgelegt (im Log: revive 2.3/2.5 -> wieder downed mit frischen 30 s).
+		p.set("god_mode", true)
+		var _guard = p
+		get_tree().create_timer(2.0).timeout.connect(func():
+			if is_instance_valid(_guard):
+				_guard.set("god_mode", false)
+				print("[REVIVE] Schutz vorbei slot=%d" % slot))
+		print("[REVIVE] Slot %d aufgeweckt, 2 s Schutz" % slot)
 	var ring2 = _downed_rings.get(slot, null)
 	if is_instance_valid(ring2):
 		ring2.queue_free()

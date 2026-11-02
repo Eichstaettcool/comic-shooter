@@ -1,6 +1,8 @@
 # UIManager.gd - Verwaltet HUD, StartScreen und DeathScreen inkl. Touch-Controls
 extends Node
 
+signal revive_hold_changed(held: bool)
+
 const LootTable = preload("res://scripts/loot_table.gd")
 
 signal upgrade_chosen(id: String)
@@ -1164,6 +1166,129 @@ func _shop_ls(size: int, col: Color, outline: int = 6) -> LabelSettings:
 	return ls
 
 
+
+
+# ---------------------------------------------------------------
+# Runde 82: Aufweck-Knopf mit 5-Sekunden-Leiste
+# ---------------------------------------------------------------
+var revive_panel: Control = null
+var revive_bar: ProgressBar = null
+var revive_hint: Label = null
+
+func show_revive_prompt(on: bool) -> void:
+	if revive_panel == null:
+		_build_revive_prompt()
+	if revive_panel != null:
+		revive_panel.visible = on
+
+
+func set_revive_progress(p: float) -> void:
+	if revive_bar != null:
+		revive_bar.value = clampf(p, 0.0, 1.0) * 100.0
+
+
+func _build_revive_prompt() -> void:
+	revive_panel = Control.new()
+	revive_panel.set_anchors_preset(Control.PRESET_FULL_RECT)
+	revive_panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	add_child(revive_panel)
+
+	var box := VBoxContainer.new()
+	box.set_anchors_preset(Control.PRESET_CENTER_BOTTOM)
+	box.offset_left = -260.0
+	box.offset_right = 260.0
+	box.offset_top = -210.0
+	box.offset_bottom = -60.0
+	box.alignment = BoxContainer.ALIGNMENT_END
+	revive_panel.add_child(box)
+
+	revive_hint = Label.new()
+	revive_hint.text = "PARTNER LIEGT — HALTE ZUM AUFWECKEN"
+	revive_hint.horizontal_alignment = HorizontalAlignment.HORIZONTAL_ALIGNMENT_CENTER
+	revive_hint.label_settings = _make_label_settings(24, Color(1.0, 0.85, 0.35), 6)
+	box.add_child(revive_hint)
+
+	revive_bar = ProgressBar.new()
+	revive_bar.min_value = 0.0
+	revive_bar.max_value = 100.0
+	revive_bar.value = 0.0
+	revive_bar.custom_minimum_size = Vector2(520, 34)
+	revive_bar.show_percentage = false
+	var bg := StyleBoxFlat.new()
+	bg.bg_color = Color(0.10, 0.11, 0.16, 0.95)
+	bg.border_color = Color(0.05, 0.05, 0.08)
+	bg.set_border_width_all(4)
+	bg.set_corner_radius_all(4)
+	var fill := StyleBoxFlat.new()
+	fill.bg_color = Color(0.99, 0.80, 0.22)
+	fill.set_corner_radius_all(3)
+	revive_bar.add_theme_stylebox_override("background", bg)
+	revive_bar.add_theme_stylebox_override("fill", fill)
+	box.add_child(revive_bar)
+
+	var btn := _make_pixel_button("AUFWECKEN", Color(0.20, 0.62, 0.42), 28)
+	btn.custom_minimum_size = Vector2(520, 74)
+	# Runde 87: EIN Klick startet den 5-Sekunden-Lauf. Halten war in der
+	# Praxis nicht zu schaffen (Log: 4 Versuche, alle bei 2,1-2,3 s abgebrochen).
+	btn.pressed.connect(func(): revive_hold_changed.emit(true))
+	btn.text = "AUFWECKEN (5 s)"
+	box.add_child(btn)
+	revive_panel.visible = false
+	print("[REVIVE][UI] Aufweck-Knopf erzeugt")
+
+
+
+
+# ---------------------------------------------------------------
+# Runde 84: Klarer Zuschauer-Bildschirm
+# ---------------------------------------------------------------
+var spec_overlay: Control = null
+
+func show_spectator_overlay(on: bool, partner_name: String = "") -> void:
+	if spec_overlay == null:
+		spec_overlay = Control.new()
+		spec_overlay.set_anchors_preset(Control.PRESET_FULL_RECT)
+		spec_overlay.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		add_child(spec_overlay)
+
+		var vig := ColorRect.new()
+		vig.color = Color(0.02, 0.03, 0.06, 0.55)
+		vig.set_anchors_preset(Control.PRESET_FULL_RECT)
+		vig.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		spec_overlay.add_child(vig)
+
+		var vb := VBoxContainer.new()
+		vb.set_anchors_preset(Control.PRESET_CENTER_TOP)
+		vb.offset_left = -420.0
+		vb.offset_right = 420.0
+		vb.offset_top = 54.0
+		vb.offset_bottom = 220.0
+		vb.alignment = BoxContainer.ALIGNMENT_BEGIN
+		spec_overlay.add_child(vb)
+
+		var t1 := Label.new()
+		t1.name = "SpecTitle"
+		t1.text = "DU BIST AUSGESCHIEDEN"
+		t1.horizontal_alignment = HorizontalAlignment.HORIZONTAL_ALIGNMENT_CENTER
+		t1.label_settings = _make_label_settings(46, Color(1.0, 0.42, 0.42), 10)
+		vb.add_child(t1)
+
+		var t2 := Label.new()
+		t2.name = "SpecSub"
+		t2.text = "ZUSCHAUER — dein Partner kämpft weiter"
+		t2.horizontal_alignment = HorizontalAlignment.HORIZONTAL_ALIGNMENT_CENTER
+		t2.label_settings = _make_label_settings(24, Color(0.85, 0.90, 1.0), 6)
+		vb.add_child(t2)
+		spec_overlay.visible = false
+
+	spec_overlay.visible = on
+	if on and partner_name != "":
+		var sub = spec_overlay.find_child("SpecSub", true, false)
+		if sub != null:
+			sub.text = "ZUSCHAUER — %s kämpft weiter" % partner_name
+	print("[SPEC][UI] Overlay %s" % ("AN" if on else "AUS"))
+
+
 func _make_label_settings(size: int, color: Color, outline: int) -> LabelSettings:
 	var ls = LabelSettings.new()
 	ls.font_size = size
@@ -1620,10 +1745,13 @@ func _make_page(title_text: String) -> Control:
 	page.set_anchors_preset(Control.PRESET_FULL_RECT)
 	page.mouse_filter = Control.MOUSE_FILTER_STOP
 	start_screen.add_child(page)
+	# Runde 103: Seite nach GANZ OBEN - sonst liegt sie unter dem Startbildschirm-
+	# Overlay und Titel/Banner scheinen durch die Karten.
+	start_screen.move_child(page, start_screen.get_child_count() - 1)
 
 	var dim := ColorRect.new()
 	dim.set_anchors_preset(Control.PRESET_FULL_RECT)
-	dim.color = Color(0.03, 0.05, 0.08, 0.94)
+	dim.color = Color(0.03, 0.05, 0.08, 1.0)
 	dim.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	page.add_child(dim)
 
@@ -1633,7 +1761,7 @@ func _make_page(title_text: String) -> Control:
 	panel.offset_right = 0.0
 	panel.offset_top = 0.0
 	panel.offset_bottom = 0.0
-	panel.add_theme_stylebox_override("panel", _comic_panel_sb(Color(0.05, 0.05, 0.10, 0.93), Color(0.98, 0.80, 0.20), 5, 30))
+	panel.add_theme_stylebox_override("panel", _comic_panel_sb(Color(0.05, 0.05, 0.10, 1.0), Color(0.98, 0.80, 0.20), 5, 30))
 	page.add_child(panel)
 
 	var box := VBoxContainer.new()
@@ -1780,7 +1908,7 @@ func _create_start_screen():
 
 	# Versionsanzeige - damit man am Geraet sofort sieht, welcher Build laeuft
 	var ver := Label.new()
-	ver.text = "v1.10  ·  Build 10"
+	ver.text = "v1.28  ·  Build 28"
 	ver.label_settings = _make_label_settings(20, Color(0.75, 0.80, 0.86), 3)
 	ver.horizontal_alignment = HorizontalAlignment.HORIZONTAL_ALIGNMENT_CENTER
 	ver.mouse_filter = Control.MOUSE_FILTER_STOP
@@ -3132,7 +3260,7 @@ func refresh_profile_ui() -> void:
 	if char_name_chip:
 		# Runde 43: alle drei Eigenschaften zeigen
 		var skin_txt: String = str(TextureManager.RIG_NAMES[clampi(skin, 0, 5)]) if skin > 0 else "STANDARD"
-		char_name_chip.text = "Farbe: %s   ·   Hut: %s   ·   Skin: %s" % [str(TextureManager.COLOR_NAMES[col]), str(TextureManager.HAT_NAMES[hat]), skin_txt]
+		char_name_chip.text = "Farbe: %s   ·   Hut: %s   ·   Skin: %s" % [str(TextureManager.COLOR_NAMES[col]), str(TextureManager.HAT_NAMES[clampi(hat, 0, TextureManager.HAT_NAMES.size() - 1)]), skin_txt]
 	var open_hats: int = game_manager.unlocked_hats.size()
 	if char_unlock_label:
 		char_unlock_label.text = "%d/%d Farben   ·   %d/%d Hüte freigeschaltet   ·   Gold: %d" % [game_manager.unlocked_colors.size(), TextureManager.COLOR_NAMES.size(), open_hats, TextureManager.HAT_NAMES.size(), game_manager.gold]
@@ -4053,6 +4181,55 @@ func _create_chest_page() -> void:
 	chest_row.add_child(_chest_card("premium", "PREMIUM", "auch Skins",
 		Color(0.42, 0.28, 0.58), "0 / 39 / 19 / 6 %"))
 
+	# ---- Glueckswalze: eigener Abschnitt mit Banner ----
+	col.add_child(_section_banner("GLÜCKSWALZE", Color(0.99, 0.80, 0.22)))
+	var slot_row := HBoxContainer.new()
+	slot_row.alignment = BoxContainer.ALIGNMENT_CENTER
+	col.add_child(slot_row)
+	var slot_card := PanelContainer.new()
+	var ssb := StyleBoxFlat.new()
+	ssb.bg_color = Color(0.24, 0.14, 0.20)
+	ssb.border_color = Color(0.03, 0.03, 0.05)
+	ssb.set_border_width_all(5)
+	ssb.set_corner_radius_all(6)
+	ssb.content_margin_left = 24.0
+	ssb.content_margin_right = 24.0
+	ssb.content_margin_top = 14.0
+	ssb.content_margin_bottom = 18.0
+	ssb.shadow_color = Color(0.95, 0.30, 0.35, 0.35)
+	ssb.shadow_size = 22
+	slot_card.add_theme_stylebox_override("panel", ssb)
+	slot_card.custom_minimum_size = Vector2(640, 420)
+	slot_row.add_child(slot_card)
+	var sv := VBoxContainer.new()
+	sv.add_theme_constant_override("separation", 8)
+	slot_card.add_child(sv)
+	var sicon := TextureRect.new()
+	sicon.texture = TextureManager.get_texture("slot_machine_icon")
+	sicon.custom_minimum_size = Vector2(280, 240)
+	sicon.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	sicon.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	sicon.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR
+	sicon.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+	sv.add_child(sicon)
+	var stitle := Label.new()
+	stitle.text = "GLÜCKSWALZE"
+	stitle.horizontal_alignment = HorizontalAlignment.HORIZONTAL_ALIGNMENT_CENTER
+	stitle.label_settings = _shop_ls(34, Color(1.0, 0.86, 0.30), 7)
+	sv.add_child(stitle)
+	var ssub := Label.new()
+	ssub.text = "Nur Gold · Einsatz 50 / 100 / 250"
+	ssub.horizontal_alignment = HorizontalAlignment.HORIZONTAL_ALIGNMENT_CENTER
+	ssub.label_settings = _shop_ls(20, Color(0.88, 0.86, 0.90), 4)
+	sv.add_child(ssub)
+	var sbtn := _make_pixel_button("🪙  DREHEN", Color(0.99, 0.80, 0.22), 28)
+	sbtn.add_theme_font_override("font", _shop_font())
+	sbtn.add_theme_color_override("font_color", Color(0.16, 0.11, 0.02))
+	sbtn.custom_minimum_size = Vector2(520, 86)
+	sbtn.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+	sbtn.pressed.connect(_open_slot_ui)
+	sv.add_child(sbtn)
+
 	# ---- Edelsteine aufladen ----
 	col.add_child(_section_banner("EDELSTEINE AUFLADEN", Color(0.99, 0.80, 0.22)))
 	var gem_row := HBoxContainer.new()
@@ -4216,6 +4393,28 @@ func _chest_card(tier: String, title: String, sub: String, accent: Color, odds: 
 	s2.label_settings = _shop_ls(18, Color(0.80, 0.84, 0.88), 4)
 	v.add_child(s2)
 
+	# Runde 102: kleine Symbole, damit man sofort sieht WAS drin ist
+	var icon_row := HBoxContainer.new()
+	icon_row.alignment = BoxContainer.ALIGNMENT_CENTER
+	icon_row.add_theme_constant_override("separation", 10)
+	v.add_child(icon_row)
+	# HUT/GEM/SKIN als kleine Symbole - Hut wird lazy erzeugt, deshalb
+	# direkt ueber get_hat_only_texture() holen.
+	var icons: Array = [TextureManager.get_hat_only_texture(1), TextureManager.get_texture("slot_gem1")]
+	if tier == "premium":
+		icons.append(TextureManager.get_skin_texture(0, 2))
+	for tex_ic in icons:
+		if tex_ic == null:
+			print("[SHOP][UI] FEHLER: Symbol fehlt")
+			continue
+		var ic := TextureRect.new()
+		ic.texture = tex_ic
+		ic.custom_minimum_size = Vector2(72, 72)
+		ic.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+		ic.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+		ic.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR
+		icon_row.add_child(ic)
+
 	var o := Label.new()
 	o.text = "Chancen " + odds
 	o.horizontal_alignment = HorizontalAlignment.HORIZONTAL_ALIGNMENT_CENTER
@@ -4300,6 +4499,24 @@ func _on_quick_buy(kind: String) -> void:
 		chest_msg.text = ("%s gekauft - gilt im nächsten Run" % str(info["label"])) if ok \
 			else ("Zu wenig Gold - %d nötig" % int(info["price"]))
 	refresh_chest_page()
+
+
+func _open_slot_ui() -> void:
+	var ui = load("res://scripts/slot_ui.gd").new()
+	ui.setup(game_manager)
+	add_child(ui)
+	if chest_page != null:
+		chest_page.hide()
+	if start_screen != null:
+		start_screen.hide()
+	ui.call("open")
+	ui.connect("closed", func():
+		if chest_page != null:
+			chest_page.show()
+		if start_screen != null:
+			start_screen.show()
+		refresh_chest_page())
+	print("[SLOT][UI] Seite geoeffnet")
 
 
 func refresh_chest_page() -> void:

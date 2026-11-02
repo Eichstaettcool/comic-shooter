@@ -43,7 +43,7 @@ Spielbalance bleibt unberührt.
 Kisten kosten 12, 18 oder 28 Edelsteine. Edelsteine kauft man mit Gold —
 1.000 Gold = 1 💎, 10.000 Gold = 12 💎.
 
-![Shop](screenshots/60-shop-breit.png)
+![Shop](screenshots/130-shop-sym.png)
 
 ![Kisten](screenshots/15-kisten-final.png)
 
@@ -62,6 +62,34 @@ Trostpreis (gemessen über 8.000 Züge je Kiste).
 | Standard | 12 💎 | Farben, Hüte |
 | Silber | 18 💎 | bessere Chancen, keine Skins |
 | Premium | 28 💎 | zusätzlich Skins, nie gewöhnlich |
+
+## Glückswalze
+
+Einarmiger Bandit im Shop — **nur Gold**, keine Edelsteine, keine Items.
+Drei Walzenbänder, eine Gewinnlinie, Einsatz 50/100/250.
+
+![Glückswalze](screenshots/113-slot-final.png)
+
+| Symbol | 3× Auszahlung |
+|---|---|
+| Gold x3 | 370× (Jackpot) |
+| Gold x2 | 110× |
+| Gold x1 | 46× |
+| BAR | 55× |
+| Glocke | 37× |
+| Kirsche | 18,5× |
+| 2× Kirsche (links) | 5,5× |
+
+Gemessen über 200.000 Spins: **RTP 90,10 %**, Trefferquote 10,3 %.
+Die Walzen stoppen versetzt (0,62 / 0,88 / 1,15 s), bei zwei gleichen
+Symbolen läuft die dritte auf 1,45 s — Anticipation. Spec: `SPEC_SLOT.md`.
+
+## Kosmetik
+
+13 Hüte (inkl. Engelsschein, Antenne, Krönchen) und 9 Skins
+(inkl. Astronaut, Gold-Roboter, Schatten).
+
+![Halo](screenshots/120-halo.png)
 
 ## Einstellungen
 

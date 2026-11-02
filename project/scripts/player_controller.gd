@@ -12,6 +12,7 @@ var health: int = MAX_HEALTH
 var max_health: int = MAX_HEALTH
 var input_direction: Vector2 = Vector2.ZERO
 var shoot_held: bool = false
+var _touch_count: int = 0
 var downed: bool = false             # Runde 34: liegt am Boden (Mehrspieler)
 var spectating: bool = false         # Runde 51: endgueltig tot -> Zuschauer
 var _downed_tint: bool = false       # Runde 50: Farbe fuer den liegenden Zustand
@@ -25,6 +26,7 @@ var punch_tween: Tween = null
 var gm: Node = null
 
 # --- LAN/Co-op-Modi ---
+var local_controlled: bool = false   # Runde 88: dieser Knoten wird lokal gesteuert (Client)
 var remote_controlled: bool = false        # Client: Position kommt vom Host
 var remote_target_pos: Vector2 = Vector2.ZERO
 var remote_driven: bool = false            # Host: Held wird vom Client gesteuert
@@ -400,6 +402,11 @@ func _physics_process(delta: float) -> void:
 	var shooting_allowed := true
 	if gm != null and gm.has_method("can_shoot_now"):
 		shooting_allowed = bool(gm.call("can_shoot_now"))
+	# Runde 91: Auf Mobile kann der Touch-Knopf "haengen" (released kommt nicht
+	# an, wenn der Finger woanders hochgeht). Dann feuert der Spieler dauerhaft.
+	# Wenn kein Finger mehr auf dem Schirm ist, wird der Zustand hart geloescht.
+	if OS.has_feature("mobile") and shoot_held and _touch_count == 0:
+		shoot_held = false
 	if shooting_allowed and (shoot_held or key_shoot) and can_shoot:
 		_shoot()
 
@@ -551,6 +558,26 @@ func _spawn_muzzle_flash() -> void:
 	punch_tween = create_tween()
 	punch_tween.tween_property(sprite, "scale", Vector2.ONE, 0.12).set_trans(Tween.TRANS_BOUNCE).set_ease(Tween.EASE_OUT)
 
+func _input(event: InputEvent) -> void:
+	# Finger auf dem Schirm zaehlen, damit ein haengender Touch-Knopf erkannt wird
+	if event is InputEventScreenTouch:
+		if event.pressed:
+			_touch_count += 1
+		else:
+			_touch_count = maxi(0, _touch_count - 1)
+
+
+func _unhandled_input(event: InputEvent) -> void:
+	# Runde 90: Mausfeuer nur am Desktop. Auf Android wuerde die
+	# Touch-Emulation dauerhaft "Maustaste gedrueckt" melden.
+	if OS.has_feature("mobile"):
+		return
+	if remote_controlled or remote_driven:
+		return
+	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT:
+		set_shoot_held(event.pressed)
+
+
 func set_shoot_held(value: bool) -> void:
 	shoot_held = value
 
@@ -580,6 +607,13 @@ func take_damage(amount: int) -> void:
 		emit_signal("player_died")
 		if downed:
 			print("[LAN][DEATH] health<=0 -> DOWNED (Knoten bleibt fuer Revive)")
+			return
+		# Runde 99: Im LAN darf der Knoten NIE geloescht werden - der Host
+		# braucht ihn fuer Downed/Revive. Vorher verschwand Slot 1 und war
+		# gleichzeitig als "liegt" im Log.
+		var in_lan: bool = gm != null and bool(gm.get("lan_mode"))
+		if in_lan:
+			print("[LAN][DEATH] health<=0 -> Knoten bleibt (LAN)")
 			return
 		print("[LAN][DEATH] health<=0 -> nicht LAN, Knoten wird entfernt")
 		queue_free()

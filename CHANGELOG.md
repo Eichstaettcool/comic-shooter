@@ -1,5 +1,16 @@
 # Changelog
 
+## v1.28
+- Glückswalze im Shop: Walzenbänder mit gezeichneten Symbolen, 4 eigene Sounds,
+  RTP 90,1 % über 200.000 Spins
+- Neue Kosmetik: Engelsschein, Antenne, Krönchen (Hüte) + Astronaut,
+  Gold-Roboter, Schatten (Skins)
+- Kisten-Reveal zeigt nur noch das gewonnene Item; Gold/Gems als 1–3 Symbole
+- Shop: Item-Symbole auf den Kistenkarten, Glückswalze als eigener Abschnitt
+- LAN: Lobby-Guard (kein Run ohne Mitspieler), hp=0-Schutz, Host-Knoten bleibt,
+  Peer-Trennung räumt den Slot auf
+- Specs: SPEC_SLOT.md, SPEC_LAN.md
+
 ## v1.10
 - Fix: Zwei Spieler-Figuren nach Run-Neustart — `_clear_run()` räumt Spieler,
   Monster und Boss-Referenzen beim Verlassen und vor jedem Start

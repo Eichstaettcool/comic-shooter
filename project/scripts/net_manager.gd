@@ -582,6 +582,22 @@ func coop_apply_upgrade(slot: int, id: String) -> void:
 	upgrade_applied_received.emit(slot, id)
 
 
+signal revive_request_received(slot: int, active: bool)
+
+func c_send_revive(slot: int, active: bool) -> void:
+	# Client meldet dem Host, dass er beim liegenden Partner aufweckt.
+	if not active or multiplayer.get_peers().is_empty():
+		pass
+	rpc_id(1, "srv_revive_request", slot, active)
+
+
+@rpc("any_peer", "call_remote", "reliable")
+func srv_revive_request(slot: int, active: bool) -> void:
+	if not multiplayer.is_server():
+		return
+	revive_request_received.emit(slot, active)
+
+
 func h_send_downed_state(slot: int, is_downed: bool, hp: int, progress: float) -> void:
 	# Runde 49: Downed/Revive-Zustand (unreliable reicht - 10 Hz)
 	if not active or multiplayer.get_peers().is_empty():
