@@ -513,73 +513,73 @@ func _draw_hat(img, hat: int) -> void:
 		return
 
 	# Runde 48: Hut-Overlay - wird fuer Base-Skin UND alle Skins benutzt
-		match hat:
-			1:
-				# Kappe: Kuppel + Schirm nach rechts + Knopf
-				_disc(img, 32, 14, 9, OUTLINE)
-				_disc(img, 32, 14, 7, Color(0.90, 0.20, 0.20))
-				_rect(img, 37, 15, 12, 5, OUTLINE)
-				_rect(img, 38, 16, 10, 3, Color(0.74, 0.14, 0.14))
-				_disc(img, 32, 6, 2, Color(0.74, 0.14, 0.14))
-			2:
-				# Cowboyhut: breite Krempe + Krone + Band
-				_ellipse(img, 32, 17, 17, 5, OUTLINE)
-				_ellipse(img, 32, 17, 15, 3, Color(0.55, 0.38, 0.18))
-				_ellipse(img, 32, 12, 9, 6, OUTLINE)
-				_ellipse(img, 32, 12, 7, 4, Color(0.70, 0.50, 0.25))
-				_rect(img, 26, 14, 12, 2, Color(0.35, 0.22, 0.10))
-			3:
-				# Krone
-				_rect(img, 24, 11, 16, 7, OUTLINE)
-				_rect(img, 25, 12, 14, 5, Color(0.98, 0.82, 0.20))
-				_tri(img, Vector2(25, 12), Vector2(28, 4), Vector2(31, 12), Color(0.98, 0.82, 0.20))
-				_tri(img, Vector2(31, 12), Vector2(34, 3), Vector2(37, 12), Color(0.98, 0.82, 0.20))
-				_tri(img, Vector2(36, 12), Vector2(39, 5), Vector2(40, 12), Color(0.98, 0.82, 0.20))
-				_disc(img, 34, 14, 1, Color(0.85, 0.20, 0.30))
-			4:
-				# Zylinder + rotes Band
-				_ellipse(img, 32, 17, 13, 4, OUTLINE)
-				_ellipse(img, 32, 17, 11, 2, Color(0.12, 0.12, 0.16))
-				_rect(img, 25, 4, 14, 15, OUTLINE)
-				_rect(img, 26, 5, 12, 13, Color(0.12, 0.12, 0.16))
-				_rect(img, 26, 15, 12, 3, Color(0.85, 0.15, 0.20))
-			5:
-				# Wollmütze: Kuppel + Rippen + Bommel
-				_disc(img, 32, 14, 9, OUTLINE)
-				_disc(img, 32, 14, 7, Color(0.30, 0.62, 0.95))
-				_rect(img, 27, 8, 2, 11, Color(0.22, 0.50, 0.80))
-				_rect(img, 32, 7, 2, 12, Color(0.22, 0.50, 0.80))
-				_rect(img, 36, 9, 2, 10, Color(0.22, 0.50, 0.80))
-				_disc(img, 32, 5, 4, OUTLINE)
-				_disc(img, 32, 5, 3, Color(0.96, 0.96, 0.99))
-			6:
-				# Piratenhut: Dreispitz + weisse Knoepfe
-				_tri(img, Vector2(32.0, 4.0), Vector2(50.0, 16.0), Vector2(32.0, 12.0), OUTLINE)
-				_tri(img, Vector2(32.0, 6.0), Vector2(46.0, 15.0), Vector2(32.0, 13.0), Color(0.18, 0.18, 0.22))
-				_tri(img, Vector2(32.0, 4.0), Vector2(14.0, 16.0), Vector2(32.0, 12.0), OUTLINE)
-				_tri(img, Vector2(32.0, 6.0), Vector2(18.0, 15.0), Vector2(32.0, 13.0), Color(0.18, 0.18, 0.22))
-				_disc(img, 32, 8, 2, Color(0.95, 0.95, 0.98))
-			7:
-				# Stroempf: runder Hut + Bündel + Kante
-				_ellipse(img, 32, 12, 9, 8, OUTLINE)
-				_ellipse(img, 32, 12, 7, 6, Color(0.90, 0.35, 0.30))
-				_rect(img, 23, 14, 18, 4, OUTLINE)
-				_rect(img, 24, 15, 16, 2, Color(0.80, 0.28, 0.24))
-				_disc(img, 32, 4, 3, Color(0.95, 0.95, 0.98))
-			8:
-				# Viking: Eisenhelm + Hoerner + Nieten
-				_ellipse(img, 32, 13, 9, 7, OUTLINE)
-				_ellipse(img, 32, 13, 7, 5, Color(0.62, 0.66, 0.74))
-				_tri(img, Vector2(24.0, 12.0), Vector2(12.0, 6.0), Vector2(24.0, 4.0), Color(0.92, 0.90, 0.82))
-				_tri(img, Vector2(40.0, 12.0), Vector2(52.0, 6.0), Vector2(40.0, 4.0), Color(0.92, 0.90, 0.82))
-				_rect(img, 28, 12, 9, 3, Color(0.30, 0.32, 0.38))
-			9:
-				# Stern: goldene Krone mit Stern in der Mitte
-				_tri(img, Vector2(22.0, 14.0), Vector2(26.0, 4.0), Vector2(30.0, 14.0), Color(1.0, 0.82, 0.25))
-				_tri(img, Vector2(34.0, 14.0), Vector2(38.0, 4.0), Vector2(42.0, 14.0), Color(1.0, 0.82, 0.25))
-				_rect(img, 21, 13, 22, 4, OUTLINE)
-				_rect(img, 22, 14, 20, 2, Color(1.0, 0.82, 0.25))
-				_tri(img, Vector2(32.0, 2.0), Vector2(35.0, 9.0), Vector2(29.0, 9.0), Color(1.0, 0.94, 0.55))
+	match hat:
+		1:
+			# Kappe: Kuppel + Schirm nach rechts + Knopf
+			_disc(img, 32, 14, 9, OUTLINE)
+			_disc(img, 32, 14, 7, Color(0.90, 0.20, 0.20))
+			_rect(img, 37, 15, 12, 5, OUTLINE)
+			_rect(img, 38, 16, 10, 3, Color(0.74, 0.14, 0.14))
+			_disc(img, 32, 6, 2, Color(0.74, 0.14, 0.14))
+		2:
+			# Cowboyhut: breite Krempe + Krone + Band
+			_ellipse(img, 32, 17, 17, 5, OUTLINE)
+			_ellipse(img, 32, 17, 15, 3, Color(0.55, 0.38, 0.18))
+			_ellipse(img, 32, 12, 9, 6, OUTLINE)
+			_ellipse(img, 32, 12, 7, 4, Color(0.70, 0.50, 0.25))
+			_rect(img, 26, 14, 12, 2, Color(0.35, 0.22, 0.10))
+		3:
+			# Krone
+			_rect(img, 24, 11, 16, 7, OUTLINE)
+			_rect(img, 25, 12, 14, 5, Color(0.98, 0.82, 0.20))
+			_tri(img, Vector2(25, 12), Vector2(28, 4), Vector2(31, 12), Color(0.98, 0.82, 0.20))
+			_tri(img, Vector2(31, 12), Vector2(34, 3), Vector2(37, 12), Color(0.98, 0.82, 0.20))
+			_tri(img, Vector2(36, 12), Vector2(39, 5), Vector2(40, 12), Color(0.98, 0.82, 0.20))
+			_disc(img, 34, 14, 1, Color(0.85, 0.20, 0.30))
+		4:
+			# Zylinder + rotes Band
+			_ellipse(img, 32, 17, 13, 4, OUTLINE)
+			_ellipse(img, 32, 17, 11, 2, Color(0.12, 0.12, 0.16))
+			_rect(img, 25, 4, 14, 15, OUTLINE)
+			_rect(img, 26, 5, 12, 13, Color(0.12, 0.12, 0.16))
+			_rect(img, 26, 15, 12, 3, Color(0.85, 0.15, 0.20))
+		5:
+			# Wollmütze: Kuppel + Rippen + Bommel
+			_disc(img, 32, 14, 9, OUTLINE)
+			_disc(img, 32, 14, 7, Color(0.30, 0.62, 0.95))
+			_rect(img, 27, 8, 2, 11, Color(0.22, 0.50, 0.80))
+			_rect(img, 32, 7, 2, 12, Color(0.22, 0.50, 0.80))
+			_rect(img, 36, 9, 2, 10, Color(0.22, 0.50, 0.80))
+			_disc(img, 32, 5, 4, OUTLINE)
+			_disc(img, 32, 5, 3, Color(0.96, 0.96, 0.99))
+		6:
+			# Piratenhut: Dreispitz + weisse Knoepfe
+			_tri(img, Vector2(32.0, 4.0), Vector2(50.0, 16.0), Vector2(32.0, 12.0), OUTLINE)
+			_tri(img, Vector2(32.0, 6.0), Vector2(46.0, 15.0), Vector2(32.0, 13.0), Color(0.18, 0.18, 0.22))
+			_tri(img, Vector2(32.0, 4.0), Vector2(14.0, 16.0), Vector2(32.0, 12.0), OUTLINE)
+			_tri(img, Vector2(32.0, 6.0), Vector2(18.0, 15.0), Vector2(32.0, 13.0), Color(0.18, 0.18, 0.22))
+			_disc(img, 32, 8, 2, Color(0.95, 0.95, 0.98))
+		7:
+			# Stroempf: runder Hut + Bündel + Kante
+			_ellipse(img, 32, 12, 9, 8, OUTLINE)
+			_ellipse(img, 32, 12, 7, 6, Color(0.90, 0.35, 0.30))
+			_rect(img, 23, 14, 18, 4, OUTLINE)
+			_rect(img, 24, 15, 16, 2, Color(0.80, 0.28, 0.24))
+			_disc(img, 32, 4, 3, Color(0.95, 0.95, 0.98))
+		8:
+			# Viking: Eisenhelm + Hoerner + Nieten
+			_ellipse(img, 32, 13, 9, 7, OUTLINE)
+			_ellipse(img, 32, 13, 7, 5, Color(0.62, 0.66, 0.74))
+			_tri(img, Vector2(24.0, 12.0), Vector2(12.0, 6.0), Vector2(24.0, 4.0), Color(0.92, 0.90, 0.82))
+			_tri(img, Vector2(40.0, 12.0), Vector2(52.0, 6.0), Vector2(40.0, 4.0), Color(0.92, 0.90, 0.82))
+			_rect(img, 28, 12, 9, 3, Color(0.30, 0.32, 0.38))
+		9:
+			# Stern: goldene Krone mit Stern in der Mitte
+			_tri(img, Vector2(22.0, 14.0), Vector2(26.0, 4.0), Vector2(30.0, 14.0), Color(1.0, 0.82, 0.25))
+			_tri(img, Vector2(34.0, 14.0), Vector2(38.0, 4.0), Vector2(42.0, 14.0), Color(1.0, 0.82, 0.25))
+			_rect(img, 21, 13, 22, 4, OUTLINE)
+			_rect(img, 22, 14, 20, 2, Color(1.0, 0.82, 0.25))
+			_tri(img, Vector2(32.0, 2.0), Vector2(35.0, 9.0), Vector2(29.0, 9.0), Color(1.0, 0.94, 0.55))
 func _make_player_rig(idx: int, shirt: Color = Color(0.20, 0.60, 1.0), pants: Color = Color(0.15, 0.25, 0.55), hat: int = -1) -> ImageTexture:
 	# Runde 42: SKINS sind komplette Charakter-Looks UND nehmen die gewaehlte
 	# Spielerfarbe an - Farbe x Haut x Skin sind frei kombinierbar.
@@ -641,43 +641,58 @@ func _make_player_rig(idx: int, shirt: Color = Color(0.20, 0.60, 1.0), pants: Co
 			_rect(img, 55, 27, 5, 10, OUTLINE)
 			_rect(img, 56, 28, 3, 8, gun)
 		6:
-			# ASTRONAUT: weisser Anzug, blaues Visier
-			var suit6 := Color(0.92, 0.93, 0.96)
-			_outlined_ellipse(img, 32, 36, 14, 14, suit6, 3)
-			_outlined_ellipse(img, 26, 47, 4, 8, suit6.darkened(0.15), 2)
-			_outlined_ellipse(img, 38, 47, 4, 8, suit6.darkened(0.15), 2)
-			_outlined_disc(img, 32, 21, 12, suit6, 3)
-			_rect(img, 22, 17, 20, 9, Color(0.10, 0.22, 0.40))
-			_rect(img, 23, 18, 8, 4, Color(0.45, 0.75, 0.98))
-			_rect(img, 30, 30, 5, 8, shirt)
-			_disc(img, 32, 34, 3, Color(0.95, 0.30, 0.30))
-			_rect(img, 40, 28, 20, 8, OUTLINE)
-			_rect(img, 41, 29, 18, 6, gun)
+			# GEIST: schwebendes Laken, keine Beine, leuchtende Augen.
+			# Farbe des Spielers faerbt das Laken ein.
+			var sheet := shirt.lerp(Color(0.88, 0.94, 1.0), 0.55)
+			# welliger Saum unten
+			for k in range(4):
+				_outlined_disc(img, 24 + k * 5, 50, 4, sheet, 2)
+			_outlined_ellipse(img, 32, 33, 15, 17, sheet, 3)
+			_outlined_ellipse(img, 32, 27, 12, 11, sheet.lightened(0.06), 2)
+			# Kapuze / Gesichtsöffnung
+			_outlined_ellipse(img, 33, 26, 8, 9, Color(0.10, 0.10, 0.16), 2)
+			_disc(img, 30, 25, 2.0, Color(0.55, 0.90, 1.0), true)
+			_disc(img, 37, 25, 2.0, Color(0.55, 0.90, 1.0), true)
+			# Arme als Zipfel
+			_outlined_disc(img, 43, 36, 4, sheet, 2)
+			_outlined_disc(img, 21, 36, 4, sheet, 2)
 		7:
-			# GOLD-ROBOTER: goldene Panzerung, gluehende Augen
-			var gold7 := Color(0.92, 0.74, 0.26).lerp(shirt, 0.15)
-			_outlined_ellipse(img, 32, 36, 13, 14, gold7, 3)
-			_outlined_ellipse(img, 26, 47, 4, 8, gold7.darkened(0.35), 2)
-			_outlined_ellipse(img, 38, 47, 4, 8, gold7.darkened(0.35), 2)
-			_outlined_disc(img, 32, 21, 12, gold7.lightened(0.10), 3)
-			_rect(img, 24, 17, 16, 6, Color(0.15, 0.10, 0.05))
-			_disc(img, 28, 20, 2, Color(1.0, 0.55, 0.20))
-			_disc(img, 36, 20, 2, Color(1.0, 0.55, 0.20))
-			_disc(img, 32, 36, 6, Color(1.0, 0.90, 0.45))
-			_rect(img, 40, 28, 20, 8, OUTLINE)
-			_rect(img, 41, 29, 18, 6, Color(0.30, 0.24, 0.12))
+			# WIKINGER: breiter Koerper, Fellkragen, Helm mit Hoernern, Bart.
+			var fur := shirt.lerp(Color(0.55, 0.42, 0.30), 0.35)
+			_outlined_ellipse(img, 32, 38, 14, 13, shirt, 3)
+			_outlined_ellipse(img, 32, 33, 16, 7, fur, 3)          # Fellkragen
+			_outlined_ellipse(img, 26, 48, 5, 8, pants.darkened(0.2), 2)
+			_outlined_ellipse(img, 38, 48, 5, 8, pants.darkened(0.2), 2)
+			_outlined_disc(img, 32, 22, 11, Color(0.86, 0.70, 0.55), 3)
+			# Bart
+			_tri(img, Vector2(24, 24), Vector2(32, 40), Vector2(40, 24), Color(0.62, 0.30, 0.14))
+			_disc(img, 28, 22, 1.6, OUTLINE, true)
+			_disc(img, 36, 22, 1.6, OUTLINE, true)
+			# Helm + Hoerner
+			_outlined_disc(img, 32, 16, 11, Color(0.55, 0.58, 0.64), 3)
+			_rect(img, 21, 15, 22, 4, Color(0.42, 0.45, 0.52))
+			_tri(img, Vector2(23, 12), Vector2(15, 4), Vector2(24, 8), Color(0.94, 0.92, 0.86))
+			_tri(img, Vector2(41, 12), Vector2(49, 4), Vector2(40, 8), Color(0.94, 0.92, 0.86))
+			_rect(img, 40, 30, 20, 8, OUTLINE)
+			_rect(img, 41, 31, 18, 6, Color(0.42, 0.30, 0.18))
 		8:
-			# SCHATTEN: dunkler Mantel, violette Energie
-			var cloak8 := Color(0.22, 0.14, 0.34)
-			_outlined_ellipse(img, 32, 36, 13, 15, cloak8, 3)
-			_outlined_ellipse(img, 26, 48, 4, 8, cloak8.darkened(0.3), 2)
-			_outlined_ellipse(img, 38, 48, 4, 8, cloak8.darkened(0.3), 2)
-			_outlined_disc(img, 32, 21, 11, Color(0.14, 0.10, 0.20), 3)
-			_rect(img, 23, 20, 18, 4, Color(0.72, 0.40, 0.95))
-			_disc(img, 32, 36, 5, Color(0.72, 0.40, 0.95))
-			_disc(img, 32, 36, 2, Color(1, 1, 1))
-			_rect(img, 40, 28, 20, 8, OUTLINE)
-			_rect(img, 41, 29, 18, 6, Color(0.20, 0.20, 0.26))
+			# ALIEN: grosser dreieckiger Kopf, drei Augen, Tentakel.
+			var skin8 := Color(0.46, 0.82, 0.42).lerp(shirt, 0.25)
+			# Tentakel statt Beine
+			_thick_line(img, Vector2(27, 44), Vector2(22, 55), 3.0, OUTLINE)
+			_thick_line(img, Vector2(32, 44), Vector2(32, 56), 3.0, OUTLINE)
+			_thick_line(img, Vector2(37, 44), Vector2(42, 55), 3.0, OUTLINE)
+			_outlined_ellipse(img, 32, 38, 12, 11, skin8.darkened(0.12), 3)
+			# Kopf: breite Ellipse, nach unten schmaler
+			_outlined_ellipse(img, 32, 24, 15, 13, skin8, 3)
+			_tri(img, Vector2(18, 26), Vector2(46, 26), Vector2(32, 12), skin8)
+			# drei Augen
+			_disc(img, 25, 22, 3.2, Color(0.06, 0.05, 0.10), true)
+			_disc(img, 32, 20, 3.6, Color(0.06, 0.05, 0.10), true)
+			_disc(img, 39, 22, 3.2, Color(0.06, 0.05, 0.10), true)
+			_disc(img, 32, 20, 1.6, Color(0.95, 0.95, 0.35), true)
+			_rect(img, 40, 30, 20, 8, OUTLINE)
+			_rect(img, 41, 31, 18, 6, Color(0.30, 0.34, 0.30))
 		4:
 			# COMIC-HELD: Umhang + Muskel in der Spielerfarbe
 			_tri(img, Vector2(20.0, 26.0), Vector2(44.0, 26.0), Vector2(40.0, 50.0), shirt.darkened(0.22))
@@ -737,8 +752,8 @@ func _make_player_rig(idx: int, shirt: Color = Color(0.20, 0.60, 1.0), pants: Co
 const COLOR_NAMES := ["BLAU", "ROT", "GRUEN", "GELB", "LILA", "WEISS", "ORANGE", "CYAN", "ROSA", "STAHL"]
 # Runde 38: Character-Rigs (Helden-Overlays)
 # Runde 40/42: RIGS = echte SKINS (kompletter Charakter-Look, farbbar)
-const RIG_NAMES := ["STANDARD", "PANZERHELD", "NINJA", "ROBOTER", "COMIC-HELD", "MARS-MARSCHALL", "ASTRONAUT", "GOLD-ROBOTER", "SCHATTEN"]
-const HAT_NAMES := ["KAPPE", "COWBOY", "KRONE", "ZYLINDER", "WOLLMÜTZE", "PIRAT", "STROHHUT", "WIKINGER", "STERN", "KRONE+", "HALO", "ANTENNE", "KRÖNCHEN"]
+const RIG_NAMES := ["STANDARD", "PANZERHELD", "NINJA", "ROBOTER", "COMIC-HELD", "MARS-MARSCHALL", "GEIST", "WIKINGER", "ALIEN"]
+const HAT_NAMES := ["OHNE", "KAPPE", "COWBOY", "KRONE", "ZYLINDER", "WOLLMÜTZE", "PIRAT", "STROHHUT", "WIKINGER", "STERN", "HALO", "ANTENNE", "KRÖNCHEN"]
 
 const PLAYER_COLORS := [
 	{ "shirt": Color(0.20, 0.60, 1.00), "pants": Color(0.15, 0.25, 0.55) },

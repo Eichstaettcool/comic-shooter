@@ -1908,7 +1908,7 @@ func _create_start_screen():
 
 	# Versionsanzeige - damit man am Geraet sofort sieht, welcher Build laeuft
 	var ver := Label.new()
-	ver.text = "v1.28  ·  Build 28"
+	ver.text = "v1.29  ·  Build 29"
 	ver.label_settings = _make_label_settings(20, Color(0.75, 0.80, 0.86), 3)
 	ver.horizontal_alignment = HorizontalAlignment.HORIZONTAL_ALIGNMENT_CENTER
 	ver.mouse_filter = Control.MOUSE_FILTER_STOP

@@ -1,25 +1,31 @@
 extends Node
 var t := 0.0
-var step := 0
+var done := false
 func start(_g: Node) -> void: set_process(true)
-func _shot(n: String) -> void:
-	get_viewport().get_texture().get_image().save_png("C:/Users/vince/Games/comic-shooter/screenshots/" + n + ".png")
-	print("[SHOT] " + n)
 func _process(d: float) -> void:
 	t += d
-	var gm = get_parent(); var ui = gm.get("ui_manager")
-	if step == 0 and t > 6.5:
-		step = 1; gm.set("gold", 9000); gm.set("gems", 80); ui.call("_open_chest_page")
-	elif step == 1 and t > 8.2:
-		step = 2; _shot("130-shop-sym")
-	elif step == 2 and t > 8.6:
-		step = 3
-		# Skin 7 (Gold-Roboter) pruefen
-		gm.set("p_rig", 7); gm.set("active_map", "earth"); gm.call("quit_to_menu"); gm.call("start_game", false, false)
-	elif step == 3 and t > 12.0:
-		step = 4
-		var p = gm.get("player")
-		if p != null:
-			var tex = TextureManager.get_skin_hat_texture(0, 7, 0)
-			print("[TEST] Skin7 tex=%s" % str(tex != null))
-		get_tree().quit()
+	if done or t < 1.0: return
+	done = true
+	var W := 1400
+	var H := 760
+	var img := Image.create(W, H, false, Image.FORMAT_RGBA8)
+	img.fill(Color(0.10, 0.11, 0.14))
+	for i in range(13):
+		var tex = TextureManager.get_skin_hat_texture(0, 0, i)
+		if tex == null: continue
+		var im: Image = tex.get_image(); im.resize(92, 92, Image.INTERPOLATE_NEAREST)
+		img.blend_rect(im, Rect2i(0, 0, 92, 92), Vector2i(10 + (i % 7) * 190, 10 + int(i / 7) * 180))
+	for s in range(9):
+		var tex2 = TextureManager.get_skin_hat_texture(0, s, 0)
+		if tex2 == null: continue
+		var im2: Image = tex2.get_image(); im2.resize(120, 120, Image.INTERPOLATE_NEAREST)
+		img.blend_rect(im2, Rect2i(0, 0, 120, 120), Vector2i(10 + (s % 7) * 190, 390 + int(s / 7) * 180))
+	# Farbe 3 (andere Farbe) fuer Skin 7 zeigen
+	var tex3 = TextureManager.get_skin_hat_texture(3, 7, 0)
+	if tex3 != null:
+		var im3: Image = tex3.get_image(); im3.resize(120, 120, Image.INTERPOLATE_NEAREST)
+		img.blend_rect(im3, Rect2i(0, 0, 120, 120), Vector2i(1250, 390))
+		print("[TEST] Skin7 in Farbe 3 gezeichnet")
+	img.save_png("C:/Users/vince/Games/comic-shooter/screenshots/141-kontakt2.png")
+	print("[SHOT] 141")
+	get_tree().quit()
