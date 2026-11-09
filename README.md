@@ -98,6 +98,26 @@ tools/                    Build-, Mess- und Split-Werkzeuge (Python/Bash)
 .github/workflows/ios.yml iOS-Build auf macOS-Runner (unsignierte IPA)
 ```
 
+## Galerie
+
+Bilder liegen im Ordner `screenshots/` (mit im Repo).
+
+| Startseite | vier Welten |
+|---|---|
+| ![Startseite](screenshots/01-startseite.png) | ![Welten](screenshots/02-welt-erde.png) |
+
+| Bosse | Kisten |
+|---|---|
+| ![Boss Erde](screenshots/70-boss-earth.png) | ![Kisten](screenshots/15-kisten-final.png) |
+
+| Shop | Glückswalze |
+|---|---|
+| ![Shop](screenshots/130-shop-sym.png) | ![Walze](screenshots/113-slot-final.png) |
+
+| Skins | Einstellungen |
+|---|---|
+| ![Skins](screenshots/06-skins.png) | ![Einstellungen](screenshots/07-einstellungen.png) |
+
 ## Was nicht im Repo liegt
 
 Bewusst ausgeschlossen (siehe `.gitignore`), weil es sich reproduzieren lässt:
