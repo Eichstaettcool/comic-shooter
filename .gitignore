@@ -1,10 +1,12 @@
 # ============================================================
-# comic-shooter — .gitignore (v1.58, 9.11.2026)
-# Ziel: NUR Quellcode + Assets + Doku im Repo. Alles Gebaute,
-# Gemessene und Heruntergeladene bleibt lokal.
+# comic-shooter - .gitignore (v1.58)
+# Im Repo liegt NUR das Spiel: project/, screenshots/, README,
+# LICENSE, CHANGELOG, CREDITS, Export-Skripte.
+# Arbeitsdateien (Plaene, Specs, Berichte, Messlogs, Werkzeuge)
+# bleiben lokal.
 # ============================================================
 
-# ---------- Engine und Werkzeuge (nicht ins Repo) ----------
+# ---------- Engine und Export-Templates ----------
 /Godot.exe
 /Godot_v*-console.exe
 /Godot.zip
@@ -15,12 +17,11 @@
 project/.godot/
 **/.godot/
 
-# ---------- Builds (APK/EXE/PCK) ----------
+# ---------- Builds ----------
 dist/
-# alte Snapshot-ZIPs im Wurzelverzeichnis (iOS-Xcode-Bundle, Repo-Kopie)
+build/
 /*.zip
 /*.tar.gz
-build/
 *.apk
 *.aab
 *.idsig
@@ -30,32 +31,46 @@ build/
 project/ComicShooter*.apk
 project/ComicShooter*.exe
 
-# ---------- iOS/macOS-Exporte (hunderte MB, nur lokal) ----------
+# ---------- iOS/macOS-Exporte ----------
 ios_build*/
 ios_v*/
 ios_*_package/
 *.xcframework/
+MoltenVK.xcframework/
 *.xcodeproj/
 *.xcworkspace/
 *.ipa
 *.mobileprovision
-MoltenVK.xcframework/
+PrivacyInfo.xcprivacy
 
-# ---------- Belege, Messlogs, Screenshots ----------
+# ---------- Arbeitsdateien: Plaene, Specs, Berichte ----------
+PLAN*.md
+STATUS.md
+SPEC_*.md
+iOS-*.md
+project/*.md
+project/docs/
+project/research/
+
+# ---------- Messbelege, Werkzeuge, Golden-Referenzen ----------
 logs_*.log
 *.log
-screenshots/
-backup/*
-# Golden-Referenzen GEHOEREN ins Repo: ohne sie laeuft tools/golden_check.sh nicht
-# (Verzeichnis UND Inhalt freigeben - sonst greift weiter *.log)
-!backup/golden_v136/
-!backup/golden_v136/**
+tools/
+backup/
+repo/
 compare/
 cache/
 scratch/
 data/
+*.py
 
-# ---------- temporaere/abgeleitete Dinge ----------
+# ---------- Screenshots: nur die fertigen Bilder ----------
+screenshots/v*/
+screenshots/*raw*
+screenshots/*tmp*
+screenshots/*-touch*
+
+# ---------- temporaer/abgeleitet ----------
 *.tmp
 *.bak
 *.bak[0-9]*
@@ -80,7 +95,7 @@ __pycache__/
 .venv/
 venv/
 
-# ---------- Lokale Umgebung (nie hochladen) ----------
+# ---------- Zugangsdaten (nie hochladen) ----------
 .env
 .env.*
 *.keystore

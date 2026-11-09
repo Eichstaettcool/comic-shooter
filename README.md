@@ -1,134 +1,128 @@
 # Comic Shooter
 
-2D-Arena-Shooter im Comic-Look (Godot 4.7.2, GDScript) — Mobile-first, mit Touch-Steuerung,
-drei Spielmodi, Meta-Progression (Kisten, Skins, Hüte, Karten) und LAN-Co-op.
+Top-down-Comic-Shooter für Desktop (Windows) und Android. Vier Welten, drei
+Spielmodi, Bosse, LAN-Koop und ein Shop mit Kisten und Glücksautomaten.
+Godot 4.7, GDScript, Mobile-first mit Touch-Steuerung und virtuellen Sticks.
 
-**Aktuelle Version:** 1.58 · **Projektordner:** `project/`
+**Aktuelle Version: 1.58**
 
----
+![Startseite](screenshots/01-startseite.png)
 
 ## Spielmodi
 
-| # | Modus | Kern |
-|---|---|---|
-| 0 | **ENDLOS** | Wellen ohne Ende, Level-Ups, Sägezahn-Spawn mit Erholungsfenstern |
-| 1 | **WELLEN + SHOP** | feste Wellen, Shop zwischen den Wellen, Boss alle 5 Wellen |
-| 2 | **RUNDEN** | 30 Runden, Gruppen-Spawns, Runden-Shop, Mini-/Biom-Bosse |
+| Modus | Ablauf |
+| --- | --- |
+| **Endlos** | Sägezahn-Wellen: Anlauf, Peak, Erholung. Kein Ende, Ziel ist die Bestzeit. |
+| **Wellen + Shop** | Welle räumen, im Shop aufrüsten, nächste Welle. Alle 5 Wellen ein Boss. |
+| **Runden** | Kurze, feste Runden mit Gruppen und Mini-Bossen, Erholungsfenster dazwischen. |
 
-Vier Schwierigkeitsstufen (LEICHT / NORMAL / SCHWER / HARDCORE) mit **strukturell**
-unterschiedlichem Aufbau — nicht nur Multiplikatoren: Phasenlängen, Hetzer-Limit,
-Schonfrist, Boss-Kadenz und Druckkurve sind je Stufe eigene Werte.
+Vier Schwierigkeitsstufen: Leicht, Normal, Schwer, Hardcore. Die Balance läuft
+über **Druck** (Gegner-HP pro Sekunde gegen den Spieler-DPS), nicht über starre
+HP-Multiplikatoren — dadurch bleibt das Tempo in jeder Stufe spielbar.
 
-## Balancing
+## Die vier Welten
 
-Alle Modi ziehen ihre Zahlen aus **einer** Datei: `project/scripts/core/balance.gd`.
+Jede Welt hat eine eigene prozedural erzeugte Karte, eigene Gegner und einen
+eigenen Boss.
+
+| Erde | Mars |
+| --- | --- |
+| ![Erde](screenshots/07-welt-erde.png) | ![Mars](screenshots/08-welt-mars.png) |
+| **Dschungel** | **Elektro** |
+| ![Dschungel](screenshots/09-welt-dschungel.png) | ![Elektro](screenshots/10-welt-elektro.png) |
+
+## Bosse
+
+Jede Welt hat einen eigenen Boss mit zwei Phasen und Telegraph vor dem Angriff.
+Auf der Karte gibt es zusätzlich Mini-Bosse.
+
+![Boss](screenshots/11-boss.png)
+
+## Shop und Kisten
+
+Kisten kosten 12, 18 oder 28 Edelsteine. Edelsteine gibt es im Umtausch für
+Gold (1.000 Gold = 1 💎, 10.000 Gold = 12 💎).
+
+![Shop](screenshots/05-shop-kisten.png)
+
+| Kiste | Preis | Inhalt |
+| --- | --- | --- |
+| Standard | 12 💎 | Farben, Hüte |
+| Silber | 18 💎 | bessere Chancen, keine Skins |
+| Premium | 28 💎 | zusätzlich Skins, nie gewöhnlich |
+
+Rund 35–40 % der Kisten bringen keinen Skin, sondern Gold oder Edelsteine als
+Trostpreis.
+
+## Glücksautomaten
+
+Einarmiger Bandit im Shop — **nur Gold**, keine Edelsteine, keine Items.
+Drei Walzenbänder, eine Gewinnlinie, Einsatz 50/100/250. Die Walzen stoppen
+versetzt, bei zwei gleichen Symbolen läuft die dritte länger (Anticipation).
+
+![Glücksautomaten](screenshots/06-gluecksautomaten.png)
+
+Gemessen über 200.000 Spins: **RTP 90,1 %**, Trefferquote 10,3 %.
+
+## Sammlung und Karten
+
+Skins, Hüte und Farben sind rein kosmetisch — die Balance bleibt unberührt.
+
+| Sammlung | Kartenauswahl |
+| --- | --- |
+| ![Sammlung](screenshots/03-sammlung.png) | ![Karten](screenshots/02-karten.png) |
+
+## Einstellungen
+
+Musik und Soundeffekte getrennt schaltbar, Grafikqualität, Aim-Assist,
+Schwierigkeit.
+
+![Einstellungen](screenshots/04-einstellungen.png)
+
+## Steuerung
+
+| Taste | Aktion |
+| --- | --- |
+| WASD / Pfeile | Bewegen |
+| Maus | Zielen |
+| Linke Maustaste | Schießen (halten = Dauerfeuer) |
+| Q / E | Trank / Bombe |
+| ESC | Pause |
+| F9 | Debug-Fenster (Desktop) |
+
+Auf Android: virtueller Stick links, Feuerknopf rechts, Utility-Knöpfe unten.
+
+**Debug-Modus:** 7× auf die Versionszeile auf dem Startbildschirm tippen.
+Darin: Weltwechsel, Monster-Auswahl, Boss und Mini-Boss je Karte,
+Unverwundbarkeit, alles freischalten.
+
+## Selbst bauen
+
+Voraussetzung: **Godot 4.7** (Standard-Build, kein Mono).
 
 ```
-druck()           HP/s der ankommenden Gegner / Referenz-DPS
-ziel_druck()      Soll-Kurve über die Zeit (je Modus × Stufe)
-spieler_dps()     Referenz-DPS der Startwaffe (Pistole: 3 Schaden / 0,4 s)
-fehler_budget()   erlaubte Treffer in 60 s je Stufe
+# Windows-EXE
+godot --headless --path project --export-release "Windows Desktop" build/ComicShooter.exe
+
+# Android-APK (Debug-Keystore)
+godot --headless --path project --export-debug "Android" build/ComicShooter.apk
 ```
 
-`waves.gd`, `rounds.gd` und `game_manager.DIFFICULTY` sind nur noch Adapter darauf.
-Messbericht: `project/BALANCE_BERICHT.md`, Konzept: `project/SPEC_BALANCE_V156.md`.
+Oder die mitgelieferten Skripte `export_exe.bat` und `export_apk.bat`.
+Für Android braucht es SDK Platform 36 und einen Debug-Keystore unter
+`%USERPROFILE%\.android\debug.keystore`.
 
-## Starten
-
-```bash
-# Godot 4.7.2 (Windows-Binary liegt nicht im Repo)
-Godot.exe --path project
-
-# Direkt in einen Modus springen (Diagnose-Modi, s. u.)
-COMIC_LANTEST=balmodel Godot.exe --headless --path project
-```
-
-## Diagnose- und Messmodi
-
-Aktiv über die Umgebungsvariable `COMIC_LANTEST` (Gerüst: `project/scripts/tools/lan_diag_tmp.gd`).
-Jeder Modus schreibt Belegzeilen ins Log und beendet sich selbst.
-
-| Modus | Zweck |
-|---|---|
-| `balmodel` | Balance-Modell 3 Modi × 4 Stufen (`[BAL][MODELL]`) |
-| `balbot` | Kiting-Bot spielt echte Läufe, Profile Anfänger/Erfahren (`[BOT][LAUF]`) |
-| `balshot` | Belegbilder (Anlauf, Peak, Boss-Telegraph, Erholung) — schreibt nach `screenshots/` (lokal, nicht im Repo) |
-| `chesttouch` / `chesttouch2` | Kistenkauf + Öffnung über den **echten** Touch-Pfad |
-| `chestfull`, `chestseq`, `chest145` | Kisten-Inszenierung, Sequenz, Grafik |
-| `rounds`, `roundrun`, `roundecon` | Runden-Plan, Durchlauf, Ökonomie |
-| `shop`, `shop141`, `rundenshop151` | Shop-Seiten, Kaufpfade |
-| `hatfit`, `hatmatrix`, `hatsheet154` | Hüte: Sitz, Matrix, Kontaktblätter |
-| `mini`, `boss141`, `bossrun` | Boss-/Mini-Boss-Spawn und -Kampf |
-
-Beispiel für einen Messlauf:
-
-```bash
-COMIC_LANTEST=balbot COMIC_BAL_MODE=endlos COMIC_BAL_STUFE=normal \
-  COMIC_BAL_PROFIL=anfaenger COMIC_BAL_LAEUFE=2 COMIC_BAL_TS=4 COMIC_BAL_MAX=11 \
-  Godot.exe --headless --path project
-```
-
-`tools/bal_matrix.sh` fährt die komplette Matrix, `tools/bal_auswertung.py --write`
-schreibt die Tabelle in den Balance-Bericht.
-
-## Regressionstest
-
-```bash
-./tools/golden_check.sh          # 8 Diag-Modi gegen backup/golden_v136/
-./tools/golden_check.sh shop upg # nur einzelne Modi
-```
-
-Vergleicht normalisierte Logs. Referenzen werden nur mit Begründung neu gesetzt
-(siehe `project/BUGLISTE.md`).
-
-## Aufbau
+## Projektstruktur
 
 ```
 project/
-  project.godot           Godot-Projekt
-  scripts/
-    core/                 balance.gd, waves.gd, rounds.gd, spawn_api.gd, shop_logic.gd …
-    entities/             Spieler, Monster, Waffen
-    ui/                   HUD, Seiten, Overlays (Shop, Kisten, Rad)
-    tools/lan_diag_tmp.gd Diagnose-/Messgerüst (alle COMIC_LANTEST-Modi)
-  assets/                 Grafiken (PNG, im Code generiert oder gezeichnet)
-  scenes/, shaders/
-  docs/, research/
-tools/                    Build-, Mess- und Split-Werkzeuge (Python/Bash)
-.github/workflows/ios.yml iOS-Build auf macOS-Runner (unsignierte IPA)
+  scenes/     Szenen (Spieler, Monster, Kisten, UI)
+  scripts/    Gameplay, Balance, UI, Karten-Generierung, Loot
+  assets/     Grafiken, Schrift, Sounds
+screenshots/  Bilder für diese README
 ```
-
-## Galerie
-
-Bilder liegen im Ordner `screenshots/` (mit im Repo).
-
-| Startseite | vier Welten |
-|---|---|
-| ![Startseite](screenshots/01-startseite.png) | ![Welten](screenshots/02-welt-erde.png) |
-
-| Bosse | Kisten |
-|---|---|
-| ![Boss Erde](screenshots/70-boss-earth.png) | ![Kisten](screenshots/15-kisten-final.png) |
-
-| Shop | Glückswalze |
-|---|---|
-| ![Shop](screenshots/130-shop-sym.png) | ![Walze](screenshots/113-slot-final.png) |
-
-| Skins | Einstellungen |
-|---|---|
-| ![Skins](screenshots/06-skins.png) | ![Einstellungen](screenshots/07-einstellungen.png) |
-
-## Was nicht im Repo liegt
-
-Bewusst ausgeschlossen (siehe `.gitignore`), weil es sich reproduzieren lässt:
-
-- Godot-Binary und Export-Templates
-- Builds: `dist/`, `*.apk`, `*.exe`, `*.pck`
-- iOS-Exporte: `ios_v*/`, `*.xcframework/`, `*.xcodeproj/`
-- Messlogs (`logs_*.log`), Screenshots (`screenshots/`), übrige `backup/`-Stände
-- Keystores, `.env`-Dateien
 
 ## Lizenz
 
-Noch keine Lizenz gesetzt. Ohne Lizenz gilt automatisch „alle Rechte vorbehalten" —
-vor einer Veröffentlichung hier eine Lizenz (z. B. MIT) eintragen.
+Code und Grafiken: MIT, siehe [LICENSE](LICENSE).
+Schrift „Pixelify Sans" von Stefie Justprince, SIL Open Font License 1.1.
