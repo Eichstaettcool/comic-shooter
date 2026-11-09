@@ -1110,6 +1110,10 @@ func _run() -> void:
 		await _balshot()
 		get_tree().quit()
 		return
+	if mode == "shots158":
+		await _shots158()
+		get_tree().quit()
+		return
 	if mode == "chesttouch":
 		await _chesttouch()
 		get_tree().quit()
@@ -9546,3 +9550,142 @@ func _chesttouch2() -> void:
 	gm.set("gems", gems_echt)
 	gm.call("_save_profile")
 	print("[TOUCH2][RESTORE] gold=%d gems=%d" % [int(gm.get("gold")), int(gm.get("gems"))])
+
+
+# ---------------------------------------------------------------
+# v1.58: Galerie-Bilder fuer das GitHub-Repo (aktueller Stand).
+# Laeuft im FENSTER (nicht headless), Groesse 1920x1080.
+# Ergebnis: screenshots/01-... bis 12-...
+# ---------------------------------------------------------------
+
+func _shots158() -> void:
+	for _f in range(8):
+		await get_tree().process_frame
+	get_window().size = Vector2i(1920, 1080)
+	var uim = gm.get("ui_manager")
+	# Profil fuer die Bilder praeparieren (nur Anzeige, wird zurueckgesetzt)
+	var gold0: int = int(gm.get("gold"))
+	var gems0: int = int(gm.get("gems"))
+	gm.set("gold", 48000)
+	gm.set("gems", 240)
+	gm.call("debug_unlock_all")
+	await get_tree().create_timer(0.6).timeout
+	print("[SHOTS][START] version=%s" % str(gm.get("APP_VERSION")))
+
+	# 1) Startseite
+	uim.call("show_start_screen")
+	await get_tree().create_timer(0.9).timeout
+	await _shot("01-startseite.png")
+
+	# 2) Kartenauswahl
+	uim.call("_open_maps_page")
+	await get_tree().create_timer(0.8).timeout
+	await _shot("02-karten.png")
+	uim.call("_close_pages")
+	await get_tree().create_timer(0.4).timeout
+
+	# 3) Sammlung (Skins, Huete, Farben)
+	uim.call("show_collection")
+	await get_tree().create_timer(0.9).timeout
+	await _shot("03-sammlung.png")
+	uim.call("_close_pages")
+	await get_tree().create_timer(0.4).timeout
+
+	# 4) Einstellungen
+	uim.call("_open_settings_page", "menu")
+	await get_tree().create_timer(0.8).timeout
+	await _shot("04-einstellungen.png")
+	uim.call("_close_pages")
+	await get_tree().create_timer(0.4).timeout
+
+	# 5) Shop: Kisten
+	uim.call("_open_chest_page")
+	uim.call("refresh_chest_page")
+	await get_tree().create_timer(1.0).timeout
+	await _shot("05-shop-kisten.png")
+
+	# 6) Shop: Gluecksautomaten (runter scrollen)
+	var sc: ScrollContainer = uim.get("shop_scroll")
+	if sc != null:
+		sc.scroll_vertical = 760
+		await get_tree().create_timer(0.7).timeout
+	await _shot("06-gluecksautomaten.png")
+	if sc != null:
+		sc.scroll_vertical = 0
+	uim.call("_close_pages")
+	await get_tree().create_timer(0.5).timeout
+
+	# 7) Gameplay je Welt (Erde, Mars, Dschungel, Elektro)
+	var welten: Array = [["earth", "07-welt-erde"], ["mars", "08-welt-mars"],
+		["jungle", "09-welt-dschungel"], ["volt", "10-welt-elektro"]]
+	for w in welten:
+		gm.call("set_active_map", str(w[0]))
+		gm.call("set_game_mode", 0)
+		gm.call("set_difficulty", 1)
+		gm.call("start_game", false, false)
+		await get_tree().create_timer(0.8).timeout
+		for ov in ["load_screen", "start_screen"]:
+			var o = uim.get(ov)
+			if o != null and is_instance_valid(o):
+				o.visible = false
+				o.set_process(false)
+		# ein paar Sekunden spielen, damit Gegner im Bild sind
+		var p = gm.get("player")
+		# WICHTIG: _perf_lauf_s zaehlt prozessweit weiter. Ohne Basis rechnet
+		# der 3. und 4. Welt-Lauf mit der Zeit des Vorgaengers (Messung: aktiv=0).
+		var basis: float = float(gm.get("_perf_lauf_s"))
+		var t: float = 0.0
+		# Erst schiessen, wenn mindestens 3 Gegner im Bild sind - ein leeres
+		# Feld als "Welt-Bild" ist wertlos (Messung: aktiv=0 bei 8 s).
+		var bereit: bool = false
+		while t < 26.0:
+			await get_tree().process_frame
+			t = float(gm.get("_perf_lauf_s")) - basis
+			var n_akt: int = get_tree().get_nodes_in_group("monsters").size()
+			if p != null and is_instance_valid(p) and bereit:
+				_bot_decide(p, _bot_params("anfaenger"), t)
+			if not bereit and n_akt >= 3 and t > 8.0:
+				bereit = true
+				print("[SHOTS] welt=%s bereit bei t=%.1f s mit %d Gegnern" % [str(w[0]), t, n_akt])
+			if bereit and t > 12.0 and n_akt >= 3:
+				break
+		await _shot(str(w[1]) + ".png")
+		print("[SHOTS] welt=%s gespielt=%.0f s aktiv=%d" % [
+			str(w[0]), t, get_tree().get_nodes_in_group("monsters").size()])
+		gm.call("quit_to_menu")
+		await get_tree().create_timer(0.5).timeout
+
+	# 8) Boss-Kampf (Erde, Boss direkt spawnen)
+	gm.call("set_active_map", "earth")
+	gm.call("set_game_mode", 0)
+	gm.call("start_game", false, false)
+	await get_tree().create_timer(1.0).timeout
+	for ov2 in ["load_screen", "start_screen"]:
+		var o2 = uim.get(ov2)
+		if o2 != null and is_instance_valid(o2):
+			o2.visible = false
+			o2.set_process(false)
+	var sp = gm.get("monster_spawner")
+	if sp != null:
+		sp.call("_boss_start", "biom")
+		await get_tree().create_timer(2.3).timeout
+		sp.call("_spawn_boss_now")
+		var pb = gm.get("player")
+		var basis_b: float = float(gm.get("_perf_lauf_s"))
+		var tb: float = 0.0
+		var ende: float = 5.0
+		while tb < ende:
+			await get_tree().process_frame
+			tb = float(gm.get("_perf_lauf_s")) - basis_b
+			if pb != null and is_instance_valid(pb):
+				_bot_decide(pb, _bot_params("anfaenger"), tb)
+		await _shot("11-boss.png")
+		print("[SHOTS] boss gespawnt=%s" % str(gm.get("current_boss") != null))
+	gm.call("quit_to_menu")
+	await get_tree().create_timer(0.4).timeout
+
+	# Profil zuruecksetzen
+	gm.set("gold", gold0)
+	gm.set("gems", gems0)
+	gm.call("_save_profile")
+	print("[SHOTS][ENDE] profil_zurueck gold=%d gems=%d" % [int(gm.get("gold")), int(gm.get("gems"))])

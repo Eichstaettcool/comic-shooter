@@ -55,9 +55,11 @@ project/research/
 # ---------- Messbelege, Werkzeuge, Golden-Referenzen ----------
 logs_*.log
 *.log
-tools/
+/tools/
 backup/
 repo/
+project/screenshots/
+/*.sh
 compare/
 cache/
 scratch/
@@ -65,10 +67,12 @@ data/
 *.py
 
 # ---------- Screenshots: nur die fertigen Bilder ----------
+screenshots/_alt/
 screenshots/v*/
 screenshots/*raw*
 screenshots/*tmp*
 screenshots/*-touch*
+screenshots/*.html
 
 # ---------- temporaer/abgeleitet ----------
 *.tmp
