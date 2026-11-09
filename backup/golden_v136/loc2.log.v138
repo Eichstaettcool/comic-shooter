@@ -1,0 +1,63 @@
+[CHEST][TEX] geladen: res://assets/chests/chest_standard.png (512x512)
+[CHEST][TEX] geladen: res://assets/chests/open_standard.png (512x512)
+[CHEST][SPIKES] Textur gezeichnet stufe=standard (5 Strahlen, 256 px)
+[CHEST][TEX] geladen: res://assets/chests/chest_silver.png (512x512)
+[CHEST][TEX] geladen: res://assets/chests/open_silver.png (512x512)
+[CHEST][SPIKES] Textur gezeichnet stufe=silver (5 Strahlen, 256 px)
+[CHEST][TEX] geladen: res://assets/chests/chest_premium.png (512x512)
+[CHEST][TEX] geladen: res://assets/chests/open_premium.png (512x512)
+[CHEST][SPIKES] Textur gezeichnet stufe=premium (5 Strahlen, 256 px)
+[SND][BANK] Kiste: 11 Phasen-Keys (lock/open x3/tick/tick_slow/land/win x4/none)
+[CHAR][UI] neues Layout gebaut: 3 Felder + Figur 420 px
+[LOC][UI] Sprachumschalter gebaut (DEUTSCH / ENGLISH)
+[DIAG] start mode=loc2
+[WAHL] feld=hut pikto=kappe idx=N tex=true
+[WAHL] feld=hut pikto=kappe idx=N tex=true
+[LOC][SET] sprache=en
+[LOC][INIT] gespeicherte sprache=en
+[LOC][T] fehlt="P2"
+[LOC][T] fehlt="II"
+[LOC][T] fehlt="COMIC SHOOTER"
+[LOC][T] fehlt="vN  ·  Build 36"
+[LOC][T] fehlt="FARBE: GRUEN   HUT: KAPPE   SKIN: STANDARD"
+[LOC][APPLY] uebersetzt=+49 (gesamt 49)
+[LOC][SET] sprache=en
+[LOC][SAVE] lang=en im Profil
+[LOC][SET] sprache=en (gespeichert) texte=N uebersetzt=N
+[WAHL] feld=hut pikto=kappe idx=N tex=true
+[SHOP][CARD] gem idx=N gold=N gems=N icons=gold,gem
+[SHOP][CARD] gem idx=N gold=N gems=N icons=gold,gem
+[SHOP][BACK] trefferflaeche gebaut: knopf=(40,26,210x68) streifen=(0,0,260x110) head_ignore=true
+[WAHL] feld=hut pikto=kappe idx=N tex=true
+[SHOP][SCROLL] scroll_vertical=N (Start 0) top_pad=N
+[LOC][APPLY] uebersetzt=+31 (gesamt 31)
+[WAHL] feld=hut pikto=kappe idx=N tex=true
+[WAHL] feld=hut pikto=kappe idx=N tex=true
+[WAHL] feld=hut pikto=kappe idx=N tex=true
+[LOC][APPLY] uebersetzt=+36 (gesamt 67)
+[WAHL] feld=hut pikto=kappe idx=N tex=true
+[WAHL] feld=hut pikto=kappe idx=N tex=true
+[LOC][APPLY] uebersetzt=+7 (gesamt 74)
+[WAHL] feld=hut pikto=kappe idx=N tex=true
+[SHOP][SCROLL] scroll_vertical=N (Start 0) top_pad=N
+[LOC][APPLY] uebersetzt=+13 (gesamt 87)
+[SEASON][MODE] planet=mars modus=fixed pool=["spring", "summer"] jahreszeit=spring
+[SEASON][HUD] FRUEHLING
+[SHOP][UI][N][HIDE] Shop geschlossen (modal_open=false)
+[SPAWN] start first_delay=N interval=N
+[WPN][HUD] slot=weapon_pistol stufe=common farbe=(N,N,N) kante=Npx
+[LOC][APPLY] uebersetzt=+2 (gesamt 89)
+[WAHL] feld=hut pikto=kappe idx=N tex=true
+[WPN][STATS-UI] waffe=weapon_pistol stufe=common
+[WPN][STATS-UI] waffe=weapon_shotgun stufe=common
+[WPN][STATS-UI] waffe=weapon_machine stufe=common
+[WPN][STATS-UI] waffe=weapon_laser stufe=common
+[WPN][STATS-UI] waffe=weapon_revolver stufe=common
+[LOC][APPLY] uebersetzt=+25 (gesamt 114)
+[LOC][MISS] COMIC SHOOTER
+[LOC][MISS] FARBE: GRUEN   HUT: KAPPE   SKIN: STANDARD
+[LOC][MISS] II
+[LOC][MISS] P2
+[LOC][MISS] vN  ·  Build 36
+[LOC][MISS] gesamt=N
+[TEST][K] fehlend=N uebersetzt=N

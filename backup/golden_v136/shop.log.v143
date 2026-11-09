@@ -1,0 +1,54 @@
+[CHEST][TEX] geladen: res://assets/chests/chest_standard.png (512x512)
+[CHEST][TEX] geladen: res://assets/chests/open_standard.png (512x512)
+[CHEST][SPIKES] Textur gezeichnet stufe=standard (5 Strahlen, 256 px)
+[CHEST][TEX] geladen: res://assets/chests/chest_silver.png (512x512)
+[CHEST][TEX] geladen: res://assets/chests/open_silver.png (512x512)
+[CHEST][SPIKES] Textur gezeichnet stufe=silver (5 Strahlen, 256 px)
+[CHEST][TEX] geladen: res://assets/chests/chest_premium.png (512x512)
+[CHEST][TEX] geladen: res://assets/chests/open_premium.png (512x512)
+[CHEST][SPIKES] Textur gezeichnet stufe=premium (5 Strahlen, 256 px)
+[SND][BANK] Kiste: 11 Phasen-Keys (lock/open x3/tick/tick_slow/land/win x4/none)
+[CHAR][UI] neues Layout gebaut: 3 Felder + Figur 420 px
+[LOC][UI] Sprachumschalter gebaut (DEUTSCH / ENGLISH)
+[DIAG] start mode=shop
+[WAHL] feld=hut pikto=kappe idx=N tex=true
+[WAHL] feld=hut pikto=kappe idx=N tex=true
+[LOC][SET] sprache=en
+[LOC][INIT] gespeicherte sprache=en
+[LOC][T] fehlt="P2"
+[LOC][T] fehlt="II"
+[LOC][T] fehlt="COMIC SHOOTER"
+[LOC][T] fehlt="vN  ·  Build 36"
+[LOC][T] fehlt="FARBE: GRUEN   HUT: KAPPE   SKIN: STANDARD"
+[LOC][APPLY] uebersetzt=+49 (gesamt 49)
+[SHOP][CARD] gem idx=N gold=N gems=N icons=gold,gem
+[SHOP][CARD] gem idx=N gold=N gems=N icons=gold,gem
+[SHOP][BACK] trefferflaeche gebaut: knopf=(40,26,210x68) streifen=(0,0,260x110) head_ignore=true
+[WAHL] feld=hut pikto=kappe idx=N tex=true
+[SHOP][SCROLL] scroll_vertical=N (Start 0) top_pad=N
+[LOC][APPLY] uebersetzt=+31 (gesamt 80)
+[WAHL] feld=hut pikto=kappe idx=N tex=true
+[SHOP][SCROLL] scroll_vertical=N (Start 0) top_pad=N
+[WAHL] feld=hut pikto=kappe idx=N tex=true
+[SHOP][BACK] treffer=(X,Y) -> geschlossen=true
+[WAHL] feld=hut pikto=kappe idx=N tex=true
+[SHOP][SCROLL] scroll_vertical=N (Start 0) top_pad=N
+[WAHL] feld=hut pikto=kappe idx=N tex=true
+[SHOP][BACK] treffer=(X,Y) -> geschlossen=true
+[WAHL] feld=hut pikto=kappe idx=N tex=true
+[SHOP][SCROLL] scroll_vertical=N (Start 0) top_pad=N
+[WAHL] feld=hut pikto=kappe idx=N tex=true
+[SHOP][BACK] treffer=(X,Y) -> geschlossen=true
+[WAHL] feld=hut pikto=kappe idx=N tex=true
+[SHOP][SCROLL] scroll_vertical=N (Start 0) top_pad=N
+[WAHL] feld=hut pikto=kappe idx=N tex=true
+[SHOP][BACK] treffer=(X,Y) -> geschlossen=true
+[WAHL] feld=hut pikto=kappe idx=N tex=true
+[SHOP][SCROLL] scroll_vertical=N (Start 0) top_pad=N
+[WAHL] feld=hut pikto=kappe idx=N tex=true
+[SHOP][BACK] treffer=(X,Y) -> geschlossen=true
+[SHOP][BACK] Ergebnis oben: 5/5 geschlossen
+[WAHL] feld=hut pikto=kappe idx=N tex=true
+[SHOP][SCROLL] scroll_vertical=N (Start 0) top_pad=N
+[TEST][A4] scroll_vertical=N
+[TEST][A] fertig

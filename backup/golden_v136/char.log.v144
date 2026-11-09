@@ -1,0 +1,28 @@
+[CHEST][TEX] geladen: res://assets/chests/chest_standard.png (512x512)
+[CHEST][TEX] geladen: res://assets/chests/open_standard.png (512x512)
+[CHEST][SPIKES] Textur gezeichnet stufe=standard (5 Strahlen, 256 px)
+[CHEST][TEX] geladen: res://assets/chests/chest_silver.png (512x512)
+[CHEST][TEX] geladen: res://assets/chests/open_silver.png (512x512)
+[CHEST][SPIKES] Textur gezeichnet stufe=silver (5 Strahlen, 256 px)
+[CHEST][TEX] geladen: res://assets/chests/chest_premium.png (512x512)
+[CHEST][TEX] geladen: res://assets/chests/open_premium.png (512x512)
+[CHEST][SPIKES] Textur gezeichnet stufe=premium (5 Strahlen, 256 px)
+[SND][BANK] Kiste: 11 Phasen-Keys (lock/open x3/tick/tick_slow/land/win x4/none)
+[CHAR][UI] neues Layout gebaut: 3 Felder + Figur 420 px
+[LOC][UI] Sprachumschalter gebaut (DEUTSCH / ENGLISH)
+[DIAG] start mode=char
+[WAHL] feld=hut pikto=kappe idx=N tex=true
+[WAHL] feld=hut pikto=kappe idx=N tex=true
+[LOC][SET] sprache=de
+[LOC][INIT] gespeicherte sprache=de
+[WAHL] feld=hut pikto=kappe idx=N tex=true
+[WAHL] feld=hut pikto=kappe idx=N tex=true
+[TEST][D1] felder=N scrollbar=false
+[WAHL] feld=hat frei=N gesamt=N
+[WAHL] feld=hat kacheln=N (frei=N gesamt=N)
+[CHAR][GRID] feld=hat kacheln=N sichtbar=N scroll=false overflow=false
+[WAHL] uebernommen feld=hat idx=N
+[WAHL] feld=hut pikto=kappe idx=N tex=true
+[TEST][D2] hut=N name=N
+[WAHL] feld=hut pikto=kappe idx=N tex=true
+[TEST][D4] sammlung gesamt=N frei=N

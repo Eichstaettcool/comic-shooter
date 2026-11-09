@@ -1,0 +1,96 @@
+[SND][BANK] bereit schritte=N (Haeppchen-Bau)
+[SND][STEP] shoot ms=N rest=N
+[SND][STEP] shotgun ms=N rest=N
+[SND][STEP] machine ms=N rest=N
+[SND][STEP] hit ms=N rest=N
+[SND][STEP] kill ms=N rest=N
+[SND][STEP] pickup ms=N rest=N
+[SND][STEP] hurt ms=N rest=N
+[SND][STEP] chest ms=N rest=N
+[SND][STEP] chest_lock ms=N rest=N
+[SND][STEP] chest_open_standard ms=N rest=N
+[SND][STEP] chest_open_silver ms=N rest=N
+[SND][STEP] chest_open_premium ms=N rest=N
+[SND][STEP] chest_tick ms=N rest=N
+[SND][STEP] chest_land ms=N rest=N
+[SND][STEP] chest_wins_a ms=N rest=N
+[SND][STEP] chest_wins_b ms=N rest=N
+[SND][STEP] slot_spin ms=N rest=N
+[SND][STEP] slot_stop ms=N rest=N
+[SND][STEP] slot_jackpot ms=N rest=N
+[SND][STEP] levelup ms=N rest=N
+[SND][STEP] boss ms=N rest=N
+[SND][STEP] death ms=N rest=N
+[CHEST][TEX] geladen: res://assets/chests/chest_standard.png (512x512)
+[CHEST][TEX] geladen: res://assets/chests/open_standard.png (512x512)
+[CHEST][TEX] geladen: res://assets/chests/chest_silver.png (512x512)
+[CHEST][TEX] geladen: res://assets/chests/open_silver.png (512x512)
+[CHEST][TEX] geladen: res://assets/chests/chest_premium.png (512x512)
+[CHEST][TEX] geladen: res://assets/chests/open_premium.png (512x512)
+[CHEST][SPIKES] Textur gezeichnet stufe=standard (5 Strahlen, 256 px)
+[CHEST][SPIKES] Textur gezeichnet stufe=silver (5 Strahlen, 256 px)
+[CHEST][SPIKES] Textur gezeichnet stufe=premium (5 Strahlen, 256 px)
+[CHAR][UI] neues Layout gebaut: 3 Felder + Figur 420 px
+[LOC][UI] Sprachumschalter gebaut (DEUTSCH / ENGLISH)
+[DIAG] start mode=shop
+[WAHL] feld=hut pikto=kappe idx=N tex=true
+[WAHL] feld=hut pikto=kappe idx=N tex=true
+[LOC][SET] sprache=de
+[LOC][INIT] gespeicherte sprache=de
+[SHOP][STIL] bausteine=N quelle=ui_style panel=slot_banner+slot_button
+[SHOP][KARTE] tier=standard fenster=Nx300 balken=true chancen_zeilen=N knopf=true bild=Nx270
+[SHOP][KARTE] tier=silver fenster=Nx300 balken=true chancen_zeilen=N knopf=true bild=Nx270
+[SHOP][KARTE] tier=premium fenster=Nx300 balken=true chancen_zeilen=N knopf=true bild=Nx270
+[SHOP][UMTAUSCH] idx=N streifen=true knopf=Nx64 icon_im_text=false gold=N gems=N
+[SHOP][UMTAUSCH] idx=N streifen=true knopf=Nx64 icon_im_text=false gold=N gems=N
+[SHOP][UMTAUSCH] panel=true streifen=N trennlinien=N
+[SHOP][WALZE] oeffnet=true stil=banner
+[SHOP][BACK] trefferflaeche gebaut: knopf=(40,24,210x64) streifen=(0,0,260x104) head_ignore=true
+[WAHL] feld=hut pikto=kappe idx=N tex=true
+[SHOP][KARTE] tier=standard bild=Nx270 fenster=Nx304 luft=Npx keep_aspect=true
+[SHOP][KARTE] tier=silver bild=Nx270 fenster=Nx304 luft=Npx keep_aspect=true
+[SHOP][KARTE] tier=premium bild=Nx270 fenster=Nx304 luft=Npx keep_aspect=true
+[SHOP][SCROLL] scroll_vertical=N (Start 0) top_pad=N
+[WAHL] feld=hut pikto=kappe idx=N tex=true
+[SHOP][KARTE] tier=standard bild=Nx270 fenster=Nx304 luft=Npx keep_aspect=true
+[SHOP][KARTE] tier=silver bild=Nx270 fenster=Nx304 luft=Npx keep_aspect=true
+[SHOP][KARTE] tier=premium bild=Nx270 fenster=Nx304 luft=Npx keep_aspect=true
+[SHOP][SCROLL] scroll_vertical=N (Start 0) top_pad=N
+[WAHL] feld=hut pikto=kappe idx=N tex=true
+[SHOP][BACK] treffer=(X,Y) -> geschlossen=true
+[WAHL] feld=hut pikto=kappe idx=N tex=true
+[SHOP][KARTE] tier=standard bild=Nx270 fenster=Nx304 luft=Npx keep_aspect=true
+[SHOP][KARTE] tier=silver bild=Nx270 fenster=Nx304 luft=Npx keep_aspect=true
+[SHOP][KARTE] tier=premium bild=Nx275 fenster=Nx304 luft=Npx keep_aspect=true
+[SHOP][SCROLL] scroll_vertical=N (Start 0) top_pad=N
+[WAHL] feld=hut pikto=kappe idx=N tex=true
+[SHOP][BACK] treffer=(X,Y) -> geschlossen=true
+[WAHL] feld=hut pikto=kappe idx=N tex=true
+[SHOP][KARTE] tier=standard bild=Nx270 fenster=Nx304 luft=Npx keep_aspect=true
+[SHOP][KARTE] tier=silver bild=Nx270 fenster=Nx304 luft=Npx keep_aspect=true
+[SHOP][KARTE] tier=premium bild=Nx276 fenster=Nx304 luft=Npx keep_aspect=true
+[SHOP][SCROLL] scroll_vertical=N (Start 0) top_pad=N
+[WAHL] feld=hut pikto=kappe idx=N tex=true
+[SHOP][BACK] treffer=(X,Y) -> geschlossen=true
+[WAHL] feld=hut pikto=kappe idx=N tex=true
+[SHOP][KARTE] tier=standard bild=Nx270 fenster=Nx304 luft=Npx keep_aspect=true
+[SHOP][KARTE] tier=silver bild=Nx270 fenster=Nx304 luft=Npx keep_aspect=true
+[SHOP][KARTE] tier=premium bild=Nx277 fenster=Nx304 luft=Npx keep_aspect=true
+[SHOP][SCROLL] scroll_vertical=N (Start 0) top_pad=N
+[WAHL] feld=hut pikto=kappe idx=N tex=true
+[SHOP][BACK] treffer=(X,Y) -> geschlossen=true
+[WAHL] feld=hut pikto=kappe idx=N tex=true
+[SHOP][KARTE] tier=standard bild=Nx270 fenster=Nx304 luft=Npx keep_aspect=true
+[SHOP][KARTE] tier=silver bild=Nx270 fenster=Nx304 luft=Npx keep_aspect=true
+[SHOP][KARTE] tier=premium bild=Nx278 fenster=Nx304 luft=Npx keep_aspect=true
+[SHOP][SCROLL] scroll_vertical=N (Start 0) top_pad=N
+[WAHL] feld=hut pikto=kappe idx=N tex=true
+[SHOP][BACK] treffer=(X,Y) -> geschlossen=true
+[SHOP][BACK] Ergebnis oben: 5/5 geschlossen
+[WAHL] feld=hut pikto=kappe idx=N tex=true
+[SHOP][KARTE] tier=standard bild=Nx270 fenster=Nx304 luft=Npx keep_aspect=true
+[SHOP][KARTE] tier=silver bild=Nx270 fenster=Nx304 luft=Npx keep_aspect=true
+[SHOP][KARTE] tier=premium bild=Nx278 fenster=Nx304 luft=Npx keep_aspect=true
+[SHOP][SCROLL] scroll_vertical=N (Start 0) top_pad=N
+[TEST][A4] scroll_vertical=N
+[TEST][A] fertig

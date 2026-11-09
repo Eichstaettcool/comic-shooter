@@ -1,0 +1,70 @@
+
+
+
+# ============================================================
+# v1.42 (P7.4): Steine mit echter Textur - funf Silhouetten,
+# dunkler Umriss, 4-5 Grautoene, Moos an der Unterseite.
+# ============================================================
+
+static func _make_stone_variant(idx: int, size: int) -> ImageTexture:
+	var img = _new_img(size, size)
+	var f := float(size)
+	var bases: Array = [
+		Color(0.52, 0.54, 0.55), Color(0.47, 0.49, 0.52), Color(0.58, 0.57, 0.54),
+		Color(0.44, 0.47, 0.50), Color(0.50, 0.52, 0.51),
+	]
+	var base: Color = bases[idx % bases.size()]
+	var light: Color = base.lightened(0.26)
+	var light2: Color = base.lightened(0.12)
+	var mid: Color = base
+	var dark: Color = base.darkened(0.20)
+	var deep: Color = base.darkened(0.40)
+	var moss: Color = Color(0.30, 0.50, 0.26)
+	var moss_d: Color = Color(0.22, 0.40, 0.20)
+	_ellipse(img, int(f * 0.50), int(f * 0.90), int(f * 0.40), int(f * 0.08), SHADOW, true)
+	match idx % 5:
+		0:
+			# runder Findling
+			_outlined_ellipse(img, int(f * 0.50), int(f * 0.62), int(f * 0.40), int(f * 0.29), mid, 3)
+			_tri(img, Vector2(f * 0.34, f * 0.40), Vector2(f * 0.66, f * 0.40), Vector2(f * 0.50, f * 0.58), light)
+			_tri(img, Vector2(f * 0.24, f * 0.62), Vector2(f * 0.46, f * 0.62), Vector2(f * 0.34, f * 0.84), dark)
+			_rect(img, int(f * 0.60), int(f * 0.52), int(f * 0.14), int(f * 0.05), light2)
+			_tri(img, Vector2(f * 0.62, f * 0.72), Vector2(f * 0.80, f * 0.78), Vector2(f * 0.68, f * 0.88), deep)
+		1:
+			# flacher Brocken
+			_outlined_ellipse(img, int(f * 0.50), int(f * 0.70), int(f * 0.46), int(f * 0.19), mid, 3)
+			_rect(img, int(f * 0.22), int(f * 0.62), int(f * 0.30), int(f * 0.04), light)
+			_rect(img, int(f * 0.56), int(f * 0.66), int(f * 0.22), int(f * 0.04), light2)
+			_tri(img, Vector2(f * 0.30, f * 0.74), Vector2(f * 0.54, f * 0.74), Vector2(f * 0.42, f * 0.88), dark)
+		2:
+			# hoher Fels
+			_tri(img, Vector2(f * 0.50, f * 0.22), Vector2(f * 0.76, f * 0.84), Vector2(f * 0.24, f * 0.84), mid)
+			_ellipse(img, int(f * 0.50), int(f * 0.84), int(f * 0.26), int(f * 0.07), mid, true)
+			_tri(img, Vector2(f * 0.50, f * 0.24), Vector2(f * 0.50, f * 0.82), Vector2(f * 0.26, f * 0.82), light)
+			_tri(img, Vector2(f * 0.50, f * 0.24), Vector2(f * 0.74, f * 0.82), Vector2(f * 0.50, f * 0.82), dark)
+			_thick_line(img, Vector2(f * 0.50, f * 0.30), Vector2(f * 0.50, f * 0.80), 1.0, deep)
+		3:
+			# gespalten (zwei Huegel)
+			_outlined_ellipse(img, int(f * 0.38), int(f * 0.64), int(f * 0.28), int(f * 0.24), mid, 3)
+			_outlined_ellipse(img, int(f * 0.66), int(f * 0.70), int(f * 0.24), int(f * 0.18), base.darkened(0.10), 3)
+			_tri(img, Vector2(f * 0.30, f * 0.46), Vector2(f * 0.46, f * 0.48), Vector2(f * 0.38, f * 0.62), light)
+			_rect(img, int(f * 0.30), int(f * 0.72), int(f * 0.24), int(f * 0.04), dark)
+			_thick_line(img, Vector2(f * 0.54, f * 0.56), Vector2(f * 0.50, f * 0.80), 2.0, deep)
+		4:
+			# eckiger Block
+			_outlined_ellipse(img, int(f * 0.50), int(f * 0.66), int(f * 0.36), int(f * 0.24), mid, 3)
+			_tri(img, Vector2(f * 0.30, f * 0.56), Vector2(f * 0.70, f * 0.56), Vector2(f * 0.58, f * 0.42), light)
+			_rect(img, int(f * 0.26), int(f * 0.66), int(f * 0.48), int(f * 0.05), dark)
+			_rect(img, int(f * 0.42), int(f * 0.46), int(f * 0.16), int(f * 0.22), light2)
+			_tri(img, Vector2(f * 0.62, f * 0.72), Vector2(f * 0.82, f * 0.74), Vector2(f * 0.70, f * 0.86), deep)
+	# Moos/Gras an der Unterseite (bei jedem Varianten-Typ)
+	var mx: int = int(f * 0.22)
+	while mx < int(f * 0.78):
+		var h: int = 2 + int(abs(sin(float(mx) * 0.7)) * 4.0)
+		_rect(img, mx, int(f * 0.86) - h, 2, h, moss if (mx / 2) % 2 == 0 else moss_d)
+		mx += 2
+	_disc(img, int(f * 0.30), int(f * 0.82), int(f * 0.05), moss, true)
+	_disc(img, int(f * 0.68), int(f * 0.84), int(f * 0.04), moss_d, true)
+	print("[ART][STEIN] variante=%d basis=(%.2f,%.2f,%.2f) toene=5 moss=true" % [
+		idx % 5, base.r, base.g, base.b])
+	return ImageTexture.create_from_image(img)

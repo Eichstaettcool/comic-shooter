@@ -1,0 +1,27 @@
+# Zeilenenden: Godot/GDScript kommt mit LF und CRLF klar - Git normalisiert
+# beim Commit, im Arbeitsverzeichnis bleibt die Windows-Konvention.
+* text=auto
+
+# Grafiken und Schriften nie als Text behandeln (sonst Diff-Muell)
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.webp binary
+*.ttf binary
+*.otf binary
+*.wav binary
+*.ogg binary
+*.mp3 binary
+*.fontdata binary
+*.ctex binary
+
+# Godot-Projektdateien als Text (lesbare Diffs)
+*.gd text
+*.tscn text
+*.tres text
+*.godot text
+*.cfg text
+*.import text
+
+# Skripte ausfuehrbar halten
+*.sh text eol=lf

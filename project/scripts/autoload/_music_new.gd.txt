@@ -1,0 +1,329 @@
+# ============================================================
+# MUSIK (v1.42 P4): sechs Tracks + Boss-Track, weicher Fade,
+# Lautstaerke-Regler. Alles prozedural (keine Dateien).
+# ============================================================
+
+# v1.42 (P4.2): 2 Menue- + 4 Spiel-Tracks + Boss, je eigener Tempo/Tonart/
+# Instrumentierung. "lead" = Wellenform der Melodie, "drums" = Anteil Rauschen.
+const TRACK_CFG := {
+	"menu_1": { "bpm": 84.0, "lead": "sine", "drums": 0.0, "arp": 0.055, "bass": 0.13,
+		"chords": [[220.0, 261.6, 329.6], [174.6, 220.0, 261.6], [196.0, 246.9, 293.7], [164.8, 207.7, 246.9]] },
+	"menu_2": { "bpm": 72.0, "lead": "sine", "drums": 0.0, "arp": 0.040, "bass": 0.11,
+		"chords": [[146.8, 174.6, 220.0], [116.5, 146.8, 174.6], [174.6, 220.0, 261.6], [130.8, 164.8, 196.0]] },
+	"game_1": { "bpm": 96.0, "lead": "sine", "drums": 0.05, "arp": 0.055, "bass": 0.13,
+		"chords": [[220.0, 261.6, 329.6], [174.6, 220.0, 261.6], [196.0, 246.9, 293.7], [164.8, 207.7, 246.9]] },
+	"game_2": { "bpm": 104.0, "lead": "square", "drums": 0.10, "arp": 0.050, "bass": 0.14,
+		"chords": [[164.8, 196.0, 246.9], [130.8, 164.8, 196.0], [196.0, 246.9, 293.7], [146.8, 185.0, 220.0]] },
+	"game_3": { "bpm": 112.0, "lead": "saw", "drums": 0.12, "arp": 0.045, "bass": 0.15,
+		"chords": [[220.0, 261.6, 329.6], [196.0, 246.9, 293.7], [174.6, 220.0, 261.6], [164.8, 207.7, 246.9]] },
+	"game_4": { "bpm": 120.0, "lead": "saw", "drums": 0.14, "arp": 0.042, "bass": 0.16,
+		"chords": [[138.6, 164.8, 207.7], [103.8, 130.8, 155.6], [155.6, 196.0, 233.1], [116.5, 146.8, 174.6]] },
+	"game_boss": { "bpm": 140.0, "lead": "square", "drums": 0.20, "arp": 0.060, "bass": 0.19,
+		"chords": [[110.0, 130.8, 164.8], [87.3, 110.0, 130.8], [98.0, 116.5, 146.8], [82.4, 98.0, 123.5]] },
+}
+
+const MUSIC_BARS_PER_TRACK := 16      # 4 Akkorde x 4 Durchlaeufe = 16 Takte
+const MUSIC_BEATS_PER_BAR := 4
+const MUSIC_RATE := 16000             # Musik braucht keine 22 kHz
+const MUSIC_FADE := 0.6
+const MUSIC_DB_GAME := -12.0
+const MUSIC_DB_MENU := -15.0
+const MUSIC_DUCK_DB := -24.0
+
+var music_volume: int = 80            # P4.1: Regler 0..100 %, Standard 80
+var _music_ducked: bool = false
+var _music_fade_tw: Tween = null
+var _music_bars_played: int = 0
+
+
+func _music_db(base: float) -> float:
+	# Regler in dB: 100 % = Basiswert, 0 % = still. 0,18 dB je Prozent
+	# (80 % ergibt bei Spielmusik -15,6 dB).
+	if music_volume <= 0:
+		return -80.0
+	return base - float(100 - music_volume) * 0.18
+
+
+func set_music_volume(pct: int) -> void:
+	music_volume = clampi(pct, 0, 100)
+	_music_ducked = false
+	_apply_music_db()
+	var db: float = _music_db(MUSIC_DB_MENU if _current_music.begins_with("menu") else MUSIC_DB_GAME)
+	print("[SFX][MUSIK] regler=%d track=%s db=%.1f" % [music_volume, _current_music, db])
+
+
+func _apply_music_db() -> void:
+	if _music_player != null:
+		_music_player.volume_db = _music_db(MUSIC_DB_GAME)
+	if _music_menu != null:
+		_music_menu.volume_db = _music_db(MUSIC_DB_MENU)
+
+
+func set_music_ducked(on: bool) -> void:
+	# P5.2: beim Tod auf -24 dB absenken, beim Neustart wieder anheben
+	_music_ducked = on
+	var db: float = MUSIC_DUCK_DB if on else _music_db(MUSIC_DB_GAME)
+	if _music_player != null:
+		_music_player.volume_db = db
+	if _music_menu != null:
+		_music_menu.volume_db = MUSIC_DUCK_DB if on else _music_db(MUSIC_DB_MENU)
+	print("[SFX][TOD] musik=%.1f" % db)
+
+
+func _build_music() -> void:
+	_music_player = AudioStreamPlayer.new()
+	_music_player.volume_db = _music_db(MUSIC_DB_GAME)
+	_music_player.finished.connect(_on_music_finished)
+	add_child(_music_player)
+	_music_menu = AudioStreamPlayer.new()
+	_music_menu.volume_db = _music_db(MUSIC_DB_MENU)
+	_music_menu.finished.connect(_on_music_finished)
+	add_child(_music_menu)
+	# P5.1: eigener Player fuer den Todes-Jingle (wird vom SFX-Pool nie verdraengt)
+	_death_player = AudioStreamPlayer.new()
+	_death_player.volume_db = -4.0
+	add_child(_death_player)
+	var namen: Array = []
+	for k in TRACK_CFG.keys():
+		namen.append(str(k))
+	print("[SFX][MUSIK] tracks=%d namen=%s" % [TRACK_CFG.size(), ",".join(namen)])
+
+
+func _music_stream(name: String) -> AudioStreamWAV:
+	# Lazy erzeugt und gecacht - der Boot muss nicht sieben Tracks rechnen.
+	var key: String = _track_key(name)
+	if _music_streams.has(key):
+		return _music_streams[key]
+	var t0: int = Time.get_ticks_msec()
+	var wav: AudioStreamWAV = _gen_track(key)
+	_music_streams[key] = wav
+	_music_bars_played = MUSIC_BARS_PER_TRACK
+	var sek: float = float(wav.data.size()) / 2.0 / float(wav.mix_rate)
+	print("[SFX][MUSIK] track=%s gebaut ms=%d loop=ok laenge=%.2fs bars=%d" % [
+		key, Time.get_ticks_msec() - t0, sek, MUSIC_BARS_PER_TRACK])
+	return wav
+
+
+func _track_key(name: String) -> String:
+	# Altnamen bleiben gueltig ("game" -> game_1, "menu" -> menu_1)
+	if TRACK_CFG.has(name):
+		return name
+	if name == "game":
+		return "game_1"
+	if name == "menu":
+		return "menu_1"
+	return "game_1"
+
+
+func game_track_for_round(round_no: int) -> String:
+	# P4.3: feste Reihenfolge, kein Zufall - Runde 1 -> game_1 usw.
+	var i: int = ((maxi(1, round_no) - 1) % 4) + 1
+	return "game_%d" % i
+
+
+func play_music_for_round(round_no: int, boss: bool) -> void:
+	# P4.3/P4.4: Rundentrack, beim Boss der Boss-Track, danach zurueck
+	var t: String = "game_boss" if boss else game_track_for_round(round_no)
+	play_music(t)
+	print("[SFX][MUSIK] runde=%d track=%s boss=%s fade=%.1fs" % [
+		round_no, t, str(boss), MUSIC_FADE])
+
+
+func _on_music_finished() -> void:
+	# Der Stream ist als Loop gesetzt - das Signal kommt trotzdem.
+	if _current_music.begins_with("menu") and _music_menu.stream != null:
+		_music_menu.play()
+	elif _current_music != "" and _music_player.stream != null:
+		_music_player.play()
+
+
+func play_music(name: String) -> void:
+	# Wechselt die Musik mit 0,6 s Fade. "menu*" laeuft im Menue, alles
+	# andere im Spiel. Ist der Ton aus, bleibt die Musik aus.
+	var track: String = _track_key(name)
+	if not music_on:
+		_current_music = track
+		return
+	if muted:
+		_current_music = track
+		return
+	if _current_music == track:
+		return
+	var alt: String = _current_music
+	_current_music = track
+	var stream: AudioStreamWAV = _music_stream(track)
+	var ziel: AudioStreamPlayer = _music_menu if track.begins_with("menu") else _music_player
+	var alt_p: AudioStreamPlayer = _music_menu if alt.begins_with("menu") else _music_player
+	if _music_fade_tw != null and _music_fade_tw.is_valid():
+		_music_fade_tw.kill()
+	# alten Track ausblenden
+	if alt != "" and alt_p != null and alt_p.playing:
+		var tw: Tween = create_tween()
+		tw.tween_property(alt_p, "volume_db", -60.0, MUSIC_FADE)
+		tw.tween_callback(alt_p.stop)
+		_music_fade_tw = tw
+	else:
+		if _music_player != null:
+			_music_player.stop()
+		if _music_menu != null:
+			_music_menu.stop()
+	if ziel == null:
+		return
+	ziel.stream = stream
+	ziel.volume_db = -60.0
+	ziel.play()
+	var tw2: Tween = create_tween()
+	tw2.tween_property(ziel, "volume_db", _music_db(MUSIC_DB_MENU if track.begins_with("menu") else MUSIC_DB_GAME), MUSIC_FADE)
+	var aktiv: int = 0
+	if _music_player != null and _music_player.playing:
+		aktiv += 1
+	if _music_menu != null and _music_menu.playing:
+		aktiv += 1
+	print("[SFX][MUSIK] track=%s db=%.1f regler=%d aktiv=%d fade=%.1fs" % [
+		track, _music_db(MUSIC_DB_MENU if track.begins_with("menu") else MUSIC_DB_GAME),
+		music_volume, aktiv, MUSIC_FADE])
+
+
+func stop_music() -> void:
+	_current_music = ""
+	if _music_player != null:
+		_music_player.stop()
+	if _music_menu != null:
+		_music_menu.stop()
+
+
+func set_music_enabled(on: bool) -> void:
+	music_on = on
+	if not on:
+		stop_music()
+	elif _current_music != "":
+		var c: String = _current_music
+		_current_music = ""
+		play_music(c)
+
+
+func _gen_track(name: String) -> AudioStreamWAV:
+	# Ein Track = 16 Takte ueber vier Akkorde. Aufbau: Pad + Bass-Puls +
+	# Arpeggio + Melodie (Grundton-Oktaven der Akkorde) + optionales Rauschen.
+	var cfg: Dictionary = TRACK_CFG.get(name, TRACK_CFG["game_1"])
+	var chords: Array = cfg["chords"]
+	var bpm: float = float(cfg["bpm"])
+	var beat: float = 60.0 / bpm
+	var bars: int = MUSIC_BARS_PER_TRACK
+	var bar_len: float = beat * float(MUSIC_BEATS_PER_BAR)
+	var dauer: float = bar_len * float(bars)
+	var n: int = int(MUSIC_RATE * dauer)
+	var data := PackedByteArray()
+	data.resize(n * 2)
+	var lead: String = str(cfg["lead"])
+	var drums: float = float(cfg["drums"])
+	var arp: float = float(cfg["arp"])
+	var bass: float = float(cfg["bass"])
+	var mel_off: float = 4.0
+	var rng := RandomNumberGenerator.new()
+	rng.seed = 20261104 + name.length() * 977
+	for i in range(n):
+		var t_abs: float = float(i) / float(MUSIC_RATE)
+		var bar: int = int(t_abs / bar_len)
+		var chord: Array = chords[bar % chords.size()]
+		var t_in_bar: float = t_abs - float(bar) * bar_len
+		var beat_i: int = int(t_in_bar / beat)
+		var t_beat: float = (t_in_bar - float(beat_i) * beat) / beat
+		var ph: float = float(i)
+		var s: float = 0.0
+		# Pad
+		for f in chord:
+			s += sin(TAU * float(f) * ph / float(MUSIC_RATE)) * 0.20
+		s /= float(chord.size())
+		# Bass-Puls auf jedem Schlag
+		s += sin(TAU * float(chord[0]) * 0.5 * ph / float(MUSIC_RATE)) * bass * pow(1.0 - t_beat, 2.0)
+		# Arpeggio
+		var arp_f: float = float(chord[(beat_i * 2) % chord.size()]) * 2.0
+		s += sin(TAU * arp_f * ph / float(MUSIC_RATE)) * arp * pow(1.0 - t_beat, 2.4)
+		# Melodie in der zweiten Takthaelfte
+		if beat_i % 4 >= 2:
+			var mf: float = float(chord[(beat_i + 1) % chord.size()]) * mel_off
+			var env: float = pow(1.0 - t_beat, 1.9)
+			# Wellenform je Track - der hoerbare Unterschied
+			match lead:
+				"square":
+					s += (1.0 if sin(TAU * mf * ph / float(MUSIC_RATE)) >= 0.0 else -1.0) * 0.10 * env
+				"saw":
+					var x: float = fmod(mf * ph / float(MUSIC_RATE), 1.0)
+					s += (2.0 * x - 1.0) * 0.11 * env
+				_:
+					s += sin(TAU * mf * ph / float(MUSIC_RATE)) * 0.22 * env
+					s += sin(TAU * mf * 2.0 * ph / float(MUSIC_RATE)) * 0.05 * env
+		# Rauschen (nur Spiel-/Boss-Tracks)
+		if drums > 0.0:
+			s += rng.randf_range(-1.0, 1.0) * drums * pow(1.0 - t_beat, 6.0)
+		# sanftes Tremolo
+		s *= 0.90 + 0.10 * sin(TAU * 3.0 * ph / float(MUSIC_RATE))
+		# weicher Loop-Rand (kein Klick)
+		var pos: float = float(i) / float(n)
+		var loop_env: float = 1.0
+		if pos < 0.01:
+			loop_env = pos / 0.01
+		elif pos > 0.99:
+			loop_env = (1.0 - pos) / 0.01
+		data.encode_s16(i * 2, int(clampf(s * loop_env * 32000.0, -32768.0, 32767.0)))
+	var wav := AudioStreamWAV.new()
+	wav.data = data
+	wav.format = AudioStreamWAV.FORMAT_16_BITS
+	wav.mix_rate = MUSIC_RATE
+	wav.stereo = false
+	wav.loop_mode = AudioStreamWAV.LOOP_FORWARD
+	wav.loop_begin = 0
+	wav.loop_end = n
+	return wav
+
+
+# ---------------- P5: Todessound ----------------
+
+var _death_player: AudioStreamPlayer = null
+var _death_stream: AudioStreamWAV = null
+
+
+func play_death() -> void:
+	# P5.1: eigener 2,0-s-Jingle auf eigenem Player (-4 dB, also 4 dB lauter
+	# als der SFX-Standard -8 dB). P5.2: Musik auf -24 dB absenken.
+	if _death_stream == null:
+		_death_stream = _gen_death_jingle()
+	var gespielt: bool = false
+	if _death_player != null and sfx_on and not muted:
+		_death_player.stream = _death_stream
+		_death_player.volume_db = -4.0
+		_death_player.play()
+		gespielt = true
+	set_music_ducked(true)
+	print("[SFX][TOD] dauer=2.00s db=-4.0 eigener_player=true musik=%.1f sfx_aus=%s gespielt=%s" % [
+		MUSIC_DUCK_DB, str(not sfx_on or muted), str(gespielt)])
+
+
+func _gen_death_jingle() -> AudioStreamWAV:
+	# 2,0 s absteigender Sweep + Ausklang (zwei Stimmen, tief nach tief)
+	var rate: int = SAMPLE_RATE
+	var n: int = int(rate * 2.0)
+	var data := PackedByteArray()
+	data.resize(n * 2)
+	for i in range(n):
+		var t: float = float(i) / float(rate)
+		var p: float = t / 2.0
+		var f0: float = 420.0 * pow(0.16, p)
+		var f1: float = 210.0 * pow(0.16, p)
+		var env: float = pow(1.0 - p, 1.6)
+		var s: float = sin(TAU * f0 * t) * 0.32 * env
+		s += sin(TAU * f1 * t) * 0.26 * env
+		s += sin(TAU * f0 * 0.5 * t) * 0.10 * env
+		# kurzer Nachhall-Ausklang in den letzten 300 ms
+		if p > 0.85:
+			s *= 1.0 - (p - 0.85) / 0.15
+		data.encode_s16(i * 2, int(clampf(s * 30000.0, -32768.0, 32767.0)))
+	var wav := AudioStreamWAV.new()
+	wav.data = data
+	wav.format = AudioStreamWAV.FORMAT_16_BITS
+	wav.mix_rate = rate
+	wav.stereo = false
+	return wav
+
+

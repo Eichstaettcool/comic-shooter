@@ -1,0 +1,26 @@
+[application]
+config_name = "ComicShooter"
+run/main_scene = "res://scenes/Main.tscn"
+config/icon = "res://icon.png"
+; v1.43 (S1.4): Android-Zurueck beendet die App NICHT mehr - das UI faengt
+; die Taste ab (Seite schliessen / Pause). Vorher schloss Zurueck das Spiel.
+config/quit_on_go_back = false
+
+[autoload]
+TextureManager="*res://scripts/autoload/texture_manager.gd"
+SoundManager="*res://scripts/autoload/sound_manager.gd"
+NetManager="*res://scripts/net/net_manager.gd"
+Loc="*res://scripts/autoload/loc.gd"
+
+[display]
+
+window/size/viewport_width = 1920
+window/size/viewport_height = 1080
+window/stretch/mode = "canvas_items"
+window/stretch/aspect = "expand"
+window/handheld/orientation = 4
+
+[rendering]
+driver = 0
+textures/vram_compression/import_etc2_astc = true
+

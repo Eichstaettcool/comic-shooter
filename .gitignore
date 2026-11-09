@@ -1,0 +1,86 @@
+# ============================================================
+# comic-shooter — .gitignore (v1.58, 9.11.2026)
+# Ziel: NUR Quellcode + Assets + Doku im Repo. Alles Gebaute,
+# Gemessene und Heruntergeladene bleibt lokal.
+# ============================================================
+
+# ---------- Engine und Werkzeuge (nicht ins Repo) ----------
+/Godot.exe
+/Godot_v*-console.exe
+/Godot.zip
+/godot*.zip
+*.pck
+
+# ---------- Godot-Importcache ----------
+project/.godot/
+**/.godot/
+
+# ---------- Builds (APK/EXE/PCK) ----------
+dist/
+# alte Snapshot-ZIPs im Wurzelverzeichnis (iOS-Xcode-Bundle, Repo-Kopie)
+/*.zip
+/*.tar.gz
+build/
+*.apk
+*.aab
+*.idsig
+*.exe
+*.dmg
+*.app/
+project/ComicShooter*.apk
+project/ComicShooter*.exe
+
+# ---------- iOS/macOS-Exporte (hunderte MB, nur lokal) ----------
+ios_build*/
+ios_v*/
+ios_*_package/
+*.xcframework/
+*.xcodeproj/
+*.xcworkspace/
+*.ipa
+*.mobileprovision
+MoltenVK.xcframework/
+
+# ---------- Belege, Messlogs, Screenshots ----------
+logs_*.log
+*.log
+screenshots/
+backup/*
+# Golden-Referenzen GEHOEREN ins Repo: ohne sie laeuft tools/golden_check.sh nicht
+!backup/golden_v136/
+compare/
+cache/
+scratch/
+data/
+
+# ---------- temporaere/abgeleitete Dinge ----------
+*.tmp
+*.bak
+*.bak[0-9]*
+STATUS.md.bak*
+STATUS.md.v*
+STATUS.md.neu
+*.orig
+*.rej
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ---------- Editor/IDE ----------
+.vscode/
+.idea/
+*.swp
+*~
+
+# ---------- Python ----------
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# ---------- Lokale Umgebung (nie hochladen) ----------
+.env
+.env.*
+*.keystore
+*.jks
+debug.keystore

@@ -1,0 +1,65 @@
+[SND][BANK] bereit schritte=N (Haeppchen-Bau)
+[SND][STEP] shoot ms=N rest=N
+[SND][STEP] shotgun ms=N rest=N
+[SND][STEP] machine ms=N rest=N
+[SND][STEP] hit ms=N rest=N
+[SND][STEP] kill ms=N rest=N
+[SND][STEP] pickup ms=N rest=N
+[SND][STEP] hurt ms=N rest=N
+[SND][STEP] chest ms=N rest=N
+[SND][STEP] chest_lock ms=N rest=N
+[SND][STEP] chest_open_standard ms=N rest=N
+[SND][STEP] chest_open_silver ms=N rest=N
+[SND][STEP] chest_open_premium ms=N rest=N
+[SND][STEP] chest_tick ms=N rest=N
+[SND][STEP] chest_land ms=N rest=N
+[SND][STEP] chest_wins_a ms=N rest=N
+[SND][STEP] chest_wins_b ms=N rest=N
+[SND][STEP] slot_spin ms=N rest=N
+[SND][STEP] slot_stop ms=N rest=N
+[SND][STEP] slot_jackpot ms=N rest=N
+[SND][STEP] levelup ms=N rest=N
+[SND][STEP] boss ms=N rest=N
+[SND][STEP] death ms=N rest=N
+[CHEST][TEX] geladen: res://assets/chests/chest_standard.png (512x512)
+[CHEST][TEX] geladen: res://assets/chests/open_standard.png (512x512)
+[CHEST][TEX] geladen: res://assets/chests/chest_silver.png (512x512)
+[CHEST][TEX] geladen: res://assets/chests/open_silver.png (512x512)
+[CHEST][TEX] geladen: res://assets/chests/chest_premium.png (512x512)
+[CHEST][TEX] geladen: res://assets/chests/open_premium.png (512x512)
+[CHEST][SPIKES] Textur gezeichnet stufe=standard (5 Strahlen, 256 px)
+[CHEST][SPIKES] Textur gezeichnet stufe=silver (5 Strahlen, 256 px)
+[CHEST][SPIKES] Textur gezeichnet stufe=premium (5 Strahlen, 256 px)
+[CHAR][UI] neues Layout gebaut: 3 Felder + Figur 420 px
+[LOC][UI] Sprachumschalter gebaut (DEUTSCH / ENGLISH)
+[DIAG] start mode=upg
+[WAHL] feld=hut pikto=kappe idx=N tex=true
+[WAHL] feld=hut pikto=kappe idx=N tex=true
+[LOC][SET] sprache=de
+[LOC][INIT] gespeicherte sprache=de
+[SEASON][MODE] planet=mars modus=fixed pool=["spring", "summer"] jahreszeit=spring
+[SEASON][HUD] FRUEHLING
+[SHOP][UI][N][HIDE] Shop geschlossen (modal_open=false)
+[SPAWN] start first_delay=N interval=N
+[WPN][HUD] slot=weapon_pistol stufe=R farbe=(N,N,N) kante=Npx
+[TEST][H] Run gestartet, Monster=N
+[UPG][TOAST][UI] gebaut verfuegbar=N pos=(X,Y) groesse=Nx96
+[UPG][TOAST] verfuegbar=N paused=false
+[UPG][TOAST][UI] Zaehler=N (kein zweiter Toast)
+[UPG][TOAST] verfuegbar=N paused=false
+[TEST][H] paused=false toast=true
+[TEST][H] Welt laeuft: 1/1 Monster in 0,5 s bewegt, paused=false vorher=N nachher=N
+[UPG][WINDOW] offen idx=N von 2
+[TEST][H] nach Tipp: paused=true toast=false
+[UPG][TOAST][UI] gebaut verfuegbar=N pos=(X,Y) groesse=Nx96
+[UPG][TOAST] verfuegbar=N paused=false
+[UPG][DONE] rest=N
+[TEST][H] nach Wahl 1: rest=N toast=true paused=false
+[UPG][WINDOW] offen idx=N von 1
+[UPG][DONE] rest=N
+[TEST][H] Ende: rest=N toast=false paused=false
+[UPG][TOAST][UI] gebaut verfuegbar=N pos=(X,Y) groesse=Nx96
+[UPG][TOAST] verfuegbar=N paused=false
+[TEST][H3] Toast vor Tod=true
+[UPG][TOAST] entfernt (run vorbei)
+[TEST][H3] Toast nach Tod=false (muss false sein)

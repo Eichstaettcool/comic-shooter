@@ -1,0 +1,62 @@
+[SND][BANK] bereit schritte=N (Haeppchen-Bau)
+[SND][STEP] shoot ms=N rest=N
+[SND][STEP] shotgun ms=N rest=N
+[SND][STEP] machine ms=N rest=N
+[SND][STEP] hit ms=N rest=N
+[SND][STEP] kill ms=N rest=N
+[SND][STEP] pickup ms=N rest=N
+[SND][STEP] hurt ms=N rest=N
+[SND][STEP] chest ms=N rest=N
+[SND][STEP] chest_lock ms=N rest=N
+[SND][STEP] chest_open_standard ms=N rest=N
+[SND][STEP] chest_open_silver ms=N rest=N
+[SND][STEP] chest_open_premium ms=N rest=N
+[SND][STEP] chest_tick ms=N rest=N
+[SND][STEP] chest_land ms=N rest=N
+[SND][STEP] chest_wins_a ms=N rest=N
+[SND][STEP] chest_wins_b ms=N rest=N
+[SND][STEP] slot_spin ms=N rest=N
+[SND][STEP] slot_stop ms=N rest=N
+[SND][STEP] slot_jackpot ms=N rest=N
+[SND][STEP] levelup ms=N rest=N
+[SND][STEP] boss ms=N rest=N
+[SND][STEP] death ms=N rest=N
+[CHEST][TEX] geladen: res://assets/chests/chest_standard.png (512x512)
+[CHEST][TEX] geladen: res://assets/chests/open_standard.png (512x512)
+[CHEST][TEX] geladen: res://assets/chests/chest_silver.png (512x512)
+[CHEST][TEX] geladen: res://assets/chests/open_silver.png (512x512)
+[CHEST][TEX] geladen: res://assets/chests/chest_premium.png (512x512)
+[CHEST][TEX] geladen: res://assets/chests/open_premium.png (512x512)
+[CHEST][SPIKES] Textur gezeichnet stufe=standard (5 Strahlen, 256 px)
+[CHEST][SPIKES] Textur gezeichnet stufe=silver (5 Strahlen, 256 px)
+[CHEST][SPIKES] Textur gezeichnet stufe=premium (5 Strahlen, 256 px)
+[CHAR][UI] neues Layout gebaut: 3 Felder + Figur 420 px
+[LOC][UI] Sprachumschalter gebaut (DEUTSCH / ENGLISH)
+[DIAG] start mode=seasons
+[WAHL] feld=hut pikto=kappe idx=N tex=true
+[WAHL] feld=hut pikto=kappe idx=N tex=true
+[LOC][SET] sprache=de
+[LOC][INIT] gespeicherte sprache=de
+[WAHL] feld=hut pikto=kappe idx=N tex=true
+[SEASON][KAUF] planet=mars saison=summer preis=N gold_vorher=N nachher=N gespeichert=true
+[TEST][I1] gold nach Kauf=N
+[SEASON][KAUF] FEHLER: zu wenig Gold (2000 noetig, 100 vorhanden)
+[TEST][I1] gold nach Fehlversuch=N (muss 100 sein)
+[SEASON][MODE] ABGELEHNT planet=mars modus=cycle pool=["spring"] (zu klein)
+[SEASON][MODE] planet=mars modus=cycle gespeichert
+[SEASON][MODE] planet=mars modus=cycle pool=["spring", "summer"] jahreszeit=spring
+[SEASON][HUD] FRUEHLING   ·   als Nächstes: SOMMER
+[SHOP][UI][N][HIDE] Shop geschlossen (modal_open=false)
+[SPAWN] start first_delay=N interval=N
+[WPN][HUD] slot=weapon_pistol stufe=R farbe=(N,N,N) kante=Npx
+[SEASON][WECHSEL] planet=mars von=spring nach=summer pool=["spring", "summer"]
+[SEASON][HUD] SOMMER   ·   als Nächstes: FRUEHLING
+[SEASON][WECHSEL] planet=mars von=summer nach=spring pool=["spring", "summer"]
+[SEASON][HUD] FRUEHLING   ·   als Nächstes: SOMMER
+[SEASON][WECHSEL] planet=mars von=spring nach=summer pool=["spring", "summer"]
+[SEASON][HUD] SOMMER   ·   als Nächstes: FRUEHLING
+[TEST][I2] jahreszeit=summer pool=["spring", "summer"]
+[SEASON][MODE] planet=mars modus=fixed gespeichert
+[SEASON][FEST] planet=mars jahreszeit=spring (fest, kein Wechsel)
+[SEASON][HUD] FRUEHLING
+[TEST][I2] FEST jahreszeit=spring (muss spring sein)
