@@ -1,0 +1,72 @@
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+Vulkan 1.3.235 - Forward+ - Using Device #0: Intel - Intel(R) Iris(R) Xe Graphics
+
+[CHEST][TEX] geladen: res://assets/chests/chest_standard.png (512x512)
+[CHEST][TEX] geladen: res://assets/chests/open_standard.png (512x512)
+[CHEST][SPIKES] Textur gezeichnet stufe=standard (5 Strahlen, 256 px)
+[CHEST][TEX] geladen: res://assets/chests/chest_silver.png (512x512)
+[CHEST][TEX] geladen: res://assets/chests/open_silver.png (512x512)
+[CHEST][SPIKES] Textur gezeichnet stufe=silver (5 Strahlen, 256 px)
+[CHEST][TEX] geladen: res://assets/chests/chest_premium.png (512x512)
+[CHEST][TEX] geladen: res://assets/chests/open_premium.png (512x512)
+[CHEST][SPIKES] Textur gezeichnet stufe=premium (5 Strahlen, 256 px)
+[JUNGLE][TEX] jvine neu gezeichnet (112px, 5 Ranken)
+[JUNGLE][TEX] jmushroom neu gezeichnet (56px)
+[JUNGLE][TEX] jmushroom neu gezeichnet (44px)
+[JUNGLE][TEX] jreed neu gezeichnet (80px, 6 Halme)
+[JUNGLE][TEX] jrock neu gezeichnet (64px, facettiert)
+[JUNGLE][TEX] jflower neu gezeichnet (48px, (0.98, 0.96, 0.92, 1.0))
+[JUNGLE][TEX] jflower neu gezeichnet (48px, (0.98, 0.55, 0.7, 1.0))
+[JUNGLE][TEX] jflower neu gezeichnet (48px, (0.99, 0.88, 0.35, 1.0))
+[JUNGLE][TEX] jflower neu gezeichnet (48px, (0.62, 0.72, 0.98, 1.0))
+[JUNGLE][TEX] jmushroom neu gezeichnet (52px)
+[JUNGLE][TEX] bamboo neu gezeichnet (44x80, 4 Halme)
+[JUNGLE][TEX] jleafpile neu gezeichnet (96px, 9 runde Blaetter)
+[JUNGLE][TEX] fern neu gezeichnet (64px, 6 Wedel)
+[SND][BANK] Kiste: 11 Phasen-Keys (lock/open x3/tick/tick_slow/land/win x4/none)
+[BUILD] Versionsanzeige v1.36 aktiv (Build 36)
+[CHAR][UI] neues Layout gebaut: 3 Felder + Figur 420 px
+[LOC][UI] Sprachumschalter gebaut (DEUTSCH / ENGLISH)
+[HAT][HELM] Wikinger-Helm angehoben (y=13 -> 9), Hoerner frei
+[HAT][STERN] Stern schwebend gezeichnet (kein Band)
+[HAT][KROENCHEN] klein + schraeg gezeichnet
+[LAN][BOOT] process_mode gesetzt (GM=ALWAYS, Welt=PAUSABLE)
+[DIAG] start mode=char
+[HAT][TEX] Hut 1 gezeichnet (128x128)
+[WAHL] feld=hut pikto=kappe idx=1 tex=true
+[WAHL] feld=hut pikto=kappe idx=1 tex=true
+[LOC][SET] sprache=en
+[LOC][INIT] gespeicherte sprache=en
+[WAHL] feld=hut pikto=kappe idx=1 tex=true
+[WAHL] feld=hut pikto=kappe idx=1 tex=true
+[LOC][T] fehlt="P2"
+[LOC][T] fehlt="II"
+[LOC][T] fehlt="COMIC SHOOTER"
+[LOC][T] fehlt="v1.36  ·  Build 36"
+[LOC][T] fehlt="COLOR: GREEN   HAT: CAP   SKIN: STANDARD"
+[LOC][T] fehlt="2/10 colors   ·   2/29 hats   ·   1/25 skins"
+[LOC][APPLY] uebersetzt=+48 (gesamt 48)
+[SHOT] C:/Users/vince/Games/comic-shooter/screenshots/v136/232-char-neu.png (1920x1080)
+[TEST][D1] felder=3 scrollbar=false
+[WAHL] feld=hat frei=2 gesamt=29
+[HAT][TEX] Hut 0 gezeichnet (128x128)
+[WAHL] feld=hat kacheln=2 (frei=2 gesamt=29)
+[LOC][T] fehlt="2 / 29 freigeschaltet"
+[LOC][APPLY] uebersetzt=+6 (gesamt 54)
+[SHOT] C:/Users/vince/Games/comic-shooter/screenshots/v136/232a-char-hut-wahl.png (1920x1080)
+[WAHL] uebernommen feld=hat idx=1
+[WAHL] feld=hut pikto=kappe idx=1 tex=true
+[TEST][D2] hut=1 name=1
+[SHOT] C:/Users/vince/Games/comic-shooter/screenshots/v136/232b-char-nach-wahl.png (1920x1080)
+[WAHL] feld=hut pikto=kappe idx=1 tex=true
+[HAT][ANCHOR] Hut 1 verschoben um +5 px (Kopf bei y=26)
+[HAT][ANCHOR] Hut 1 verschoben um +1 px (Kopf bei y=22)
+[HAT][ANCHOR] Hut 1 verschoben um +3 px (Kopf bei y=24)
+[HAT][ANCHOR] Hut 1 verschoben um +1 px (Kopf bei y=22)
+[HAT][ANCHOR] Hut 1 verschoben um -1 px (Kopf bei y=20)
+[HAT][HELM] Wikinger-Helm angehoben (y=13 -> 9), Hoerner frei
+[HAT][STERN] Stern schwebend gezeichnet (kein Band)
+[HAT][KROENCHEN] klein + schraeg gezeichnet
+[LOC][APPLY] uebersetzt=+7 (gesamt 61)
+[SHOT] C:/Users/vince/Games/comic-shooter/screenshots/v136/232c-sammlung.png (1920x1080)
+[TEST][D4] sammlung gesamt=2 frei=2

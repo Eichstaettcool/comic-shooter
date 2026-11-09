@@ -47,7 +47,9 @@ logs_*.log
 screenshots/
 backup/*
 # Golden-Referenzen GEHOEREN ins Repo: ohne sie laeuft tools/golden_check.sh nicht
+# (Verzeichnis UND Inhalt freigeben - sonst greift weiter *.log)
 !backup/golden_v136/
+!backup/golden_v136/**
 compare/
 cache/
 scratch/

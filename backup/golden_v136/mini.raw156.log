@@ -1,0 +1,303 @@
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+Vulkan 1.3.235 - Forward+ - Using Device #0: Intel - Intel(R) Iris(R) Xe Graphics
+
+[CHEST][TEX] quelle=generiert tier=standard,silver,premium px=256
+[TEX][BOOT] bereit steps=47 (Haeppchen, Arbeitet der Boot-Loader ab)
+[SND][BANK] bereit schritte=22 (Haeppchen-Bau)
+[SFX][MUSIK] bereit tracks=7 schritte=35 (Haeppchen-Bau)
+[UI][BOOT] bereit (Aufbau folgt nach dem Chunk-Boot)
+[LAN][BOOT] process_mode gesetzt (GM=ALWAYS, Welt=PAUSABLE)
+[BOOT][0] _ready start ms=3681 tex_keys=0
+[TEX][STEP] tiles ms=0 keys=5 rest=46
+[TEX][STEP] player ms=25 keys=7 rest=45
+[TEX][STEP] chest ms=2 keys=8 rest=44
+[TEX][STEP] rarity ms=3 keys=11 rest=43
+[TEX][STEP] herzen ms=3 keys=15 rest=42
+[TEX][STEP] waffen_icons ms=2 keys=18 rest=41
+[TEX][STEP] waffen_icons2 ms=2 keys=20 rest=40
+[TEX][STEP] touch_stick ms=67 keys=21 rest=39
+[TEX][STEP] touch_knob ms=11 keys=22 rest=38
+[BTN][PIXEL] knopf=shoot px=256 einsam=0 anteil=0.00%
+[TEX][STEP] touch_shoot ms=2822 keys=23 rest=37
+[TEX][LOCK] px=96 kette=3 schloss=1
+[TEX][WHEEL] icon=gold px=96
+[TEX][WHEEL] icon=gems px=96
+[TEX][WHEEL] icon=miss px=96
+[TEX][NEU] icon_revive gezeichnet (64x64)
+[TEX][STEP] icons_ui ms=15 keys=32 rest=36
+[TEX][STEP] nav_icons ms=1 keys=38 rest=35
+[TEX][CHAL] kind=revolver px=128 kontur=3
+[TEX][CHAL] kind=shield px=128 kontur=3
+[TEX][CHAL] kind=crown px=128 kontur=3
+[TEX][CHAL] kind=clock px=128 kontur=3
+[TEX][CHAL] kind=heart px=128 kontur=3
+[TEX][CHAL] kind=chest px=128 kontur=3
+[TEX][STEP] chal_icons ms=60 keys=44 rest=34
+[TEX][STEP] kisten_icons ms=1 keys=49 rest=33
+[TEX][STEP] map_icons ms=1 keys=56 rest=32
+[TEX][CHEST] tier=standard offen=false px=256 kontur=3 quelle=generiert spitzen=0
+[TEX][CHEST] tier=standard offen=true px=256 kontur=3 quelle=generiert spitzen=0
+[TEX][STEP] chest_art_standard ms=8 keys=58 rest=31
+[TEX][CHEST] tier=silver offen=false px=256 kontur=3 quelle=generiert spitzen=0
+[TEX][CHEST] tier=silver offen=true px=256 kontur=3 quelle=generiert spitzen=0
+[TEX][STEP] chest_art_silver ms=9 keys=60 rest=30
+[TEX][CHEST] tier=premium offen=false px=256 kontur=3 quelle=generiert spitzen=0
+[TEX][CHEST] tier=premium offen=true px=256 kontur=3 quelle=generiert spitzen=0
+[TEX][STEP] chest_art_premium ms=9 keys=62 rest=29
+[CHEST][SPIKES] Textur gezeichnet stufe=standard (5 Strahlen, 256 px)
+[TEX][STEP] chest_spikes_a ms=114 keys=63 rest=28
+[CHEST][SPIKES] Textur gezeichnet stufe=silver (5 Strahlen, 256 px)
+[TEX][STEP] chest_spikes_b ms=104 keys=64 rest=27
+[CHEST][SPIKES] Textur gezeichnet stufe=premium (5 Strahlen, 256 px)
+[TEX][STEP] chest_spikes_c ms=104 keys=65 rest=26
+[TEX][STEP] slot_icon ms=62 keys=66 rest=25
+[TEX][STEP] slot_gem1 ms=27 keys=67 rest=24
+[TEX][STEP] slot_gem2 ms=59 keys=68 rest=23
+[TEX][STEP] slot_gem3 ms=90 keys=69 rest=22
+[TEX][STEP] slot_cherry ms=41 keys=70 rest=21
+[TEX][STEP] slot_bell ms=64 keys=71 rest=20
+[TEX][STEP] slot_bar ms=4 keys=72 rest=19
+[TEX][STEP] slot_gold1 ms=15 keys=73 rest=18
+[TEX][STEP] slot_gold2 ms=31 keys=74 rest=17
+[TEX][STEP] slot_gold3 ms=57 keys=75 rest=16
+[TEX][STEP] slot_skull ms=38 keys=76 rest=15
+[TEX][STEP] rigs ms=60 keys=80 rest=14
+[CHEST][KANTE] kiste=run_epic spitzen=0 grund=zacken_entfernt_v148
+[TEX][STEP] run_kisten ms=10 keys=83 rest=13
+[TEX][STEP] glow_common ms=59 keys=84 rest=12
+[TEX][STEP] glow_rare ms=60 keys=85 rest=11
+[TEX][STEP] glow_epic ms=57 keys=86 rest=10
+[TEX][STEP] shield ms=1 keys=88 rest=9
+[TEX][STEP] monster_a ms=9 keys=91 rest=8
+[TEX][STEP] monster_b ms=9 keys=94 rest=7
+[TEX][STEP] monster_c ms=9 keys=97 rest=6
+[TEX][STEP] monster_d ms=8 keys=100 rest=5
+[TEX][STEP] monster_e ms=3 keys=102 rest=4
+[TEX][STEP] png_items_a ms=73 keys=102 rest=3
+[TEX][STEP] png_items_b ms=39 keys=104 rest=2
+[TEX][STEP] png_items_c ms=58 keys=107 rest=1
+[TEX][STEP] png_items_d ms=54 keys=110 rest=0
+[TEX][BOOT] fertig keys=110
+[BOOT][UI] flaeche=geteilt boot=true balken=(720,28) quelle=ui_manager._build_load_screen
+[BUILD] icon=icon146c_6.png quelle=res://icon.png px=1024 version=1.56 build=56
+[SND][PEGEL] key=shoot rms=-15.0db peak=-8.8db ziel=-15.0db skalierung=0.73 geclippt=0
+[SND][STEP] shoot ms=2 rest=21
+[SND][PEGEL] key=shotgun rms=-15.0db peak=-3.4db ziel=-15.0db skalierung=1.14 geclippt=0
+[SND][STEP] shotgun ms=2 rest=20
+[BOOT][UI] panel_modus=endlos icon=an leer=false balken=(720,28) in_flaeche=true mitte_text=960 mitte_kasten=960 abweichung=0.0px desc_abweichung=0.0px
+[SND][PEGEL] key=machine rms=-15.0db peak=-8.8db ziel=-15.0db skalierung=1.04 geclippt=0
+[SND][STEP] machine ms=2 rest=19
+[SND][PEGEL] key=hit rms=-14.0db peak=-3.2db ziel=-14.0db skalierung=1.42 geclippt=0
+[SND][STEP] hit ms=2 rest=18
+[SND][PEGEL] key=kill rms=-12.0db peak=-5.8db ziel=-12.0db skalierung=1.03 geclippt=0
+[SND][STEP] kill ms=3 rest=17
+[SND][PEGEL] key=pickup rms=-16.0db peak=-6.8db ziel=-16.0db skalierung=0.77 geclippt=0
+[SND][STEP] pickup ms=3 rest=16
+[SND][PEGEL] key=hurt rms=-11.8db peak=-1.0db ziel=-11.0db skalierung=1.30 geclippt=0
+[SND][STEP] hurt ms=6 rest=15
+[SND][PEGEL] key=chest rms=-15.0db peak=-5.8db ziel=-15.0db skalierung=1.03 geclippt=0
+[SND][STEP] chest ms=6 rest=14
+[SND][PEGEL] key=chest_lock rms=-15.0db peak=-2.3db ziel=-15.0db skalierung=3.45 geclippt=0
+[SND][STEP] chest_lock ms=9 rest=13
+[SND][PEGEL] key=chest_open_standard rms=-14.3db peak=-1.0db ziel=-13.0db skalierung=1.38 geclippt=0
+[SND][STEP] chest_open_standard ms=9 rest=12
+[SND][PEGEL] key=chest_open_silver rms=-14.8db peak=-1.0db ziel=-12.0db skalierung=1.32 geclippt=0
+[SND][STEP] chest_open_silver ms=9 rest=11
+[SND][PEGEL] key=chest_open_premium rms=-16.1db peak=-1.0db ziel=-11.0db skalierung=1.08 geclippt=0
+[SND][STEP] chest_open_premium ms=10 rest=10
+[SND][PEGEL] key=chest_tick rms=-19.4db peak=-1.0db ziel=-15.0db skalierung=5.85 geclippt=0
+[SND][PEGEL] key=chest_tick_slow rms=-19.1db peak=-1.0db ziel=-15.0db skalierung=5.21 geclippt=0
+[SND][STEP] chest_tick ms=4 rest=9
+[SND][PEGEL] key=chest_land rms=-14.5db peak=-1.0db ziel=-14.0db skalierung=1.27 geclippt=0
+[SND][STEP] chest_land ms=5 rest=8
+[SND][PEGEL] key=chest_win_common rms=-14.0db peak=-3.2db ziel=-14.0db skalierung=1.40 geclippt=0
+[SND][PEGEL] key=chest_win_rare rms=-13.0db peak=-2.2db ziel=-13.0db skalierung=1.47 geclippt=0
+[SND][STEP] chest_wins_a ms=12 rest=7
+[SND][PEGEL] key=chest_win_epic rms=-11.9db peak=-1.0db ziel=-9.0db skalierung=1.50 geclippt=0
+[SND][PEGEL] key=chest_win_legendary rms=-13.9db peak=-1.0db ziel=-9.0db skalierung=2.06 geclippt=0
+[SND][PEGEL] key=chest_none rms=-15.0db peak=-4.1db ziel=-15.0db skalierung=1.54 geclippt=0
+[SND][STEP] chest_wins_b ms=29 rest=6
+[SND][PEGEL] key=slot_spin rms=-15.9db peak=-1.0db ziel=-15.0db skalierung=2.71 geclippt=0
+[SND][STEP] slot_spin ms=7 rest=5
+[SND][PEGEL] key=slot_stop rms=-14.1db peak=-1.0db ziel=-14.0db skalierung=0.99 geclippt=0
+[SND][PEGEL] key=slot_win rms=-11.9db peak=-1.0db ziel=-9.0db skalierung=1.37 geclippt=0
+[SND][STEP] slot_stop ms=11 rest=4
+[SND][PEGEL] key=slot_jackpot rms=-11.9db peak=-1.0db ziel=-8.0db skalierung=1.21 geclippt=0
+[SND][STEP] slot_jackpot ms=13 rest=3
+[SND][PEGEL] key=levelup rms=-14.9db peak=-1.0db ziel=-9.0db skalierung=1.62 geclippt=0
+[SND][STEP] levelup ms=15 rest=2
+[SND][PEGEL] key=boss rms=-11.9db peak=-1.0db ziel=-8.0db skalierung=1.00 geclippt=0
+[SND][STEP] boss ms=15 rest=1
+[SND][PEGEL] key=death rms=-8.0db peak=-1.8db ziel=-8.0db skalierung=1.17 geclippt=0
+[SND][STEP] death ms=21 rest=0
+[SFX][MUSIK][STEP] menu_1 takt=0 ms=31 rest=34
+[SFX][MUSIK][STEP] menu_1 takt=1 ms=33 rest=33
+[SFX][MUSIK][STEP] menu_1 takt=2 ms=35 rest=32
+[SFX][MUSIK][STEP] menu_1 takt=3 ms=34 rest=31
+[SND][MUSIKPEGEL] track=menu_1 rms=-19.9db samples=126000 regler100_db=-2.6 ergebnis_rms_100=-22.5db
+[SFX][MUSIK] track=menu_1 loop=ok laenge=11.43s bars=4 bpm=84 lead=sine
+[MUSIK][CFG] track=menu_1 bpm=84 lead=sine drums=0.00 arp=0.055 bass=0.130 bass_hz=110.0 tritonus=false heartbeat=0.00 laenge=11.43s
+[SFX][MUSIK][STEP] menu_1 takt=-1 ms=3 rest=30
+[SFX][MUSIK][STEP] menu_2 takt=0 ms=39 rest=29
+[SFX][MUSIK][STEP] menu_2 takt=1 ms=37 rest=28
+[SFX][MUSIK][STEP] menu_2 takt=2 ms=40 rest=27
+[SFX][MUSIK][STEP] menu_2 takt=3 ms=38 rest=26
+[SND][MUSIKPEGEL] track=menu_2 rms=-19.9db samples=146992 regler100_db=-2.6 ergebnis_rms_100=-22.5db
+[SFX][MUSIK] track=menu_2 loop=ok laenge=13.33s bars=4 bpm=72 lead=sine
+[MUSIK][CFG] track=menu_2 bpm=72 lead=sine drums=0.00 arp=0.040 bass=0.110 bass_hz=73.4 tritonus=false heartbeat=0.00 laenge=13.33s
+[SFX][MUSIK][STEP] menu_2 takt=-1 ms=3 rest=25
+[SFX][MUSIK][STEP] game_1 takt=0 ms=35 rest=24
+[SFX][MUSIK][STEP] game_1 takt=1 ms=38 rest=23
+[SFX][MUSIK][STEP] game_1 takt=2 ms=37 rest=22
+[SFX][MUSIK][STEP] game_1 takt=3 ms=37 rest=21
+[SND][MUSIKPEGEL] track=game_1 rms=-20.0db samples=126000 regler100_db=-0.5 ergebnis_rms_100=-20.5db
+[SFX][MUSIK] track=game_1 loop=ok laenge=11.43s bars=4 bpm=84 lead=sine
+[MUSIK][CFG] track=game_1 bpm=84 lead=sine drums=0.02 arp=0.060 bass=0.120 bass_hz=110.0 tritonus=false heartbeat=0.00 laenge=11.43s
+[SFX][MUSIK][STEP] game_1 takt=-1 ms=3 rest=20
+[SFX][MUSIK][STEP] game_2 takt=0 ms=36 rest=19
+[SFX][MUSIK][STEP] game_2 takt=1 ms=34 rest=18
+[SFX][MUSIK][STEP] game_2 takt=2 ms=37 rest=17
+[SFX][MUSIK][STEP] game_2 takt=3 ms=38 rest=16
+[SND][MUSIKPEGEL] track=game_2 rms=-19.6db samples=120272 regler100_db=-0.9 ergebnis_rms_100=-20.5db
+[SFX][MUSIK] track=game_2 loop=ok laenge=10.91s bars=4 bpm=88 lead=sine
+[MUSIK][CFG] track=game_2 bpm=88 lead=sine drums=0.02 arp=0.065 bass=0.140 bass_hz=98.0 tritonus=false heartbeat=0.00 laenge=10.91s
+[SFX][MUSIK][STEP] game_2 takt=-1 ms=2 rest=15
+[SFX][MUSIK][STEP] game_3 takt=0 ms=36 rest=14
+[SFX][MUSIK][STEP] game_3 takt=1 ms=32 rest=13
+[SFX][MUSIK][STEP] game_3 takt=2 ms=35 rest=12
+[SFX][MUSIK][STEP] game_3 takt=3 ms=35 rest=11
+[SND][MUSIKPEGEL] track=game_3 rms=-19.5db samples=115040 regler100_db=-1.0 ergebnis_rms_100=-20.5db
+[SFX][MUSIK] track=game_3 loop=ok laenge=10.43s bars=4 bpm=92 lead=sine
+[MUSIK][CFG] track=game_3 bpm=92 lead=sine drums=0.03 arp=0.055 bass=0.150 bass_hz=87.3 tritonus=false heartbeat=0.00 laenge=10.43s
+[SFX][MUSIK][STEP] game_3 takt=-1 ms=3 rest=10
+[SFX][MUSIK][STEP] game_4 takt=0 ms=35 rest=9
+[SFX][MUSIK][STEP] game_4 takt=1 ms=34 rest=8
+[SFX][MUSIK][STEP] game_4 takt=2 ms=34 rest=7
+[SFX][MUSIK][STEP] game_4 takt=3 ms=33 rest=6
+[SND][MUSIKPEGEL] track=game_4 rms=-19.3db samples=110240 regler100_db=-1.2 ergebnis_rms_100=-20.5db
+[SFX][MUSIK] track=game_4 loop=ok laenge=10.00s bars=4 bpm=96 lead=sine
+[MUSIK][CFG] track=game_4 bpm=96 lead=sine drums=0.03 arp=0.050 bass=0.160 bass_hz=82.4 tritonus=false heartbeat=0.00 laenge=10.00s
+[SFX][MUSIK][STEP] game_4 takt=-1 ms=3 rest=5
+[SFX][MUSIK][STEP] boss_1 takt=0 ms=22 rest=4
+[SFX][MUSIK][STEP] boss_1 takt=1 ms=27 rest=3
+[SFX][MUSIK][STEP] boss_1 takt=2 ms=23 rest=2
+[SFX][MUSIK][STEP] boss_1 takt=3 ms=22 rest=1
+[SND][MUSIKPEGEL] track=boss_1 rms=-14.7db samples=72480 regler100_db=-5.8 ergebnis_rms_100=-20.5db
+[SFX][MUSIK] track=boss_1 loop=ok laenge=6.57s bars=4 bpm=146 lead=sine
+[MUSIK][CFG] track=boss_1 bpm=146 lead=sine drums=0.30 arp=0.030 bass=0.220 bass_hz=55.0 tritonus=true heartbeat=0.55 laenge=6.57s
+[SFX][MUSIK][STEP] boss_1 takt=-1 ms=3 rest=0
+[BOOT] haeppchen=57 max_block_ms=41 (grösster Block: musik) bis_hier_ms=5965
+[LOAD][FADE] dauer=0.25 quelle=boot geteilt=true
+[BOOT][0b] haeppchen fertig ms=5968
+[UI][BOOT] hud ms=50
+[BUILD] Versionsanzeige v1.56 aktiv (Build 56)
+[UI][NAV] kachel=CHALLENGES
+[CHAR][NAME] feld=true max_zeichen=10 tastatur=geraet
+[CHAR][UI] neues Layout gebaut: 3 Felder + Figur 420 px
+[LOC][UI] Sprachumschalter gebaut (DEUTSCH / ENGLISH)
+[UI][NAV] ziel=info herkunft=settings knopf=true
+[MENU][SETTINGS] Seite neu verdrahtet: parent=UIManager scroll=true knopf_fuss=true
+[UI][BOOT] start ms=135
+[UI][BOOT] tod ms=140
+[MUSIK][WECHSEL] von=- nach=menu_1 fade_out=0.6s fade_in=0.6s gleicher_player=false slot=b
+[SFX][MUSIK] track=menu_1 db=-6.2 regler=80 aktiv=0 fade=0.6s
+[UI][BOOT] show_start ms=143
+[UI][BOOT] load ms=144
+[UI][BOOT] Oberflaeche gebaut
+[BOOT][0c] ui gebaut ms=6114
+[DIAG] start mode=mini
+[MUSIK][WECHSEL] von=- nach=menu_1 fade_out=0.6s fade_in=0.6s gleicher_player=false slot=a
+[SFX][MUSIK] track=menu_1 db=-6.2 regler=80 aktiv=0 fade=0.6s
+[SFX][MUSIK] regler=80 track=menu_1 db=-6.2
+[PROFILE][CHAL] geladen aufgaben=12
+[PROFILE][CLAMP] feld=rigs entfernt=0 gueltig=1
+[PROFILE][CLAMP] feld=huete entfernt=0 gueltig=2
+[PROFILE][CLAMP] feld=farben entfernt=0 gueltig=2
+[PROFILE][WAHL] skin=0 farbe=6 hut=1 (nach Clamp)
+[MUSIK][WECHSEL] von=- nach=menu_1 fade_out=0.6s fade_in=0.6s gleicher_player=false slot=b
+[SFX][MUSIK] track=menu_1 db=-6.2 regler=80 aktiv=1 fade=0.6s
+[PROFILE][MIGR] saisons alt=5 neu=5 gratis=0
+[PROFILE][SEASON] earth frei=1
+[PROFILE][SEASON] mars frei=2
+[PROFILE][SEASON] jungle frei=1
+[PROFILE][SEASON] volt frei=1
+[SHOP][BOOST-ENTFERNT] eintraege=7 quellen=3 grund=v148_keine_run_boosts
+[BOOT][1] profil+highscore ms=7287
+[BOOT][2] szenen geladen ms=7513
+[HAT][FIT] hut=0 rig=0 kopf_w=25 skala=1.00 dx=0.0 dy=-6.0 augenband=20..21
+[HAT][PFAD] rig=0 weg=make_player_rig hut=0 ein_weg=true
+[BOOT][3] debug_panel ms=7580
+[HAT][FIT] hut=1 rig=0 kopf_w=25 skala=1.00 dx=0.0 dy=-1.0 augenband=20..21
+[HAT][PFAD] rig=0 weg=make_player_rig hut=1 ein_weg=true
+[HAT][TEX] Hut 1 gezeichnet (128x128)
+[WAHL] feld=hut pikto=kappe idx=1 tex=true
+[WAHL] feld=hut pikto=kappe idx=1 tex=true
+[MENU][GRAD] modus=0 text="GRAD: —" disabled=true
+[MENU][LAYOUT] modus=0 box=(1256,998) row3=(1181,74) ueberlauf=false
+[LOC][SET] sprache=de
+[LOC][INIT] gespeicherte sprache=de
+[MUSIK][WECHSEL] von=menu_1 nach=game_1 fade_out=0.6s fade_in=0.6s gleicher_player=false slot=b
+[SFX][MUSIK] track=game_1 db=-4.1 regler=80 aktiv=2 fade=0.6s
+[SFX][MUSIK] runde=1 track=game_1 boss=false fade=0.6s
+[SFX][MUSIK] regler=80 track=game_1 db=-4.1
+[RUN] Welt geraeumt: 0 Knoten entfernt
+[JUNGLE][TEX] jvine neu gezeichnet (112px, 5 Ranken)
+[JUNGLE][TEX] jmushroom neu gezeichnet (56px)
+[JUNGLE][TEX] jmushroom neu gezeichnet (44px)
+[JUNGLE][TEX] jreed neu gezeichnet (80px, 6 Halme)
+[JUNGLE][TEX] jrock neu gezeichnet (64px, facettiert)
+[ART][STEIN] variante=0 basis=(0.52,0.54,0.55) toene=5 moss=true
+[ART][STEIN] variante=1 basis=(0.47,0.49,0.52) toene=5 moss=true
+[ART][STEIN] variante=2 basis=(0.58,0.57,0.54) toene=5 moss=true
+[ART][STEIN] variante=3 basis=(0.44,0.47,0.50) toene=5 moss=true
+[ART][STEIN] variante=4 basis=(0.50,0.52,0.51) toene=5 moss=true
+[JUNGLE][TEX] jflower neu gezeichnet (48px, (0.98, 0.96, 0.92, 1.0))
+[JUNGLE][TEX] jflower neu gezeichnet (48px, (0.98, 0.55, 0.7, 1.0))
+[JUNGLE][TEX] jflower neu gezeichnet (48px, (0.99, 0.88, 0.35, 1.0))
+[JUNGLE][TEX] jflower neu gezeichnet (48px, (0.62, 0.72, 0.98, 1.0))
+[JUNGLE][TEX] jmushroom neu gezeichnet (52px)
+[JUNGLE][TEX] bamboo neu gezeichnet (44x80, 4 Halme)
+[JUNGLE][TEX] jleafpile neu gezeichnet (96px, 9 runde Blaetter)
+[JUNGLE][TEX] fern neu gezeichnet (64px, 6 Wedel)
+[TEX][LAZY] run-Gruppe gezeichnet: keys=228 ms=1589
+[SEASON][MODE] planet=mars modus=fixed pool=["spring", "summer"] jahreszeit=spring
+[MAP][SEASON] planet=mars season=spring modus=fixed
+[SEASON][HUD] FRUEHLING
+[BIOME][START] map=mars biome=mars
+[BIOME][TRENNUNG] season=spring biome=mars unveraendert=true
+[MAP][WAHL] aktiv=mars modus=fixed
+[MAP][mars] 101 Hindernisse platziert: { "mars_big_1": 10, "mars_big_3": 8, "mars_mid_1": 27, "mars_small_1": 56 }
+[MAP][UFER] eingriff=false bruecken_frei=true wasserkacheln=0 banksteine=0
+[SHOP][UI][13.44][HIDE] Shop geschlossen (modal_open=false)
+[SPAWN] start first_delay=5.0 interval=30.0
+[BAL][SPAWN] modus=endlos stufe=normal start=true schonfrist_gegner=20 schonfrist_hetzer=60 first_delay=5.0
+[BAL][MODELL] modus=endlos stufe=normal ziel(t0=0.03, t60=0.04, t180=0.08, t300=0.11) hit_ziel=5.5 hearts=5 hp=1.00 dmg=1.00 spd=1.00 hetzer_pro=6 max_aktiv=5
+[SKIN][HAND] rig=0 hand=(56,32) waffe=weapon_pistol ueber_deko=true z=+1 deko=an
+[RUN][START] modus=0 hp=5 schild=0 tempo=1.00 schaden=1.00
+[WPN][HUD] slot=weapon_pistol stufe=common farbe=(0.72,0.74,0.78) kante=4px
+[SKIN][HAND] rig=0 hand=(56,32) waffe=weapon_pistol ueber_deko=true z=+1 deko=an
+[LOAD][UEBERGANG] frames_leer=0
+[LOAD][BILD] sichtbar=9.72s
+[BAL][SCHONFRIST] modus=endlos t=0.0 gegner=0 art=start
+[BAL][BOSS] modus=endlos art=mini telegraph=2.0 ersetzt_peak=true adds=0 t=2
+[BOSS][VISUAL] type=23 key=boss_mini_mars scale=(0.45, 0.45) hp=120 max=120 radius=34.0
+[BOSS][VISUAL] AbilityAura gebaut: texture=glow_common (vorher monster_green)
+[BAL][BOSS] modus=endlos art=mini spawn=true hp=19 pos=(2437,1228) adds=0
+[BOSS][ABILITY] cast: kind=fire name=FEUERSTURM spieler=1 type=23
+[BOSS][VISUAL] type=23 key=boss_mini_mars scale=(0.45, 0.45) hp=120 max=120 radius=34.0
+[BOSS][VISUAL] AbilityAura gebaut: texture=glow_common (vorher monster_green)
+[BAL][BOSS] modus=endlos art=mini spawn=true hp=19 pos=(2329,959) adds=0
+[TEST][E1] mini gespawnt=true hp=19 art=mini
+[TEST][E1] blockiert=true (mini lebt)
+[BOSS][ABILITY] cast: kind=fire name=FEUERSTURM spieler=1 type=23
+[SHOT] C:/Users/vince/Games/comic-shooter/screenshots/v136/235-miniboss.png (1920x1080)
+[SEASON][HUD] FRUEHLING
+[UPG][TOAST][UI] gebaut verfuegbar=1 pos=(770,940) groesse=380x96
+[UPG][TOAST] verfuegbar=1 paused=false
+[LAN][18.79][SOLO/1][UPGRADE] Toast statt Pause: verfuegbar=1, tree.paused=false
+[BOSS][18.80][mars|Welle 0][DEFEAT] Boss besiegt (#1 type=23 hp=-1 map=mars) -> Banner
+[SFX][MUSIK] runde=1 track=game_1 boss=false fade=0.6s
+[MUSIK][BOSS] ende=dauer1.0s zurueck=game_1
+[TEST][E2] gold vorher=20003 nachher=20003
+[SHOT] C:/Users/vince/Games/comic-shooter/screenshots/v136/235b-miniboss-kill.png (1920x1080)
+[TEST][E] fertig
