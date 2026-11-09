@@ -105,3 +105,6 @@ venv/
 *.keystore
 *.jks
 debug.keystore
+
+# ---------- GitHub Actions (iOS-Workflow nur lokal) ----------
+.github/

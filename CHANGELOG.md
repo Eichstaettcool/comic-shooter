@@ -1,5 +1,20 @@
 # Changelog
 
+## v1.58
+- Balance über alle drei Modi: eine Zahlenquelle (`scripts/core/balance.gd`),
+  Schwierigkeit als Gegner-HP pro Sekunde gegen den Spieler-DPS
+- Wellen laufen als Sägezahn: Anlauf, Peak, Erholung statt gleichmäßigem Anstieg
+- Bosse ersetzen eine Welle, 2 s Telegraph, zwei Phasen, kurze Unverwundbarkeit
+  beim Phasenwechsel, keine Adds
+- Fix: Monster passen in jeder Welt zur Karte (Mars, Dschungel, Elektro hatten
+  fremde Typen)
+- Fix: In den ersten Sekunden war das Feld leer — Schonfrist verkürzt, erster
+  Schub sofort
+- Fix: Kisten ließen sich per Touch nicht öffnen (Overlay schluckte die Eingaben)
+- Fix: Wellen+Shop blieb stehen, wenn alle Gegner besiegt waren, Shop öffnete nicht
+- Spieler: 0,6 s Unverwundbarkeit nach Treffer
+- Neue Galerie-Bilder, README überarbeitet
+
 ## v1.28
 - Glückswalze im Shop: Walzenbänder mit gezeichneten Symbolen, 4 eigene Sounds,
   RTP 90,1 % über 200.000 Spins
